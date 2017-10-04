@@ -167,19 +167,33 @@ void CTRNN::ModulatedEulerStep(double stepsize, double mod)
     double input = externalinputs[i];
     for (int j = 1; j <= size; j++) {
       
-      // adding mod term and receptor strength here nothing else
-      input += (1 + mod * receptors[i]  ) *  weights[j][i] * outputs[j];
-    }  
-    states[i] += stepsize * Rtaus[i] * (input - states[i]);
+      // Option #1 adding mod term and receptor strength here
+      // functions to amplify or inhibit transmission signal based on receptor strength
+      // input +=  (1 + mod * receptors[i]  ) *  weights[j][i] * outputs[j];
+      //Original code
+      input +=   weights[j][i] * outputs[j];
+    }
+    
+    // Option #2
+    // same as above, just more efficient because it is done once
+    states[i] += stepsize * Rtaus[i] * (  (1 + mod * receptors[i]  ) *  input - states[i]);
+
+    //Original code
+    //states[i] += stepsize * Rtaus[i] * (   input - states[i]);
+    
   }
   // Update the outputs of all neurons.
-  for (int i = 1; i <= size; i++)
-    outputs[i] = sigmoid(gains[i] * (states[i] + biases[i]));
+  for (int i = 1; i <= size; i++) {
+    // Option #3   Modulate the gain itself
+    // outputs[i] = sigmoid(  (1 + mod * receptors[i]  ) *   gains[i] * (states[i] + biases[i]));
+    
+    //Option #4    Modulate the state of neurons but not their bias
+    //outputs[i] = sigmoid(     gains[i] * (  (1 + mod * receptors[i]  )   *  states[i] + biases[i]));
+
+    //Original 
+    outputs[i] = sigmoid(    gains[i] * (states[i] + biases[i]));
+    }
 }
-
-
-
-
 
 
 
