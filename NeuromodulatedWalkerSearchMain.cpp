@@ -25,7 +25,7 @@ const int minReceptor = -1;
 const double maxModulation = 0.5;
 const double minModulation = -0.5;
 
-const int externalModulationPeriods = 10;
+const int externalModulationPeriods = 16;
 const double modulationStepSize =  externalModulationPeriods / (RunDuration / StepSize)  ;
 const bool modulationEnabled = true;
 
