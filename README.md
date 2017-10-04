@@ -1,2 +1,2 @@
 # CTRNN_NM
-implementation fo neuromodulation in CTRNN
+implementation of neuromodulation in CTRNN
