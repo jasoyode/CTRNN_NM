@@ -54,13 +54,16 @@ void LeggedAgent::Reset(double ix, double iy, int randomize, RandomState &rs)
 
 
 // Step the insect using a general CTRNN CPG
-
-void LeggedAgent::Step(double StepSize)
+void LeggedAgent::ModulatedStep(double StepSize, double mod)
 {
 	double force = 0.0;
 	
 	// Update the nervous system
-	NervousSystem.EulerStep(StepSize);
+	if ( mod != 0 ) {
+		NervousSystem.ModulatedEulerStep(StepSize, mod);
+	} else {
+		NervousSystem.EulerStep(StepSize);
+	}
 	// Update the leg effectors
 	if (NervousSystem.NeuronOutput(1) > 0.5) {Leg.FootState = 1; Leg.Omega = 0;}
 	else Leg.FootState = 0;
@@ -107,6 +110,15 @@ void LeggedAgent::Step(double StepSize)
 	// If the foot is too far back, the body becomes "unstable" and forward motion ceases
 	if (cx - Leg.FootX > 20) vx = 0.0;
 }
+
+
+// Step the insect using a general CTRNN CPG
+void LeggedAgent::Step(double StepSize)
+{
+	LeggedAgent::ModulatedStep(StepSize, 0);
+}
+
+
 
 
 // Step the LeggedAgent using a 2-neuron CTRNN CPG

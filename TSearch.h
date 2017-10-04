@@ -3,8 +3,8 @@
 // *****************************
 
 // Uncomment the following line to enable multithreading
-//#define THREADED_SEARCH
-#define THREAD_COUNT 2
+#define THREADED_SEARCH
+#define THREAD_COUNT 10
 
 
 #pragma once

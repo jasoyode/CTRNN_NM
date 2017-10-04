@@ -85,6 +85,12 @@ void CTRNN::SetCircuitSize(int newsize)
 	outputs.FillContents(0.0);
 	biases.SetBounds(1,size);
 	biases.FillContents(0.0);
+	
+	//receptors - default value is turned on 100%
+	receptors.SetBounds(1,size);
+	receptors.FillContents(1.0);
+	
+	
 	gains.SetBounds(1,size);
 	gains.FillContents(1.0);
 	taus.SetBounds(1,size);
@@ -137,7 +143,6 @@ void CTRNN::RandomizeCircuitOutput(double lb, double ub, RandomState &rs)
 
 
 // Integrate a circuit one step using Euler integration.
-
 void CTRNN::EulerStep(double stepsize)
 {
   // Update the state of all neurons.
@@ -151,6 +156,31 @@ void CTRNN::EulerStep(double stepsize)
   for (int i = 1; i <= size; i++)
     outputs[i] = sigmoid(gains[i] * (states[i] + biases[i]));
 }
+
+
+// Integrate a circuit one step using Euler integration, with an external
+//modulatory signal sent in
+void CTRNN::ModulatedEulerStep(double stepsize, double mod)
+{
+  // Update the state of all neurons.
+  for (int i = 1; i <= size; i++) {
+    double input = externalinputs[i];
+    for (int j = 1; j <= size; j++) {
+      
+      // adding mod term and receptor strength here nothing else
+      input += (1 + mod * receptors[i]  ) *  weights[j][i] * outputs[j];
+    }  
+    states[i] += stepsize * Rtaus[i] * (input - states[i]);
+  }
+  // Update the outputs of all neurons.
+  for (int i = 1; i <= size; i++)
+    outputs[i] = sigmoid(gains[i] * (states[i] + biases[i]));
+}
+
+
+
+
+
 
 
 // Integrate a circuit one step using 4th-order Runge-Kutta.

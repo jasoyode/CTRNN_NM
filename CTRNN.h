@@ -72,6 +72,11 @@ class CTRNN {
             {outputs[i] = value; states[i] = InverseSigmoid(value)/gains[i] - biases[i];};
         double NeuronBias(int i) {return biases[i];};
         void SetNeuronBias(int i, double value) {biases[i] = value;};
+        
+        //receptors
+        double NeuronRceptor(int i) {return receptors[i];};
+        void SetNeuronReceptor(int i, double value) {receptors[i] = value;};
+        
         double NeuronGain(int i) {return gains[i];};
         void SetNeuronGain(int i, double value) {gains[i] = value;};
         double NeuronTimeConstant(int i) {return taus[i];};
@@ -100,10 +105,15 @@ class CTRNN {
         void RandomizeCircuitOutput(double lb, double ub);
         void RandomizeCircuitOutput(double lb, double ub, RandomState &rs);
         void EulerStep(double stepsize);
+        //add step to include external nm signal
+        void ModulatedEulerStep(double stepsize, double mod);        
         void RK4Step(double stepsize);
 		
         int size;
         TVector<double> states, outputs, biases, gains, taus, Rtaus, externalinputs;
+        //receptors
+        TVector<double> receptors;
+        
         TMatrix<double> weights;
         TVector<double> TempStates,TempOutputs,k1,k2,k3,k4;
 };
