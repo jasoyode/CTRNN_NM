@@ -187,7 +187,7 @@ int main (int argc, const char* argv[]) {
   s.SetSelectionMode(RANK_BASED);
   s.SetReproductionMode(HILL_CLIMBING);
   s.SetPopulationSize(1000);
-  s.SetMaxGenerations(200);
+  s.SetMaxGenerations(500);
   
   //start with 0.5 (per paper results)
   s.SetMutationVariance(0.5);
