@@ -30,7 +30,6 @@ const bool diplayTestText = false;
 
 //settings loaded from config file
 int NeuromodulationType;
-bool modulationEnabled;
 double minNeuronBiasAndWeights;
 double maxNeuronBiasAndWeights;
 double minTimingConstant;
@@ -154,7 +153,7 @@ double Evaluate(TVector<double> &v, RandomState &rs)
     for (double time = 0; time < RunDuration; time += StepSize) {
     
       //use global modulatioEnabled to determine whether to use modulation step or not
-      if (modulationEnabled) {
+      if (  NeuromodulationType != 0 ) {
           
           if ( sinusoidalOscillation ) {
               //calculate sin and then scale to modulation bounds
