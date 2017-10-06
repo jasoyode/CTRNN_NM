@@ -17,6 +17,7 @@
 #include "CTRNN.h"
 #include "random.h"
 #include <stdlib.h>
+#include <assert.h>
 
 
 // A fast sigmoid implementation using a table w/ linear interpolation
@@ -160,38 +161,45 @@ void CTRNN::EulerStep(double stepsize)
 
 // Integrate a circuit one step using Euler integration, with an external
 //modulatory signal sent in
-void CTRNN::ModulatedEulerStep(double stepsize, double mod)
+//
+// type 0 = OFF
+// type 1 = neuromodulation of synaptic signals
+// type 2 = external additive signal
+//
+void CTRNN::ModulatedEulerStep(double stepsize, double mod, int type)
 {
   // Update the state of all neurons.
   for (int i = 1; i <= size; i++) {
     double input = externalinputs[i];
+    
     for (int j = 1; j <= size; j++) {
-      
-      // Option #1 adding mod term and receptor strength here
-      // functions to amplify or inhibit transmission signal based on receptor strength
-      // input +=  (1 + mod * receptors[i]  ) *  weights[j][i] * outputs[j];
-      //Original code
       input +=   weights[j][i] * outputs[j];
     }
     
-    // Option #2
-    // same as above, just more efficient because it is done once
-    states[i] += stepsize * Rtaus[i] * (  (1 + mod * receptors[i]  ) *  input - states[i]);
-
-    //Original code
-    //states[i] += stepsize * Rtaus[i] * (   input - states[i]);
+    //modulate via multiplying 
     
+    
+    if (type == 0) {
+    	//original no modulation
+    	states[i] += stepsize * Rtaus[i] * (   input - states[i]);
+    } else if (type == 1) {
+    	//modulation of incoming signals
+    	states[i] += stepsize * Rtaus[i] * (  (1 + mod * receptors[i]  ) *  input - states[i]);
+    } else if (type == 2) {
+    	//modulate via external additive signal
+		states[i] += stepsize * Rtaus[i] * (   input - states[i]) +  mod * receptors[i]  ;
+    } else {
+    	assert(false);
+    }
+
   }
   // Update the outputs of all neurons.
   for (int i = 1; i <= size; i++) {
     // Option #3   Modulate the gain itself
     // outputs[i] = sigmoid(  (1 + mod * receptors[i]  ) *   gains[i] * (states[i] + biases[i]));
-    
-    //Option #4    Modulate the state of neurons but not their bias
-    //outputs[i] = sigmoid(     gains[i] * (  (1 + mod * receptors[i]  )   *  states[i] + biases[i]));
 
     //Original 
-    outputs[i] = sigmoid(    gains[i] * (states[i] + biases[i]));
+    outputs[i] = sigmoid(   gains[i] * (states[i] + biases[i]));
     }
 }
 

@@ -106,7 +106,7 @@ class CTRNN {
         void RandomizeCircuitOutput(double lb, double ub, RandomState &rs);
         void EulerStep(double stepsize);
         //add step to include external nm signal
-        void ModulatedEulerStep(double stepsize, double mod);        
+        void ModulatedEulerStep(double stepsize, double mod, int type);        
         void RK4Step(double stepsize);
 		
         int size;

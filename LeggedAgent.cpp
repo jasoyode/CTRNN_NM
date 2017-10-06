@@ -54,13 +54,13 @@ void LeggedAgent::Reset(double ix, double iy, int randomize, RandomState &rs)
 
 
 // Step the insect using a general CTRNN CPG
-void LeggedAgent::ModulatedStep(double StepSize, double mod)
+void LeggedAgent::ModulatedStep(double StepSize, double mod, int type)
 {
 	double force = 0.0;
 	
 	// Update the nervous system
 	if ( mod != 0 ) {
-		NervousSystem.ModulatedEulerStep(StepSize, mod);
+		NervousSystem.ModulatedEulerStep(StepSize, mod, type);
 	} else {
 		NervousSystem.EulerStep(StepSize);
 	}
@@ -115,7 +115,7 @@ void LeggedAgent::ModulatedStep(double StepSize, double mod)
 // Step the insect using a general CTRNN CPG
 void LeggedAgent::Step(double StepSize)
 {
-	LeggedAgent::ModulatedStep(StepSize, 0);
+	LeggedAgent::ModulatedStep(StepSize, 0, 0);
 }
 
 

@@ -1,7 +1,7 @@
-OBJS = NeuromodulatedWalkerSearchMain.o TSearch.o CTRNN.o LeggedAgent.o random.o
+OBJS = NeuromodulatedWalkerSearchMain.o TSearch.o CTRNN.o LeggedAgent.o random.o INIReader.o ini.o
 CC = g++ 
 DEBUG = -g
-CFLAGS = -Wall -c $(DEBUG)
+CFLAGS = -Wall -std=c++11 -c $(DEBUG)
 LFLAGS = -Wall -pthread $(DEBUG)
 
 runExp : $(OBJS)
@@ -21,6 +21,12 @@ LeggedAgent.o : LeggedAgent.cpp LeggedAgent.h random.h CTRNN.h
 
 random.o : random.cpp random.h
 	$(CC) $(CFLAGS) random.cpp
+
+INIReader.o : INIReader.cpp INIReader.h ini.h
+	$(CC) $(CFLAGS) INIReader.cpp
+
+ini.o : ini.c ini.h
+	$(CC) $(CFLAGS) ini.c
 	
 clean:
 	\rm *.o *~ runExp

@@ -50,7 +50,7 @@ class LeggedAgent {
     void Reset(double ix, double iy, int randomize = 0);
     void Reset(double ix, double iy, int randomize, RandomState &rs);
 		void Step(double StepSize);
-		void ModulatedStep(double StepSize, double mod);
+		void ModulatedStep(double StepSize, double mod, int type);
 
 		void Step2(double StepSize);
 		void Step1(double StepSize);
