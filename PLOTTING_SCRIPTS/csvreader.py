@@ -137,5 +137,6 @@ plt.grid(True)
 plt.savefig("{0}/{1}/mean_runs_with_error_{1}.png".format(PLOTS, experiment_directory ) )
 
 
-
+#email plots to jasonayoder@gmail.com
+os.system( "./email_plots.sh {}".format( experiment_directory )  )
 

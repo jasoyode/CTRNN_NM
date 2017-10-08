@@ -1,8 +1,8 @@
 Launch script todo
 DONE   1. save config file to directory
-   2. add test of best evolved walker and record values to file (along with modulation signal!)
+       2. add test of best evolved walker and record values to file (along with modulation signal!)
 DONE   3. generate plots upon completion
-   4. email plots upon completion
+DONE   4. email plots upon completion
 
 
 
@@ -10,5 +10,5 @@ Plotting todo
 DONE    1. CRAWL PASSED IN DIRECTORY rather than iterate through
 DONE    2. Make plot of all the individual runs in one plot
 DONE    3. Make aggregate plot with shaded regions are error space (1 STD)
-		4. Make comparison plots of all the different runs that are similar DEPENDS ON ABOVE     
+		4. Make comparison plots of list of different experiments
 		5. Make plot of the agent speed over time, overlayed with neuron activations and modulation signal
