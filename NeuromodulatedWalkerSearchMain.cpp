@@ -209,14 +209,17 @@ void runTests(bool showTests) {
     int hitTopCount=0;
     int hitBotCount=0;
     
+    //cout << "checkpoint1: " << "  modVel: " << modVel << endl;
+    
     if ( NeuromodulationType != 0 ) {
       
       for (double time = 0; time < RunDuration; time += StepSize) {
+          
           //use global modulation enabled to determine step to update    
           //oscillate back and forth between bounds
           if (modulationLevel >= maxModulation ) {
               if ( showTests ) {
-                  cout << "Hit max going DOWN! @" << time << endl;
+                  cout << "Hit max going DOWN! @" << time << " because " << modulationLevel << " >= " <<  maxModulation << endl;
               }
               modVel = -modulationStepSize;
               hitTopCount++;
@@ -228,9 +231,14 @@ void runTests(bool showTests) {
               hitBotCount++;
           } 
           modulationLevel += modVel;
+          
+          
+          //cout << "checkpoint2: " << "  modulationLevel: " << modulationLevel << endl;
+    
+          
           count++;
           if (showTests &&  count % displayFreq == 1) {
-              cout << "time: " << time << "  modulation: " << modulationLevel;
+              cout << "time: " << time << "  modulationLevel: " << modulationLevel;
               //calculate sin and then scale to modulation bounds
               //used this to debug a silly bug I kept getting
               //double sinCalc = sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
@@ -242,7 +250,7 @@ void runTests(bool showTests) {
               
               double sinCalc = (maxModulation+minModulation) / 2 + (maxModulation-minModulation )/2 * sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
               
-              cout << "  vs. sin calculated2: " << sinCalc << endl;
+              cout <<  "  vs. sin calculated2: " << sinCalc << endl;
               cout << "    " << ( modulationLevel - sinCalc ) << endl;
               assert(  modulationLevel - sinCalc  < 0.25 );
           }
@@ -324,13 +332,20 @@ void loadValuesFromConfig( INIReader &reader) {
     maxReceptor                = reader.GetReal("receptor", "maxReceptor", 1 ); 
     minReceptor                = reader.GetReal("receptor", "minReceptor", -1 );
 
-    minModulation              = reader.GetReal("mod", "minModulation", 0.5 );
+    maxModulation              = reader.GetReal("mod", "maxModulation", 0.5 );
+    minModulation              = reader.GetReal("mod", "minModulation", -0.5 );
+    
     sinusoidalOscillation      = reader.GetBoolean("mod", "sinusoidalOscillation", true );
     externalModulationPeriods  = reader.GetInteger("mod", "externalModulationPeriods", 2 );
     discreteLevelsOfModulation = reader.GetInteger("mod", "discreteLevelsOfModulation", 3 );
     
-    modulationStepSize =  2 * (maxModulation - minModulation ) *  ( externalModulationPeriods / (RunDuration / StepSize) )  ;
-
+    
+    //cout << "maxModulation" << maxModulation << endl;
+    //cout << "minModulation" << minModulation << endl;
+    //cout << "RunDuration" << RunDuration << endl;
+    //cout << "StepSize" << StepSize << endl;
+    //cout << "externalModulationPeriods" << externalModulationPeriods << endl;
+    
     popSize      = reader.GetInteger("exp", "popSize", 100 );
     generations  = reader.GetInteger("exp", "generations", 10 );
     runs         = reader.GetInteger("exp", "runs", 10 );
@@ -338,6 +353,10 @@ void loadValuesFromConfig( INIReader &reader) {
     RunDuration  = reader.GetReal("exp", "RunDuration", 220);
     StepSize     = reader.GetReal("exp", "StepSize", 0.1 );
     Stage1Threshold = reader.GetReal("exp", "Stage1Threshold", 0.126 );
+    
+    modulationStepSize =  2 * (maxModulation - minModulation ) *  ( externalModulationPeriods / (RunDuration / StepSize) )  ;
+//    cout << "modulationStepSize: " << modulationStepSize << endl;
+
 
 }
 
@@ -358,7 +377,7 @@ int main (int argc, const char* argv[]) {
   //use argument passed in to load from config file
   INIReader reader( argv[1]   );
   if (reader.ParseError() < 0) {
-    std::cout << "Can't load 'test.ini'\n";
+    std::cout << "Can't load '.ini' file!\n";
     return 1;
   }
   
@@ -521,10 +540,19 @@ int main (int argc, const char* argv[]) {
       expLogFile.close();
       cout << "   complete!" << endl;
       
+  
+      //RUN THE BEST AGENT ON THE TASK AT HAND AND RECORD ITS NEURAL ACTIVATIONS AND MOVEMENTS
+      //TODO
+      
+      
+  
+  
   }      
   //close best agent file
   bestAgentGenomeLogFile.close();
   bestAgentFitnessAndReceptorLogFile.close();
+  
+  
   
   
   //generate plots for directories
