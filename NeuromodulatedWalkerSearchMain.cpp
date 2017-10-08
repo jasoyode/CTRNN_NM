@@ -22,8 +22,8 @@
 // Evolving walking: The anatomy of an evolutionary search (2004)
 // by Chad W. Seys , Randall D. Beer
 // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.62.1649&rep=rep1&type=pdf
-const double RunDuration = 220;
-const double StepSize = 0.1;
+double RunDuration;
+double StepSize;
 
 //whether or not to show the test debugging text
 const bool diplayTestText = false;
@@ -205,50 +205,53 @@ void runTests(bool showTests) {
     int hitTopCount=0;
     int hitBotCount=0;
     
-
+    if ( NeuromodulationType != 0 ) {
+      
+      for (double time = 0; time < RunDuration; time += StepSize) {
+          //use global modulation enabled to determine step to update    
+          //oscillate back and forth between bounds
+          if (modulationLevel >= maxModulation ) {
+              if ( showTests ) {
+                  cout << "Hit max going DOWN! @" << time << endl;
+              }
+              modVel = -modulationStepSize;
+              hitTopCount++;
+          } else if ( modulationLevel < minModulation ) {
+              modVel = modulationStepSize;
+              if ( showTests ) {
+                  cout << "Hit min going UP! @" << time << endl;
+              }
+              hitBotCount++;
+          } 
+          modulationLevel += modVel;
+          count++;
+          if (showTests &&  count % displayFreq == 1) {
+              cout << "time: " << time << "  modulation: " << modulationLevel;
+              //calculate sin and then scale to modulation bounds
+              //used this to debug a silly bug I kept getting
+              //double sinCalc = sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
+              //double center = (maxModulation+minModulation) / 2 ;
+              //cout << "center: " << center << endl;
+              //double scale = (maxModulation-minModulation )/2;
+              //cout << "scale: " << scale << endl;
+              //sinCalc =     center + scale  * sinCalc ;
+              
+              double sinCalc = (maxModulation+minModulation) / 2 + (maxModulation-minModulation )/2 * sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
+              
+              cout << "  vs. sin calculated2: " << sinCalc << endl;
+              cout << "    " << ( modulationLevel - sinCalc ) << endl;
+              assert(  modulationLevel - sinCalc  < 0.25 );
+          }
+              
+      } 
+      
+      //verify that the correct number of oscillations occurs when
+      cout << "hitTopCount: " << hitTopCount <<  "   externalModulationPeriods: " << externalModulationPeriods << "  hitBotCount: " << hitBotCount << endl;
+      assert( hitTopCount == externalModulationPeriods && externalModulationPeriods == hitBotCount );
+      cout << "externalModulationPeriods is working properly" << endl;
+      
+    }      
     
-    for (double time = 0; time < RunDuration; time += StepSize) {
-        //use global modulation enabled to determine step to update    
-        //oscillate back and forth between bounds
-        if (modulationLevel >= maxModulation ) {
-            if ( showTests ) {
-                cout << "Hit max going DOWN! @" << time << endl;
-            }
-            modVel = -modulationStepSize;
-            hitTopCount++;
-        } else if ( modulationLevel < minModulation ) {
-            modVel = modulationStepSize;
-            if ( showTests ) {
-                cout << "Hit min going UP! @" << time << endl;
-            }
-            hitBotCount++;
-        } 
-        modulationLevel += modVel;
-        count++;
-        if (showTests &&  count % displayFreq == 1) {
-            cout << "time: " << time << "  modulation: " << modulationLevel;
-            //calculate sin and then scale to modulation bounds
-            //used this to debug a silly bug I kept getting
-            //double sinCalc = sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
-            //double center = (maxModulation+minModulation) / 2 ;
-            //cout << "center: " << center << endl;
-            //double scale = (maxModulation-minModulation )/2;
-            //cout << "scale: " << scale << endl;
-            //sinCalc =     center + scale  * sinCalc ;
-            
-            double sinCalc = (maxModulation+minModulation) / 2 + (maxModulation-minModulation )/2 * sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
-            
-            cout << "  vs. sin calculated2: " << sinCalc << endl;
-            cout << "    " << ( modulationLevel - sinCalc ) << endl;
-            assert(  modulationLevel - sinCalc  < 0.25 );
-        }
-            
-    } 
-    
-    //verify that the correct number of oscillations occurs when
-    cout << "hitTopCount: " << hitTopCount <<  "   externalModulationPeriods: " << externalModulationPeriods << "  hitBotCount: " << hitBotCount << endl;
-    assert( hitTopCount == externalModulationPeriods && externalModulationPeriods == hitBotCount );
-    cout << "externalModulationPeriods is working properly" << endl;
     
     if ( showTests ) {
         cout << "hitTopCount: "<< hitTopCount << " ==  " << externalModulationPeriods << endl;
@@ -328,6 +331,9 @@ void loadValuesFromConfig( INIReader &reader) {
     generations  = reader.GetInteger("exp", "generations", 10 );
     runs         = reader.GetInteger("exp", "runs", 10 );
     startingSeed = reader.GetInteger("exp", "startingSeed", 42 );
+    RunDuration  = reader.GetReal("exp", "RunDuration", 220);
+    StepSize     = reader.GetReal("exp", "StepSize", 0.1 );
+    
 
 }
 

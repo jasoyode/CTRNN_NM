@@ -1,3 +1,7 @@
+#other files
+PLOTTING_SCRIPTS/TEST/*
+
+
 # Prerequisites
 *.d
 
