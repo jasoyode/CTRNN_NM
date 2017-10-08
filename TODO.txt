@@ -1,7 +1,7 @@
 Launch script todo
-   1. save config file to directory
+DONE   1. save config file to directory
    2. add test of best evolved walker and record values to file (along with modulation signal!)
-   3. generate plots upon completion
+DONE   3. generate plots upon completion
    4. email plots upon completion
 
 

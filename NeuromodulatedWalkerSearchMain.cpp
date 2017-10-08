@@ -22,8 +22,12 @@
 // Evolving walking: The anatomy of an evolutionary search (2004)
 // by Chad W. Seys , Randall D. Beer
 // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.62.1649&rep=rep1&type=pdf
+
+//NOT CONST so that they can be set from config file
 double RunDuration;
 double StepSize;
+
+double Stage1Threshold;
 
 //whether or not to show the test debugging text
 const bool diplayTestText = false;
@@ -182,9 +186,9 @@ double Evaluate(TVector<double> &v, RandomState &rs)
 }
 
 
-//two stage evolution, switching the mutation variance after 0.126 fitness is achieved
+//two stage evolution, switching the mutation variance after 0.126 from paper fitness is achieved
 int MyTerminationFunction(int Generation,  double BestPerf,  double AvgPerf,  double PerfVar)  {
-  if (BestPerf > 0.126) 
+  if (BestPerf >  Stage1Threshold ) 
       return 1;
   else 
       return 0;
@@ -333,7 +337,7 @@ void loadValuesFromConfig( INIReader &reader) {
     startingSeed = reader.GetInteger("exp", "startingSeed", 42 );
     RunDuration  = reader.GetReal("exp", "RunDuration", 220);
     StepSize     = reader.GetReal("exp", "StepSize", 0.1 );
-    
+    Stage1Threshold = reader.GetReal("exp", "Stage1Threshold", 0.126 );
 
 }
 
@@ -361,6 +365,7 @@ int main (int argc, const char* argv[]) {
   //load global variable values from reader
   loadValuesFromConfig( reader );
   
+  
   //get current date to put in filename
   time_t secs=time(0);
   tm *t=localtime(&secs);
@@ -380,15 +385,32 @@ int main (int argc, const char* argv[]) {
       } 
   }
   
-  char command[100];
-  strcpy( command, ("mkdir -p ") );
-  strcat( command, dirPath );
+  char mkdir_command[100];
+  strcpy( mkdir_command, ("mkdir -p ") );
+  strcat( mkdir_command, dirPath );
   
-  const int dir_err = system( command );
+  const int dir_err = system( mkdir_command );
   if (-1 == dir_err) {
       printf("Error creating directory!n");
       exit(1);
-  }  
+  } 
+
+  //Copy config into the destination folder  
+  char cp_config_command[100];
+  strcpy( cp_config_command, ("cp ") );
+  strcat( cp_config_command, argv[1] );
+  strcat( cp_config_command, " DATA/" );
+  strcat( cp_config_command, expName );
+
+  const int cp_err = system( cp_config_command );
+  if (-1 == cp_err) {
+      printf("Error creating directory!n");
+      exit(1);
+  }
+
+  
+  
+   
   
   //verify settings are reasonable - true shows info
   cout << "Running tests..." << endl;
@@ -503,6 +525,20 @@ int main (int argc, const char* argv[]) {
   //close best agent file
   bestAgentGenomeLogFile.close();
   bestAgentFitnessAndReceptorLogFile.close();
+  
+  
+  //generate plots for directories
+  
+  //run plot commands!
+  char plot_command[100];
+  strcpy( plot_command, ("cd PLOTTING_SCRIPTS && python csvreader.py ") );
+  strcat( plot_command, expName );
+
+  const int plot_err = system( plot_command );
+  if (-1 == plot_err) {
+      printf("Error running plot command!");
+      exit(1);
+  }
   
   
   return 0;
