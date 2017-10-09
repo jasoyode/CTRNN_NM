@@ -1,8 +1,10 @@
+import re
 import os
 import sys
 import csv
 import glob
 import numpy
+import operator
 import matplotlib as mpl
 
 #headless mode
@@ -22,121 +24,338 @@ experiment_directory=sys.argv[1]
 
 
 
-#each element is a collection of all the generations in 1 run
-gen_all = []
-#each element is a collection of all the fitnesses in 1 run
-fit_all = []
 
-#each element is a collection of all the fitness in 1 generation
-fit_by_gen = []
+def plot_fitness():
+    #each element is a collection of all the generations in 1 run
+    gen_all = []
+    #each element is a collection of all the fitnesses in 1 run
+    fit_all = []
+    #each element is a collection of all the fitness in 1 generation
+    fit_by_gen = []
+    #START FIRST IMAGE FOR PLOTTING
+    plt.figure(0)
+    #initialize all lists in fitness by generation list to store fitnesses
+    #for i in range(0, generations):
+    #  fit_by_gen.append( [] )
+    seed_files = glob.glob(  '{}/{}/seed_*.txt'.format( DATA, experiment_directory  ) ) 
+    for seed_file in seed_files:
+      gen = []
+      fit = []
+      with open( seed_file  ) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+          g = int( row['Generation'] )
+          #grow fit_by_gen_as_needed
+          if g + 1 >= len( fit_by_gen) :
+            fit_by_gen.append( [] )
+            
+          #incase the final generation or anything else is duplicated
+          if not g in gen:
+            gen.append(  g )
+            fit.append( float( row['BestPerf'] )   )
+            #add fitness value to proper generation
+            fit_by_gen[g].append(  float( row['BestPerf'] ) )
 
-
-#START FIRST IMAGE FOR PLOTTING
-plt.figure(0)
-
-
-#initialize all lists in fitness by generation list to store fitnesses
-#for i in range(0, generations):
-#  fit_by_gen.append( [] )
-
-seed_files =  glob.glob(  '{}/{}/seed_*.txt'.format( DATA, experiment_directory  ) ) 
-
-for seed_file in seed_files:
-  gen = []
-  fit = []
-  
-  
-  with open( seed_file  ) as csvfile:
-
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-      g = int( row['Generation'] )
-      #grow fit_by_gen_as_needed
-      if g + 1 >= len( fit_by_gen) :
-        fit_by_gen.append( [] )
-        
+            #sanity check        
+            #if len( fit_by_gen[g]) > pop:
+            #  print( "g:", g )
+            #  print( " fit_by_gen[g]", fit_by_gen[g] )
+            #  quit()
+            #why does this happen???
+    #      else:
+          #  print("Warning skipping generation", g, "because it was already recorded!")
+            
+      plt.plot(gen, fit)
+      gen_all.append( gen )
+      fit_all.append( fit )
       
-      #incase the final generation or anything else is duplicated
-      if not g in gen:
-        gen.append(  g )
-        fit.append( float( row['BestPerf'] )   )
-        #add fitness value to proper generation
-        fit_by_gen[g].append(  float( row['BestPerf'] ) )
+    # any should work
+    gen = gen_all[0]
 
-        #sanity check        
-        #if len( fit_by_gen[g]) > pop:
-        #  print( "g:", g )
-        #  print( " fit_by_gen[g]", fit_by_gen[g] )
-        #  quit()
-        #why does this happen???
-#      else:
-      #  print("Warning skipping generation", g, "because it was already recorded!")
+    means = []
+
+
+    for i in gen: #range(0, len(fit_by_gen) ):
+      current_mean = 0
+
+      #each collection of means
+      for f in fit_all:
+        current_mean += f[i]
+      
+      current_mean = current_mean / len(fit_all)
+      means.append( current_mean )
+      #verify mean calculated properly
+      assert(  abs( numpy.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
+      
+
+    gen_means = []
+    gen_errors = []
+
+
+    for g in gen: #range(0, len(fit_by_gen) ):
+      gen_means.append( numpy.mean( fit_by_gen[g]) )
+      gen_errors.append( numpy.std( fit_by_gen[g] ))
+      #print( "gen: {}  mean: {}   std: {}".format( g, gen_means[g], gen_errors[g] ) )
+
+
+
+
+
+    plt.plot(gen, fit)
+    plt.xlabel('Generation')
+    plt.ylabel('Best Fitness')
+    plt.title( experiment_directory + '\nBest Fitness of Individual Experiment Runs')
+    plt.grid(True)
+    plt.savefig("{0}/{1}/individual_runs_{1}.png".format(PLOTS,  experiment_directory ) )
+
+
+
+    gen = numpy.asarray( gen )
+    gen_means = numpy.asarray( gen_means )
+    gen_errors = numpy.asarray( gen_errors )
+
+
+    plt.figure(1)
+    plt.plot(gen, gen_means  )
+
+    #shaded region indicates standard deviation
+    plt.fill_between(gen, gen_means-gen_errors, gen_means+gen_errors, facecolor='b', alpha=0.1)
+
+
+    plt.xlabel('Generation')
+    plt.ylabel('Best Mean Fitness')
+    plt.title( experiment_directory + '\nMean Best Fitness by Generation with Standard Error')
+    plt.grid(True)
+    plt.savefig("{0}/{1}/mean_runs_with_error_{1}.png".format(PLOTS, experiment_directory ) )
+
+
+
+
+    #print( '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) )
+    
+
+def plot_activity( quantity=4 ):    
+    
+    seed_to_fitness_map={}
+    
+    fitness_and_receptors = "{}/{}/fitness_and_receptors.txt".format( DATA, experiment_directory  )
+    
+    total_receptors=-1
+    
+    with open( fitness_and_receptors  ) as fitness_file:
+     fit_reader = csv.DictReader(fitness_file)
+     
+     
+     for row in fit_reader:
+      entry = []
+      f = float( row['fitness'] )
+      entry.append( f )
+      
+      if total_receptors == -1:
+       r=1
+       
+       while "r"+str(r) in row:
+        r+=1
+        total_receptors=r
+      #total_receptors
+      for r in range(1, total_receptors):
+       if "r"+str(r) in row:
+        entry.append( float( row['r'+str(r)   ]  ) )
+       else:
+        print("why??")
+        quit()
+      
+      
+      seed_to_fitness_map[  int( row['seed'] ) ] =  entry ;
+    
+    sorted_seeds_and_fit =  sorted(seed_to_fitness_map.items(), key=operator.itemgetter(1,0) )
+    
+    sorted_seeds_and_fit.reverse()
+    sorted_seeds_and_fit = sorted_seeds_and_fit[ 0:quantity ]
+    
+    print ( sorted_seeds_and_fit )
+    top_seeds = [x[0] for x in sorted_seeds_and_fit]
+    print ( top_seeds )
+
+    record_files =  glob.glob(  '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) ) 
+
+    #dictionary( "seed" -> (dictionary ( t -> (data ) )
+    
+    
+    count=0
+    for record_file in record_files:
+    
+      seed_num = re.sub('.*seed_', '', record_file )
+      seed_num = re.sub('_.*', '', seed_num )
+      seed_num= int(  seed_num )
+      
+      #only generate plots for top X
+      if seed_num not in top_seeds:
+       continue
+      
+      print( record_file )
+      
+      time = []
+      modulation = []
+      jointX = []
+      jointY = []
+      footX   = []
+      footY  = []
+      footState = []
+      distance    = []
+      n1_out = []
+      n2_out = []
+      n3_out = []
+      
+      with open( record_file  ) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+          time.append( float( row['time'] ) );
+          modulation.append( float( row['modulation'] ) );
+          jointX.append( float( row['jointX'] )  / 10 );
+          jointY.append( float( row['jointY'] ) );
+          footX.append( float( row['footX'] ) / 10 );
+          footY.append( float( row['footY'] ) );
+          footState.append( float( row['FootState'] ) );
+          distance.append( float( row['cx'] ) );
+          n1_out.append( float( row['n1_out'] ) );
+          n2_out.append( float( row['n2_out'] ) );
+          n3_out.append( float( row['n3_out'] ) );
         
-  plt.plot(gen, fit)
-  gen_all.append( gen )
-  fit_all.append( fit )
-  
-# any should work
-gen = gen_all[0]
+        
+        deriv_n1 = []
+        pre_val=n1_out[0]
+        for val in  n1_out:
+         deriv_n1.append( val - pre_val )
+         pre_val=val
+        
+        deriv_n2 = []
+        pre_val=n2_out[0]
+        for val in  n2_out:
+         deriv_n2.append( val - pre_val )
+         pre_val=val
+        
+        deriv_n3 = []
+        pre_val=n3_out[0]
+        for val in  n3_out:
+         deriv_n3.append( val - pre_val )
+         pre_val=val
+        
+        
+        
+        plt.close('all')
+        
+        fig, ( (ax1A, ax1B), (ax2A, ax2B), (ax3A,ax3B), (ax4A, ax4B), (ax5A, ax5B) ) = plt.subplots(nrows=5, ncols=2, figsize=(8, 11) )
+        
+        #plt.figure(2)
+        
+        #plt.gca().set_color_cycle(['red', 'green', 'blue', 'yellow'])
+        
+        
+        plt.xlabel('Time')
+    #    plt.ylabel('Distance Travelled')
+        
+        #VIEWING WINDOW
+        start=0
+        stop=-1
+        
+        time = time[start:stop]
+        
+        
+        fontsize=12
+        
+        
 
-means = []
+        config_plot(ax1A, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        
+        txt = "Fitness: {}".format(seed_to_fitness_map[seed_num][0] )
+        
+        
+        
+        ymin, ymax = ax1A.get_ylim()
+        xmin, xmax = ax1A.get_xlim()
+        width=xmax-xmin
+        height=ymax-ymin
+        
+        x=xmin+width/10
+        y=ymax+height/10
+        
+        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
+        
+        
+        bs_r = "OFF" if (seed_to_fitness_map[seed_num][1] == 0.0) else  str( seed_to_fitness_map[seed_num][1]  )
+        ft_r = "OFF" if (seed_to_fitness_map[seed_num][2] == 0.0) else  str( seed_to_fitness_map[seed_num][2]  )
+        fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
+        
+        
+        config_plot(ax2A, time, n1_out[start:stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+        config_plot(ax3A, time, n2_out[start:stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+        config_plot(ax4A, time, n3_out[start:stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+        
+        config_plot(ax5A, time, deriv_n1[start:stop], r"$\Delta$ BS", " delta BS over time", fontsize)
+        config_plot(ax5A, time, deriv_n2[start:stop], r"$\Delta$ FT", " delta FT over time", fontsize)
+        config_plot(ax5A, time, deriv_n3[start:stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        
+
+        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+        
+        
+        config_plot(ax1B, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        ax1B.text(x, y, txt, fontsize=12, ha="left", va="top")
+        
+        
+        config_plot(ax2B, time, footState[start:stop], "FootState", "FootState over time", fontsize)
+        config_plot(ax3B, time, jointX[start:stop], "jointX", "jointX over time", fontsize)
+        config_plot(ax4B, time, footX[start:stop], "FootX", "footX over time", fontsize)
+        config_plot(ax5B, time, footY[start:stop], "FootY", "footY over time",  fontsize)
+        #config_plot(ax, time, jointY[start:stop], "jointY", " jointY over time", fontsize)
+        
+        
+        plt.tight_layout()
+        
+    #    plt.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        
+        #legend = plt.legend(loc='upper right', shadow=True)
+        legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
+        
+        
+        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        #plt.title("Fitness: {}".format(seed_to_fitness_map[seed_num] ) , fontsize=fontsize)
+        
+        plt.savefig("{0}/{1}/seed_{2}_{1}.png".format(PLOTS, experiment_directory, seed_num  ) )
+        
+        if count >= 10:
+         return
+        
+        
 
 
-for i in gen: #range(0, len(fit_by_gen) ):
-  current_mean = 0
+def config_plot(ax, time, data, ylabel, title,  fontsize=12):
+     ax.plot( time, data, label=ylabel )
+     #ax.locator_params(nbins=3)
+     #ax.set_xlabel('time', fontsize=fontsize)
+     ax.set_ylabel( ylabel , fontsize=fontsize)
+     legend = ax.legend(loc='center right' )
+     #ax.set_title(title, fontsize=fontsize)
 
-  #each collection of means
-  for f in fit_all:
-    current_mean += f[i]
-  
-  current_mean = current_mean / len(fit_all)
-  means.append( current_mean )
-  #verify mean calculated properly
-  assert(  abs( numpy.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
-  
+def main():
 
-gen_means = []
-gen_errors = []
+    #make sure folder exists
+    os.system( "mkdir -p {}/{}".format( PLOTS, experiment_directory ) )
 
+    plot_fitness()
+    plot_activity( 4 )
 
-for g in gen: #range(0, len(fit_by_gen) ):
-  gen_means.append( numpy.mean( fit_by_gen[g]) )
-  gen_errors.append( numpy.std( fit_by_gen[g] ))
-  #print( "gen: {}  mean: {}   std: {}".format( g, gen_means[g], gen_errors[g] ) )
-
-
-#make sure folder exists
-os.system( "mkdir -p {}/{}".format( PLOTS, experiment_directory ) )
-
-
-plt.plot(gen, fit)
-plt.xlabel('Generation')
-plt.ylabel('Best Fitness')
-plt.title( experiment_directory + '\nBest Fitness of Individual Experiment Runs')
-plt.grid(True)
-plt.savefig("{0}/{1}/individual_runs_{1}.png".format(PLOTS,  experiment_directory ) )
+    #email plots to jasonayoder@gmail.com
+    os.system( "./email_plots.sh {}".format( experiment_directory )  )
 
 
 
-gen = numpy.asarray( gen )
-gen_means = numpy.asarray( gen_means )
-gen_errors = numpy.asarray( gen_errors )
+main()
 
 
-plt.figure(1)
-plt.plot(gen, gen_means  )
-
-#shaded region indicates standard deviation
-plt.fill_between(gen, gen_means-gen_errors, gen_means+gen_errors, facecolor='b', alpha=0.1)
 
 
-plt.xlabel('Generation')
-plt.ylabel('Best Mean Fitness')
-plt.title( experiment_directory + '\nMean Best Fitness by Generation with Standard Error')
-plt.grid(True)
-plt.savefig("{0}/{1}/mean_runs_with_error_{1}.png".format(PLOTS, experiment_directory ) )
 
 
-#email plots to jasonayoder@gmail.com
-os.system( "./email_plots.sh {}".format( experiment_directory )  )
 

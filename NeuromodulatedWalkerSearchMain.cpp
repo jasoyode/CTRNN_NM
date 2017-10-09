@@ -1,6 +1,7 @@
 // ***************************************************
 // An example of Evolving CTRNN controllers for Walkers
 // ***************************************************
+#include <algorithm>
 #include <sys/stat.h>
 #include <cstring>
 #include <cstdlib>
@@ -8,6 +9,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <iterator>
 #include "TSearch.h"
 #include "random.h"
 #include "CTRNN.h"
@@ -245,7 +247,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
     //setup header for logfile when passed
     if (recordLog != NULL) {
       recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx";
-      for (int i=1; i < networkSize; i++) {
+      for (int i=1; i <= networkSize; i++) {
         recordLog << ",n" << i << "_out";
       }
       recordLog << endl;
@@ -279,12 +281,11 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
           recordLog << time << "," << modulationLevel << ",";
           recordLog << Insect.Leg.JointX << "," << Insect.Leg.JointY << ",";
           recordLog << Insect.Leg.FootX << "," << Insect.Leg.FootY << ",";
-          recordLog << Insect.Leg.FootState;
+          recordLog << Insect.Leg.FootState << "," << Insect.cx;
           //write outputs of neurons
-          for (int i=1; i < networkSize; i++) {
+          for (int i=1; i <= networkSize; i++) {
             recordLog << "," <<   Insect.NervousSystem.outputs[i]   ;
           }
-          recordLog << "," << Insect.cx;
           recordLog << endl;
         }
     }
@@ -464,18 +465,132 @@ void loadValuesFromConfig( INIReader &reader) {
 }
 
 
+void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
+  cout << "inside func" << directory << endl;
+  
+  //use argument passed in to load from config file
+  INIReader reader( ini   );
+  
+  cout << "trying reader" << endl;
+  if (reader.ParseError() < 0) {
+    std::cout << "Can't load '.ini' file!\n";
+    return;
+  }
+  
+  //load global variable values from reader
+  cout <<"trying loadvalues" << endl;
+  loadValuesFromConfig( reader );  
+  cout << StepSize << " ..";
+  
+  int genomeSize = (networkSize*neuronParameterCount + networkSize*networkSize);
+  
+  cout << "TVector of size: " << genomeSize << " must be created!" << endl;
+
+  char genomesFile[100];
+  strcpy(genomesFile, directory);
+  strcat(genomesFile, "genomes.txt" );
+  
+  std::ifstream infile( genomesFile );
+  
+  std::string line;
+  bool first=true;
+  
+  for( std::string line; getline( infile, line ); )  {
+      
+      //...for each line in input...
+      // each line is a separate genome previously recorded
+      //the first line is a header
+      if (first) {
+        first = false;
+        continue;
+      }
+      //remove commas and replace with white space
+      std::replace( line.begin(), line.end(), ',', ' '); // replace all ',' to ' '
+      
+      int seed;
+      
+      
+      
+      //create space for genome!
+      TVector<double> genome(-1,1);
+      genome.SetSize( genomeSize );
+      
+      istringstream iss( line );
+      bool first_val = true;
+      int i=0;
+      
+      do {
+        string subs;
+        iss >> subs;
+        //cout << "sub: " << subs << endl;
+        if ( first_val) {
+          first_val = false;
+          seed = stoi( subs );
+          cout << "Seed set to be: " << seed << endl;
+        } else {
+          i++;
+          genome[i] = stof( subs );
+          cout << "genome["<<i<<"]: " << genome[i] << endl;
+        }
+        
+      } while (i < genomeSize &&  iss);
+      
+	
+	  string recordFilename( directory  );
+      recordFilename += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
+      
+      recordLog.open(  recordFilename  );
+      //evaluate, but record data to specified file
+      Evaluate(genome,   recordLog );
+      
+      recordLog.close();
+      
+      cout << "Wrote activity for best agent in seed " << seed  << " to file..." << endl;
+      //DONE WRITING GENOME ACTIVITY TO FILE	
+      
+      
+  }
+  
+
+
+}
+
+
 
 // The main program
 int main (int argc, const char* argv[]) {
+  
+  
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
+    std::cerr << "OR" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY YES" << std::endl;
+    return 1;
+  }
    
-    // Check the number of parameters
-    if (argc < 3) {
-        // Tell the user how to run the program
-        std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
-        return 1;
+  // Check the number of parameters
+  if (argc >= 4) {
+    cout << "special mode: generate activity from genomes in directory: " << argv[2] << endl;
+    cout << "Do you wish to continue ? (y/n)" << endl;
+    char proceed;
+    cin >> proceed;
+    
+    if (proceed == 'y') {
+      cout << "Proceeding to generate activity from genomes in directory: " << argv[2] << endl;
+      generateActivityLogsFromGenomes( argv[1], argv[2] );
+      
+      cout << "generateActivityLogsFromGenomes completed..."<<endl;
+      
+      return -1;
+    } else {
+      // Tell the user how to run the program
+      std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
+      return 1;
     }
-    // Print the user's name:
-    cout << "Running experiment "<< argv[2]  <<" according to: " << argv[1] << endl;
+  }
+  
+  // Print the user's name:
+  cout << "Running experiment "<< argv[2]  <<" according to: " << argv[1] << endl;
   
   //use argument passed in to load from config file
   INIReader reader( argv[1]   );
