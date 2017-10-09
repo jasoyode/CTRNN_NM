@@ -1,9 +1,8 @@
 Launch script todo
 DONE   1. save config file to directory
-       2. add test of best evolved walker and record values to file (along with modulation signal!)
+DONE   2. add test of best evolved walker and record values to file (along with modulation signal!)
 DONE   3. generate plots upon completion
 DONE   4. email plots upon completion
-
 
 
 Plotting todo
@@ -11,4 +10,9 @@ DONE    1. CRAWL PASSED IN DIRECTORY rather than iterate through
 DONE    2. Make plot of all the individual runs in one plot
 DONE    3. Make aggregate plot with shaded regions are error space (1 STD)
 		4. Make comparison plots of list of different experiments
-		5. Make plot of the agent speed over time, overlayed with neuron activations and modulation signal
+DONE    5. Make plot of the agent speed over time, overlayed with neuron activations and modulation signal
+
+BigRed2
+		1. create script to launch jobs
+		2. setup to sync to SDA upon competion
+		3. figure out proper cpu/thread settings
