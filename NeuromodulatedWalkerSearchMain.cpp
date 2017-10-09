@@ -60,7 +60,7 @@ int startingSeed;
 ofstream expLogFile;
 ofstream bestAgentGenomeLogFile;
 ofstream bestAgentFitnessAndReceptorLogFile;
-
+ofstream recordLog;
 
 //name of experiment as passed in through command argument
 char* expName;
@@ -92,6 +92,10 @@ double TranslateDoubleToDiscreteValues( double d, int levels ) {
 }
 
 
+//*****************************************************
+// this version does not log to file
+//*****************************************************
+
 //Evaluate the performance of externally modulated CTRNN controllers with walking task
 double Evaluate(TVector<double> &v, RandomState &rs)
 {
@@ -106,26 +110,21 @@ double Evaluate(TVector<double> &v, RandomState &rs)
        paramCount++;
        c.SetNeuronBias(i, MapSearchParameter(v[paramCount], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) );
     }
-    
     //second N search parameters are timing constants
     for (int i=1; i<= networkSize; i++) {       
        paramCount++;
        c.SetNeuronTimeConstant(i, MapSearchParameter(v[paramCount], minTimingConstant, maxTimingConstant) ) ;
 
     }
-    
     //third N search parameters are receptor strengths
     for (int i=1; i<= networkSize; i++) {
        //this is the double value that regulates how much neurons are impacted by the modulation signal
        paramCount++;
-       
        double receptorStrength = TranslateDoubleToDiscreteValues(   MapSearchParameter(v[paramCount], minReceptor, maxReceptor), discreteLevelsOfModulation );
        c.SetNeuronReceptor(i, receptorStrength ) ;
-       
        //continuous - original
        //c.SetNeuronReceptor(i, MapSearchParameter(v[paramCount], minReceptor, maxReceptor) ) ;
     }
-
     //remaining search parameters are synaptic weights
     for (int i=1; i<= networkSize; i++) {
        for (int j=1; j<= networkSize; j++) {
@@ -133,10 +132,9 @@ double Evaluate(TVector<double> &v, RandomState &rs)
          c.SetConnectionWeight(i, j, MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) );
        }
     }
-    
+
     // Randomize the circuit - causes segfault if you don't pass rs
     c.RandomizeCircuitState(-0.5,0.5, rs);
-
 
 	//Create a One Legged Walker and load the CTRNN
 	LeggedAgent Insect;
@@ -153,17 +151,13 @@ double Evaluate(TVector<double> &v, RandomState &rs)
     //swtiches from positive to negative and vice versa
     double modVel = modulationStepSize;
 
-
-    for (double time = 0; time < RunDuration; time += StepSize) {
     
+    for (double time = 0; time < RunDuration; time += StepSize) {
       //use global modulatioEnabled to determine whether to use modulation step or not
       if (  NeuromodulationType != 0 ) {
-          
           if ( sinusoidalOscillation ) {
               //calculate sin and then scale to modulation bounds
               modulationLevel = (maxModulation+minModulation) / 2 + (maxModulation-minModulation )/2 * sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
-              
-              
           } else {
               //oscillate modulationLevel back and forth between bounds
               if (modulationLevel >= maxModulation ) {
@@ -173,13 +167,125 @@ double Evaluate(TVector<double> &v, RandomState &rs)
               } 
               modulationLevel += modVel;        
           }
-
           //I use method chaining to pass this all the way down to the CTRNN where I define a special ModulatedStep function          
           Insect.ModulatedStep(StepSize, modulationLevel, NeuromodulationType);
-        
         } else {
           //regular step
           Insect.Step(StepSize);
+        }
+        
+    }
+	return Insect.cx/RunDuration;
+}
+
+
+
+
+
+///**************************************************
+// This is the version that records to a log file
+//***************************************************
+//Evaluate the performance of externally modulated CTRNN controllers with walking task
+double Evaluate(TVector<double> &v, ofstream &recordLog)
+{
+	// Create a CTRNN 
+	// then set values based upon the vector passed in
+	CTRNN c( networkSize );
+    int paramCount=0;
+    
+    //first N search parameters are biases
+    for (int i=1; i<= networkSize; i++) {
+       //setup individual neuron settings, incrementing the vector index as we go
+       paramCount++;
+       c.SetNeuronBias(i, MapSearchParameter(v[paramCount], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) );
+    }
+    //second N search parameters are timing constants
+    for (int i=1; i<= networkSize; i++) {       
+       paramCount++;
+       c.SetNeuronTimeConstant(i, MapSearchParameter(v[paramCount], minTimingConstant, maxTimingConstant) ) ;
+
+    }
+    //third N search parameters are receptor strengths
+    for (int i=1; i<= networkSize; i++) {
+       //this is the double value that regulates how much neurons are impacted by the modulation signal
+       paramCount++;
+       double receptorStrength = TranslateDoubleToDiscreteValues(   MapSearchParameter(v[paramCount], minReceptor, maxReceptor), discreteLevelsOfModulation );
+       c.SetNeuronReceptor(i, receptorStrength ) ;
+       //continuous - original
+       //c.SetNeuronReceptor(i, MapSearchParameter(v[paramCount], minReceptor, maxReceptor) ) ;
+    }
+    //remaining search parameters are synaptic weights
+    for (int i=1; i<= networkSize; i++) {
+       for (int j=1; j<= networkSize; j++) {
+         paramCount++;
+         c.SetConnectionWeight(i, j, MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) );
+       }
+    }
+   
+    // Randomize the circuit - 
+    c.RandomizeCircuitState(-0.5,0.5);
+
+	//Create a One Legged Walker and load the CTRNN
+	LeggedAgent Insect;
+	Insect.NervousSystem = c;
+
+	//TODO is this ok?
+    SetRandomSeed( 0 );
+    Insect.Reset(0, 0, 0);
+    
+    //instantaneous modulation signal
+    double modulationLevel = 0;
+    
+    //modulation rate of change (modulation velocity)
+    //swtiches from positive to negative and vice versa
+    double modVel = modulationStepSize;
+
+    
+    //RECORDING BEST PERF
+    //setup header for logfile when passed
+    if (recordLog != NULL) {
+      recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx";
+      for (int i=1; i < networkSize; i++) {
+        recordLog << ",n" << i << "_out";
+      }
+      recordLog << endl;
+      
+    }
+
+    for (double time = 0; time < RunDuration; time += StepSize) {
+      //use global modulatioEnabled to determine whether to use modulation step or not
+      if (  NeuromodulationType != 0 ) {
+          if ( sinusoidalOscillation ) {
+              //calculate sin and then scale to modulation bounds
+              modulationLevel = (maxModulation+minModulation) / 2 + (maxModulation-minModulation )/2 * sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
+          } else {
+              //oscillate modulationLevel back and forth between bounds
+              if (modulationLevel >= maxModulation ) {
+                  modVel = -modulationStepSize;
+              } else if ( modulationLevel < minModulation ) {
+                  modVel = modulationStepSize;
+              } 
+              modulationLevel += modVel;        
+          }
+          //I use method chaining to pass this all the way down to the CTRNN where I define a special ModulatedStep function          
+          Insect.ModulatedStep(StepSize, modulationLevel, NeuromodulationType);
+        } else {
+          //regular step
+          Insect.Step(StepSize);
+        }
+        
+        //RECORDING BEST PERF
+        if ( recordLog != NULL) {
+          recordLog << time << "," << modulationLevel << ",";
+          recordLog << Insect.Leg.JointX << "," << Insect.Leg.JointY << ",";
+          recordLog << Insect.Leg.FootX << "," << Insect.Leg.FootY << ",";
+          recordLog << Insect.Leg.FootState;
+          //write outputs of neurons
+          for (int i=1; i < networkSize; i++) {
+            recordLog << "," <<   Insect.NervousSystem.outputs[i]   ;
+          }
+          recordLog << "," << Insect.cx;
+          recordLog << endl;
         }
     }
 	return Insect.cx/RunDuration;
@@ -232,9 +338,7 @@ void runTests(bool showTests) {
           } 
           modulationLevel += modVel;
           
-          
           //cout << "checkpoint2: " << "  modulationLevel: " << modulationLevel << endl;
-    
           
           count++;
           if (showTests &&  count % displayFreq == 1) {
@@ -249,7 +353,6 @@ void runTests(bool showTests) {
               //sinCalc =     center + scale  * sinCalc ;
               
               double sinCalc = (maxModulation+minModulation) / 2 + (maxModulation-minModulation )/2 * sin(  time / (RunDuration / externalModulationPeriods) * 2 * PI );
-              
               cout <<  "  vs. sin calculated2: " << sinCalc << endl;
               cout << "    " << ( modulationLevel - sinCalc ) << endl;
               assert(  modulationLevel - sinCalc  < 0.25 );
@@ -542,9 +645,15 @@ int main (int argc, const char* argv[]) {
       
   
       //RUN THE BEST AGENT ON THE TASK AT HAND AND RECORD ITS NEURAL ACTIVATIONS AND MOVEMENTS
-      //TODO
+      string recordFilename( dirPath  );
+      recordFilename += "/seed_" + std::to_string(startingSeed + i)  + "_recorded_activity.csv";
+      recordLog.open(  recordFilename  );
+      
+      //evaluate, but record data to specified file
+      Evaluate( s.BestIndividual(), recordLog );
       
       
+      recordLog.close();
   
   
   }      
