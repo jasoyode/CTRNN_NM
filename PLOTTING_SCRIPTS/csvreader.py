@@ -49,7 +49,7 @@ if ".csv" in sys.argv[-1]:
 
 
 
-def plot_fitness( ):
+def plot_fitness2( ):
 
     #each element is a collection of all the generations in 1 run
     gen_all = []
@@ -484,7 +484,7 @@ def main():
 
      os.system( "mkdir -p {}/{}".format( PLOTS, experiment_directory ) )
 
-     plot_fitness()
+     plot_fitness2()
      plot_activity( 4 )
 
      #email plots to jasonayoder@gmail.com
