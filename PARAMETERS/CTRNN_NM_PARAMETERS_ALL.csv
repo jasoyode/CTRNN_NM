@@ -1,0 +1,84 @@
+parameter_name,value_label,type,value,default
+neurons,3,text,"[network]
+networkSize = 3
+neuronParameterCount = 3",*
+neurons,4,text,"[network]
+networkSize = 4
+neuronParameterCount = 3",*
+neurons,5,text,"[network]
+networkSize = 5
+neuronParameterCount = 3",*
+neurons,6,text,"[network]
+networkSize = 6
+neuronParameterCount = 3",*
+arch,std,text,"[mod]
+NeuromodulationType = 0",*
+arch,mod1,text,"[mod]
+NeuromodulationType = 1",*
+arch,mod2,text,"[mod]
+NeuromodulationType = 2",*
+modsig,sin-1p,text,"[modsignal]
+minModulation = -0.5
+maxModulation = 0.5
+externalModulationPeriods = 1
+discreteLevelsOfModulation = 3
+sinusoidalOscillation = false",*
+modsig,lin-1p,text,"[modsignal]
+minModulation = -0.5
+maxModulation = 0.5
+externalModulationPeriods = 1
+discreteLevelsOfModulation = 3
+sinusoidalOscillation = true",*
+ctrnn,normal,text,"[ctrnn]
+minNeuronBiasAndWeights=-16
+maxNeuronBiasAndWeights=16
+minTimingConstant = 0.5
+maxTimingConstant = 10.0",*
+recep,ON,text,"[receptor]
+maxReceptor = 1
+minReceptor = 1
+discreteLevelsOfModulation = 1",*
+recep,ON-OFF,text,"[receptor]
+maxReceptor = 1
+minReceptor = 0
+discreteLevelsOfModulation = 2",*
+recep,POS-OFF-NEG,text,"[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = 3",*
+recep,REAL,text,"[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = -1",
+exp,short-100,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 100
+startingSeed = 1
+RunDuration = 220
+StepSize = 0.1
+Stage1Threshold = 0.126",*
+exp,long-100,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 100
+startingSeed = 1
+RunDuration = 2200
+StepSize = 0.1
+Stage1Threshold = 0.0126",*
+exp,short-10,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 10
+startingSeed = 1
+RunDuration = 220
+StepSize = 0.1
+Stage1Threshold = 0.126",*
+exp,long_10,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 10
+startingSeed = 1
+RunDuration = 2200
+StepSize = 0.1
+Stage1Threshold = 0.0126",*

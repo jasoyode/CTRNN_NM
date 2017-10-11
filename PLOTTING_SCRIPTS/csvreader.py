@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 DATA="../DATA"
 PLOTS="../PLOTS"
 
+COMPARE_MODE=0
 
 if len(sys.argv) < 2:
   print(  "Usage: "+ sys.argv[0]+ " experiment_directory_name (inside {}".format( DATA ) )
@@ -23,9 +24,33 @@ if len(sys.argv) < 2:
 experiment_directory=sys.argv[1]
 
 
+print( sys.argv )
+experiment_directories = sys.argv[1:-1]
+
+comparison_name = sys.argv[-1]
 
 
-def plot_fitness():
+if len( sys.argv) > 2:
+  COMPARE_MODE=1
+
+
+if ".csv" in sys.argv[-1]:
+ comparison_name = comparison_name.replace(".csv","")
+ COMPARE_MODE=2
+ experiment_directories={}
+ 
+ with open( sys.argv[-1]  ) as csvfile:
+  reader = csv.DictReader(csvfile)
+  for row in reader:
+   dir =  row['directory'] 
+   label = row['label']
+   experiment_directories[dir]=  label
+
+
+
+
+def plot_fitness( ):
+
     #each element is a collection of all the generations in 1 run
     gen_all = []
     #each element is a collection of all the fitnesses in 1 run
@@ -132,6 +157,112 @@ def plot_fitness():
 
 
     #print( '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) )
+
+def plot_fitness( comparisonName, directories,  fromCSV=False):
+    
+    dirs=[]
+    if fromCSV:
+     dirs=sorted( directories.keys() )
+    else:
+     dirs=directories[:]
+       
+    #START FIRST IMAGE FOR PLOTTING
+    plt.figure(0)
+    
+    master_data = []
+    
+    print ( dirs )
+    for dir in dirs:
+
+     print( "plotting: {}".format(dir) )
+     #each element is a collection of all the generations in 1 run
+     gen_all = []
+     #each element is a collection of all the fitnesses in 1 run
+     fit_all = []
+     #each element is a collection of all the fitness in 1 generation
+     fit_by_gen = []
+     
+     #initialize all lists in fitness by generation list to store fitnesses
+     #for i in range(0, generations):
+     #  fit_by_gen.append( [] )
+     seed_files = glob.glob(  '{}/{}/seed_*.txt'.format( DATA, dir  ) ) 
+     for seed_file in seed_files:
+       gen = []
+       fit = []
+       with open( seed_file  ) as csvfile:
+         reader = csv.DictReader(csvfile)
+         for row in reader:
+           g = int( row['Generation'] )
+           #grow fit_by_gen_as_needed
+           if g + 1 >= len( fit_by_gen) :
+             fit_by_gen.append( [] )
+             
+           #incase the final generation or anything else is duplicated
+           if not g in gen:
+             gen.append(  g )
+             fit.append( float( row['BestPerf'] )   )
+             #add fitness value to proper generation
+             fit_by_gen[g].append(  float( row['BestPerf'] ) )
+
+       #plt.plot(gen, fit)
+       gen_all.append( gen )
+       fit_all.append( fit )
+       
+     # any should work
+     gen = gen_all[0]
+
+     means = []
+
+
+     for i in gen: #range(0, len(fit_by_gen) ):
+       current_mean = 0
+
+       #each collection of means
+       for f in fit_all:
+         current_mean += f[i]
+       
+       current_mean = current_mean / len(fit_all)
+       means.append( current_mean )
+       #verify mean calculated properly
+       assert(  abs( numpy.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
+       
+
+     gen_means = []
+     gen_errors = []
+
+     for g in gen: 
+       gen_means.append( numpy.mean( fit_by_gen[g]) )
+       gen_errors.append( numpy.std( fit_by_gen[g] ))
+
+     gen = numpy.asarray( gen )
+     gen_means = numpy.asarray( gen_means )
+     gen_errors = numpy.asarray( gen_errors )
+
+     master_data.append(  [gen[:], gen_means[:], gen_errors[:], dir]  )
+
+    for g, gm, ge, dir in master_data:
+    
+     print( g[0], gm[0], ge[0] )
+     print( len(g), len(gm), len(ge) )
+     
+     
+     if fromCSV:
+      plt.plot(g, gm , label=directories[dir] )
+     else:
+      plt.plot(g, gm , label=dir )
+     
+     #shaded region indicates standard deviation
+     plt.fill_between(g, gm-ge, gm+ge, alpha=0.1)  # facecolor='b',
+    
+    
+    plt.xlabel('Generation')
+    plt.ylabel('Best Mean Fitness')
+    plt.title( 'Comparing Mean Best Fitness')
+    plt.grid(True)
+    legend = plt.legend(loc='lower right') #, bbox_to_anchor=(1, 0.5) )
+    
+    plt.savefig("{0}/COMPARE/comparing_{1}.png".format(PLOTS, comparisonName ) )
+
     
 
 def plot_activity( quantity=4 ):    
@@ -340,14 +471,24 @@ def config_plot(ax, time, data, ylabel, title,  fontsize=12):
 
 def main():
 
+    
     #make sure folder exists
-    os.system( "mkdir -p {}/{}".format( PLOTS, experiment_directory ) )
+    if COMPARE_MODE==1:
+     os.system( "mkdir -p {}/{}".format( PLOTS, "COMPARE" ) )
+     plot_fitness(comparison_name, experiment_directories)
+     
+    elif COMPARE_MODE==2: 
+     plot_fitness(comparison_name, experiment_directories, True)
+     
+    else:
 
-    plot_fitness()
-    plot_activity( 4 )
+     os.system( "mkdir -p {}/{}".format( PLOTS, experiment_directory ) )
 
-    #email plots to jasonayoder@gmail.com
-    os.system( "./email_plots.sh {}".format( experiment_directory )  )
+     plot_fitness()
+     plot_activity( 4 )
+
+     #email plots to jasonayoder@gmail.com
+     os.system( "./email_plots.sh {}".format( experiment_directory )  )
 
 
 

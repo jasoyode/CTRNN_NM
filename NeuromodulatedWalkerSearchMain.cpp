@@ -435,13 +435,17 @@ void loadValuesFromConfig( INIReader &reader) {
 
     maxReceptor                = reader.GetReal("receptor", "maxReceptor", 1 ); 
     minReceptor                = reader.GetReal("receptor", "minReceptor", -1 );
+    discreteLevelsOfModulation = reader.GetInteger("receptor", "discreteLevelsOfModulation", 3 );
 
-    maxModulation              = reader.GetReal("mod", "maxModulation", 0.5 );
-    minModulation              = reader.GetReal("mod", "minModulation", -0.5 );
+    //CHANGE BELOW TO modsignal
     
-    sinusoidalOscillation      = reader.GetBoolean("mod", "sinusoidalOscillation", true );
-    externalModulationPeriods  = reader.GetInteger("mod", "externalModulationPeriods", 2 );
-    discreteLevelsOfModulation = reader.GetInteger("mod", "discreteLevelsOfModulation", 3 );
+    maxModulation              = reader.GetReal("modsignal", "maxModulation", 0.5 );
+    minModulation              = reader.GetReal("modsignal", "minModulation", -0.5 );
+    
+    sinusoidalOscillation      = reader.GetBoolean("modsignal", "sinusoidalOscillation", true );
+    externalModulationPeriods  = reader.GetInteger("modsignal", "externalModulationPeriods", 2 );
+    
+    
     
     
     //cout << "maxModulation" << maxModulation << endl;

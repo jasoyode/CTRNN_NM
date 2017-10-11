@@ -1,0 +1,11 @@
+
+[network]
+networkSize = 4
+neuronParameterCount = 3
+
+
+[ctrnn]
+minNeuronBiasAndWeights=-16
+maxNeuronBiasAndWeights=16
+minTimingConstant = 0.5
+maxTimingConstant = 10.0
