@@ -1,0 +1,92 @@
+parameter_name,value_label,type,value,default
+size,3,text,"[network]
+networkSize = 3
+neuronParameterCount = 3",*
+size,4,text,"[network]
+networkSize = 4
+neuronParameterCount = 3",*
+size,5,text,"[network]
+networkSize = 5
+neuronParameterCount = 3",*
+sim,short-100,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 100
+startingSeed = 1
+RunDuration = 220
+StepSize = 0.1
+Stage1Threshold = 0.126",*
+sim,long_10,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 10
+startingSeed = 1
+RunDuration = 2200
+StepSize = 0.1
+Stage1Threshold = 0.0126",*
+modsig,sin-1p,text,"[modsignal]
+minModulation = -0.5
+maxModulation = 0.5
+externalModulationPeriods = 1
+discreteLevelsOfModulation = 3
+sinusoidalOscillation = false",*
+modsig,lin-1p,text,"[modsignal]
+minModulation = -0.5
+maxModulation = 0.5
+externalModulationPeriods = 1
+discreteLevelsOfModulation = 3
+sinusoidalOscillation = true",*
+M,standard,text,"[mod]
+NeuromodulationType = 0
+[receptor]
+maxReceptor = 0
+minReceptor = 0
+discreteLevelsOfModulation = 1",*
+M,mod1-ON,text,"[mod]
+NeuromodulationType = 1
+[receptor]
+maxReceptor = 1
+minReceptor = 1
+discreteLevelsOfModulation = 1",*
+M,mod1-ON-OFF,text,"[mod]
+NeuromodulationType = 1
+[receptor]
+maxReceptor = 1
+minReceptor = 0
+discreteLevelsOfModulation = 2",*
+M,mod1-POS-ZERO-NEG,text,"[mod]
+NeuromodulationType = 1
+[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = 3",*
+M,mod1-REAL,text,"[mod]
+NeuromodulationType = 1
+[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = -1",*
+M,mod2-ON,text,"[mod]
+NeuromodulationType = 2
+[receptor]
+maxReceptor = 1
+minReceptor = 1
+discreteLevelsOfModulation = 1",*
+M,mod2-ON-OFF,text,"[mod]
+NeuromodulationType = 2
+[receptor]
+maxReceptor = 1
+minReceptor = 0
+discreteLevelsOfModulation = 2",*
+M,mod2-PosZerNeg,text,"[mod]
+NeuromodulationType = 2
+[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = 3",*
+M,mod2-REAL,text,"[mod]
+NeuromodulationType = 2
+[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = -1",*
