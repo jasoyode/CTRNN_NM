@@ -4,23 +4,32 @@ import os
 import sys
 import copy
 
+#import subprocess
+#def sh( command):
+#  output = subprocess.check_output( command , shell=True).decode("utf-8")
+#  return output.strip().split("\n")
+#user = sh("echo $USER")[0]
 
 
 if len(sys.argv) < 4:
   print("You must provide 4 parameters: name, template, parameter_list")
   quit()
 
-
 exp_name=sys.argv[1]
-
-
-#tmp_exp_dir=exp_dir.replace("/scratch/jasoyode/EXPERIMENTS/EXPERIMENTS/", "/tmp/")
-
-
 template=sys.argv[2]
 parameter_list_file=sys.argv[3]
 
+
+
 exp_dir="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/{}".format( exp_name )
+run_dir="/scratch/jasoyode/github_jasoyode/CTRNN_NM/"
+
+bigred2=os.path.isdir("/N/dc2/scratch/")
+
+if bigred2:
+  exp_dir="/N/dc2/scratch/jasoyode/CTRNN_NM/DATA/{}".format( exp_name )
+  run_dir="/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/"
+
 
 generate_batch_mode=False
 
@@ -84,7 +93,19 @@ def main():
     parameter_value_to_label_maps = {}
     
     
+    parameter_names = []
+    ordered_parameter_names = {}
+    reversed_ordered_parameter_names = {}
+    
     for row in reader:
+      #append numbers at front to keep order consistent as in csvfile
+      if row["parameter_name"] not in ordered_parameter_names.keys():
+        num = str(len(ordered_parameter_names))
+        ordered_parameter_names[ row["parameter_name"] ] =   num +"X"+ row["parameter_name"] 
+        reversed_ordered_parameter_names[ num +"X"+ row["parameter_name"] ] = row["parameter_name"] 
+        
+      
+      row["parameter_name"] = ordered_parameter_names.get( row["parameter_name"] )
       
       #for now we only want summary to included labeled text parameters
       if row["type"] == "text" and row["value_label"] != "":
@@ -266,18 +287,18 @@ def main():
   single_ppv_map = OrderedDict(sorted(single_ppv_map.items(), key=lambda t: t[0]))
   
   #initially everything needs to be selected, nothing is currently selected, and we are starting at job0
-  select_parameters( all_ppv_map, {}, single_ppv_map, template_replacements, parameter_value_to_label_maps)
+  select_parameters( all_ppv_map, {}, single_ppv_map, template_replacements, parameter_value_to_label_maps, reversed_ordered_parameter_names )
 
 
 #make a recursive function which has a list of SELECTED parameters AND parameters TO BE SELECTED
 #when the recursive function has no more parameters TO BE SELECTED
 #then go through the one time inclusion list, with a flag saying WRITE which replaces a single default value
-def select_parameters( unselected_parameters_map, selected_parameters_map, single_ppv_map, template_replacements, parameter_value_to_label_maps):
+def select_parameters( unselected_parameters_map, selected_parameters_map, single_ppv_map, template_replacements, parameter_value_to_label_maps, reversed_ordered_parameter_names):
   
   if len(unselected_parameters_map) == 0:
     # We have processed everything we can up to this point, we need to now go through replacing each single permutation parameter
     # one at a time, with a need for a deepcopy
-    write_selected_parameters_to_file( copy.deepcopy( selected_parameters_map ), copy.deepcopy(single_ppv_map), template_replacements, parameter_value_to_label_maps )
+    write_selected_parameters_to_file( copy.deepcopy( selected_parameters_map ), copy.deepcopy(single_ppv_map), template_replacements, parameter_value_to_label_maps, reversed_ordered_parameter_names )
     
   else:
     #choosing one parameter ti iterate over
@@ -286,10 +307,10 @@ def select_parameters( unselected_parameters_map, selected_parameters_map, singl
     for value in values:
       dprint( "Iterating:  {} -> {}".format(key, value) )
       selected_parameters_map[key] = value
-      select_parameters( copy.deepcopy(unselected_parameters_map), copy.deepcopy(selected_parameters_map), single_ppv_map, template_replacements, parameter_value_to_label_maps)
+      select_parameters( copy.deepcopy(unselected_parameters_map), copy.deepcopy(selected_parameters_map), single_ppv_map, template_replacements, parameter_value_to_label_maps, reversed_ordered_parameter_names)
   
 #then simply go through the selected list and write the necessary components to file
-def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map,  template_replacements, parameter_value_to_label_maps):
+def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map,  template_replacements, parameter_value_to_label_maps, reversed_ordered_parameter_names):
   
   
   if len(single_ppv_map) == 0:
@@ -299,13 +320,13 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         job_count += 1
         summary_top_text=";SUMMARY: "
         
+        summary_filename="JOB"
         
-        summary_filename="exp"
-        
-        for k in copy_map.keys():
+        for k in sorted(copy_map.keys()):
           if k in parameter_value_to_label_maps:
             if copy_map[k] in parameter_value_to_label_maps[k]:
               display_value = parameter_value_to_label_maps[k][ copy_map[k] ]
+              k = reversed_ordered_parameter_names[k]
               summary_top_text+= "{}->{},".format(k, display_value )
               summary_filename+= "_{}-{}".format(k, display_value )
         
@@ -331,7 +352,7 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           prop_file.write( summary_top_text )
           prop_file.write( template_contents + "\n"  )
           
-          for k in copy_map.keys():
+          for k in sorted(copy_map.keys()):
             prop_file.write( copy_map[k] )
             prop_file.write( "\n\n" )
           
@@ -343,7 +364,7 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           prop_file.write( summary_top_text )
           prop_file.write( template_contents + "\n"  )
           
-          for k in copy_map.keys():
+          for k in sorted(copy_map.keys()):
             prop_file.write( copy_map[k] )
             prop_file.write( "\n\n" )
           
@@ -355,14 +376,14 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         with open(temporary_job_queue_file, 'a') as job_file:
           
           summary = summary_filename.replace(".ini", "")
-          job_command = "cd /nfs/nfs7/home/jasoyode/github_jasoyode/CTRNN_NM/ && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format( exp_dir, summary_filename,  exp_name+"_"+summary )
+          job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, exp_dir, summary_filename,  exp_name+summary )
 
         
           job_file.write( job_command  )
         job_file.close()
   
   
-  for key in single_ppv_map.keys():
+  for key in sorted(single_ppv_map.keys()):
     #must make copy so we don't make the temporary swaps affect future permutations
     copy_map = copy.deepcopy( selected_parameters_map )
     
@@ -391,15 +412,16 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
 
 
 
-        summary_filename="exp"
+        summary_filename="JOB"
         
         
         summary_top_text=";SUMMARY: "
         
-        for k in copy_map.keys():
+        for k in sorted(copy_map.keys()):
           if k in parameter_value_to_label_maps:
             if copy_map[k] in parameter_value_to_label_maps[k]:
               display_value = parameter_value_to_label_maps[k][ copy_map[k] ]
+              k = reversed_ordered_parameter_names[k]
               summary_top_text+= "{}->{},".format(k, display_value )
               summary_filename+= "_{}-{}".format(k, display_value )
 
@@ -431,7 +453,7 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           prop_file.write( summary_top_text )
           prop_file.write( template_contents+ "\n"  )
           
-          for k in copy_map.keys():
+          for k in sorted(copy_map.keys()):
             prop_file.write( copy_map[k] )
             prop_file.write( "\n\n" )
           
@@ -443,7 +465,7 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           prop_file.write( summary_top_text )
           prop_file.write( template_contents + "\n"  )
 
-          for k in copy_map.keys():
+          for k in sorted(copy_map.keys()):
             prop_file.write( copy_map[k] )
             prop_file.write( "\n\n" )
 
@@ -456,10 +478,9 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         
         
         with open(temporary_job_queue_file, 'a') as job_file:
-          
-          #job_command = "cd /nfs/nfs7/home/jasoyode/github_jasoyode/CTRNN_NM/ && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format( exp_dir, summary_filename,  exp_name )
           summary = summary_filename.replace(".ini", "")
-          job_command = "cd /nfs/nfs7/home/jasoyode/github_jasoyode/CTRNN_NM/ && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format( exp_dir, summary_filename,  exp_name+"_"+summary )
+          job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, exp_dir, summary_filename,  exp_name+summary )
+
 
           
           
@@ -502,9 +523,9 @@ check_file.close()
 #quit()
 #os.system( "echo '{}'".format(temporary_job_queue_file ) )
 
-if generate_batch_mode:
-  os.system( "cat {}".format(temporary_job_queue_file) )
-
+if generate_batch_mode or bigred2:
+  os.system( "cat {} | tail -n 2".format(temporary_job_queue_file) )
+  print( "temporary job file will only be appended to!" )
 else:
   os.system( "python job_q_server/client_add_jobs.py {}".format( temporary_job_queue_file ) )
   os.system( "rm {}".format( temporary_job_queue_file ))
