@@ -8,7 +8,7 @@ neuronParameterCount = 3",*
 size,5,text,"[network]
 networkSize = 5
 neuronParameterCount = 3",*
-sim,short-100,text,"[exp]
+sim,short100run,text,"[exp]
 popSize = 1000
 generations = 500
 runs  = 100
@@ -16,7 +16,7 @@ startingSeed = 1
 RunDuration = 220
 StepSize = 0.1
 Stage1Threshold = 0.126",*
-sim,long_10,text,"[exp]
+sim,long10run,text,"[exp]
 popSize = 1000
 generations = 500
 runs  = 10
@@ -24,13 +24,13 @@ startingSeed = 1
 RunDuration = 2200
 StepSize = 0.1
 Stage1Threshold = 0.0126",*
-modsig,sin-1p,text,"[modsignal]
+signal,SINE-1p,text,"[modsignal]
 minModulation = -0.5
 maxModulation = 0.5
 externalModulationPeriods = 1
 discreteLevelsOfModulation = 3
 sinusoidalOscillation = false",*
-modsig,lin-1p,text,"[modsignal]
+signal,LINEAR-1p,text,"[modsignal]
 minModulation = -0.5
 maxModulation = 0.5
 externalModulationPeriods = 1
