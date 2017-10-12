@@ -4,8 +4,9 @@ DEBUG = -g
 CFLAGS = -Wall -std=c++11 -c $(DEBUG)
 LFLAGS = -Wall -pthread $(DEBUG)
 
+
 runExp : $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) -o runExp
+	$(CC) $(LFLAGS) $(OBJS) -o ../runExp
 
 NeuromodulatedWalkerSearchMain.o: NeuromodulatedWalkerSearchMain.cpp TSearch.h CTRNN.h LeggedAgent.h VectorMatrix.h random.h
 	$(CC) $(CFLAGS) NeuromodulatedWalkerSearchMain.cpp

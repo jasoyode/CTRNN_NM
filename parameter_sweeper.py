@@ -22,12 +22,14 @@ parameter_list_file=sys.argv[3]
 
 
 exp_dir="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/{}".format( exp_name )
+config_dir="/scratch/jasoyode/github_jasoyode/CTRNN_NM/CONFIG/{}".format( exp_name )
 run_dir="/scratch/jasoyode/github_jasoyode/CTRNN_NM/"
 
 bigred2=os.path.isdir("/N/dc2/scratch/")
 
 if bigred2:
-  exp_dir="/N/dc2/scratch/jasoyode/CTRNN_NM/DATA/{}".format( exp_name )
+  exp_dir="/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/DATA/{}".format( exp_name )
+  config_dir="/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/CONFIG/{}".format( exp_name )
   run_dir="/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/"
 
 
@@ -41,7 +43,7 @@ if len(sys.argv) > 4:
 print( "Job name: {}\nTemplate: {}\nParameter List: {}".format( exp_name, template, parameter_list_file ) )
 
 
-temporary_job_queue_file="temp_job_queue.txt"
+temporary_job_queue_file="resources/JOB_QUEUES/job_queue_"+exp_name+".txt"
 
 #job_path='{}/JOBS_DIR/job_{}.properties'.format(exp_dir, job_count )
 
@@ -49,7 +51,6 @@ temporary_job_queue_file="temp_job_queue.txt"
 #EDIT HERE
 DEBUG=False
 
-job_count=0
 
 def dprint(message ):
   if DEBUG:
@@ -59,17 +60,9 @@ def dprint(message ):
 def main():
 
   #create experiment directory
-  os.system("mkdir -p {}".format( exp_dir ) )
+  #os.system("mkdir -p {}".format( config_dir ) )
   
-  #create JOBS directory for properties files
-  os.system("mkdir -p {}/JOBS_DIR".format(exp_dir) )
-  
-#  job_names = []
-  
-  os.system("mkdir -p {}/NAMED_JOBS".format(exp_dir) )
-  
-  #create JOBS COMEPLTEdirectory for properties files
-  os.system("mkdir -p {}/JOBS_COMPLETED".format(exp_dir) )
+  os.system("mkdir -p {}/NAMED_JOBS".format(config_dir) )
   
   
   #open the csv file which has our list of parameters to examine
@@ -316,8 +309,6 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
   if len(single_ppv_map) == 0:
     
         copy_map = selected_parameters_map
-        global job_count
-        job_count += 1
         summary_top_text=";SUMMARY: "
         
         summary_filename="JOB"
@@ -335,8 +326,6 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         #job_names.append( summary_filename )
         
                
-        print( "Writing to file job_{}.ini".format( job_count ) )
-        
         with open( template , 'r') as template_file:
           template_contents = template_file.read()
         template_file.close()
@@ -348,19 +337,9 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
             template_contents = template_contents.replace( k, template_replacements[key] )
         
         
-        with open('{}/JOBS_DIR/job_{}.ini'.format(exp_dir, job_count ), 'w') as prop_file:
-          prop_file.write( summary_top_text )
-          prop_file.write( template_contents + "\n"  )
-          
-          for k in sorted(copy_map.keys()):
-            prop_file.write( copy_map[k] )
-            prop_file.write( "\n\n" )
-          
-        prop_file.close()
-        
         #write with the summary name in file as well
         
-        with open('{}/NAMED_JOBS/{}.ini'.format(exp_dir, summary_filename  ), 'w') as prop_file:
+        with open('{}/NAMED_JOBS/{}.ini'.format(config_dir, summary_filename  ), 'w') as prop_file:
           prop_file.write( summary_top_text )
           prop_file.write( template_contents + "\n"  )
           
@@ -376,7 +355,7 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         with open(temporary_job_queue_file, 'a') as job_file:
           
           summary = summary_filename.replace(".ini", "")
-          job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, exp_dir, summary_filename,  exp_name+summary )
+          job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, config_dir, summary_filename,  exp_name+"/"+summary )
 
         
           job_file.write( job_command  )
@@ -406,8 +385,6 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         dprint("##########################################")
         dprint("Labeling this:{}->{}".format(key, parameter_value_to_label_maps[key][value] ) )
         
-        global job_count
-        job_count += 1
         copy_map[key]= value
 
 
@@ -430,8 +407,6 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         
         #job_names.append( summary_filename )
         
-        print( "Writing to file job_{}.ini".format( job_count ) )
-        
         #read in template contents
         #search and replace
         #append all parameters at start of file
@@ -449,19 +424,9 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
             template_contents = template_contents.replace( k, template_replacements[key] )
         
         
-        with open('{}/JOBS_DIR/job_{}.ini'.format(exp_dir, job_count ), 'w') as prop_file:
-          prop_file.write( summary_top_text )
-          prop_file.write( template_contents+ "\n"  )
-          
-          for k in sorted(copy_map.keys()):
-            prop_file.write( copy_map[k] )
-            prop_file.write( "\n\n" )
-          
-        prop_file.close()
-        
         #write with the summary name in file as well
 
-        with open('{}/NAMED_JOBS/{}.ini'.format(exp_dir, summary_filename  ), 'w') as prop_file:
+        with open('{}/NAMED_JOBS/{}.ini'.format(config_dir, summary_filename  ), 'w') as prop_file:
           prop_file.write( summary_top_text )
           prop_file.write( template_contents + "\n"  )
 
@@ -479,7 +444,7 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         
         with open(temporary_job_queue_file, 'a') as job_file:
           summary = summary_filename.replace(".ini", "")
-          job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, exp_dir, summary_filename,  exp_name+summary )
+          job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, config_dir, summary_filename,  exp_name+"/"+summary )
 
 
           
@@ -500,24 +465,18 @@ def range_f(start, increment, stop):
     start += increment
   return values
 
-
-
 main()
 
-#print("DONE!")      
-#with open(temporary_job_queue_file, 'r') as job_file: 
-#  print(job_file.read() )
-#job_file.close()
 
-with open('{}/check_list.txt'.format(exp_dir ), 'w') as check_file:
-
-  #make check list for firing emails
-  for i in range( job_count ):
-    n = i+1
-    check_file.write( "job_{}.txt\n".format( n ) )
-    
-    
-check_file.close()
+#with open('{}/check_list.txt'.format(exp_dir ), 'w') as check_file:
+#
+#  #make check list for firing emails
+#  for i in range( job_count ):
+#    n = i+1
+#    check_file.write( "job_{}.txt\n".format( n ) )
+#    
+#    
+#check_file.close()
 
 #print("don't forget to rm temp")
 #quit()

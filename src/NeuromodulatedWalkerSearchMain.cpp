@@ -245,7 +245,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
     
     //RECORDING BEST PERF
     //setup header for logfile when passed
-    if (recordLog != NULL) {
+    if (recordLog ) {
       recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx";
       for (int i=1; i <= networkSize; i++) {
         recordLog << ",n" << i << "_out";
@@ -277,7 +277,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
         }
         
         //RECORDING BEST PERF
-        if ( recordLog != NULL) {
+        if ( recordLog ) {
           recordLog << time << "," << modulationLevel << ",";
           recordLog << Insect.Leg.JointX << "," << Insect.Leg.JointY << ",";
           recordLog << Insect.Leg.FootX << "," << Insect.Leg.FootY << ",";
@@ -781,13 +781,13 @@ int main (int argc, const char* argv[]) {
   bestAgentFitnessAndReceptorLogFile.close();
   
   
-  
-  
   //generate plots for directories
+  //this should be done as post processing, independent of the simulation running
   
+  /*
   //run plot commands!
   char plot_command[100];
-  strcpy( plot_command, ("cd PLOTTING_SCRIPTS && python csvreader.py ") );
+  strcpy( plot_command, ("cd ../scripts/plotting/ && python3 csvreader.py ") );
   strcat( plot_command, expName );
 
   const int plot_err = system( plot_command );
@@ -795,7 +795,7 @@ int main (int argc, const char* argv[]) {
       printf("Error running plot command!");
       exit(1);
   }
-  
+  */
   
   return 0;
 }

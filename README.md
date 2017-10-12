@@ -1,2 +1,3 @@
 # CTRNN_NM
-implementation of neuromodulation in CTRNN
+Simple implementation of neuromodulation in CTRNNs
+Using external neuromodulatory signal to perturb single leg locomotion

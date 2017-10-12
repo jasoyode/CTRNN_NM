@@ -1,4 +1,5 @@
 Launch script todo
+
 DONE   1. save config file to directory
 DONE   2. add test of best evolved walker and record values to file (along with modulation signal!)
 DONE   3. generate plots upon completion
@@ -6,16 +7,26 @@ DONE   4. email plots upon completion
 
 
 Plotting todo
+
 DONE    1. CRAWL PASSED IN DIRECTORY rather than iterate through
 DONE    2. Make plot of all the individual runs in one plot
 DONE    3. Make aggregate plot with shaded regions are error space (1 STD)
 DONE	4. Make comparison plots of list of different experiments
 DONE    5. Make plot of the agent speed over time, overlayed with neuron activations and modulation signal
-
+	6. Make a plot of the cyclic trajectory of 3 output neurons in 3d space
+		https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html
 
 
 BigRed2
+
 DONE	0. make job queue to run jobs
-		1. create script to launch jobs
-		2. setup to sync to SDA upon competion
-		3. figure out proper cpu/thread settings
+PARTIAL	1. create script to launch jobs
+PARTIAL	2. setup to sync to SDA upon competion
+DONE	3. figure out proper cpu/thread settings
+
+
+Project setup
+
+	1. Setup proper C++ package structure
+	2. Cleanup misc unneeded files
+	3. do proper pre and post processing

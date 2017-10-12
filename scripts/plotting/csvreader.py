@@ -12,20 +12,32 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 #location for DATA from experiments and PLOTS
-DATA="../DATA"
-PLOTS="../PLOTS"
+DATA="../../DATA"
+PLOTS="../../PLOTS"
 
 COMPARE_MODE=0
 
 if len(sys.argv) < 2:
   print(  "Usage: "+ sys.argv[0]+ " experiment_directory_name (inside {}".format( DATA ) )
+
   quit()
 
 experiment_directory=sys.argv[1]
 
+experiment_title = re.sub(r'.*/','', experiment_directory )
+
+
 
 print( sys.argv )
 experiment_directories = sys.argv[1:-1]
+
+
+
+if len(experiment_title) ==0:
+  print( "make sure not to leave a / at the end of the directory!" )
+  quit()
+  
+
 
 comparison_name = sys.argv[-1]
 
@@ -62,7 +74,7 @@ def plot_fitness2( ):
     #initialize all lists in fitness by generation list to store fitnesses
     #for i in range(0, generations):
     #  fit_by_gen.append( [] )
-    seed_files = glob.glob(  '{}/{}/seed_*.txt'.format( DATA, experiment_directory  ) ) 
+    seed_files = glob.glob(  '{}/seed_*.txt'.format( experiment_directory  ) ) 
     for seed_file in seed_files:
       gen = []
       fit = []
@@ -129,9 +141,19 @@ def plot_fitness2( ):
     plt.plot(gen, fit)
     plt.xlabel('Generation')
     plt.ylabel('Best Fitness')
-    plt.title( experiment_directory + '\nBest Fitness of Individual Experiment Runs')
+    
+
+    
+    #TODO FIX THIS
+    #print( experiment_directory  )
+    #print( experiment_title  )
+    #quit()
+    
+    exp_title = re.sub(r'.*/','', experiment_directory )
+    
+    plt.title( exp_title + '\nBest Fitness of Individual Experiment Runs')
     plt.grid(True)
-    plt.savefig("{0}/{1}/individual_runs_{1}.png".format(PLOTS,  experiment_directory ) )
+    plt.savefig("{0}/{1}/individual_runs_{1}.png".format(PLOTS,  exp_title ) )
 
 
 
@@ -149,9 +171,13 @@ def plot_fitness2( ):
 
     plt.xlabel('Generation')
     plt.ylabel('Best Mean Fitness')
-    plt.title( experiment_directory + '\nMean Best Fitness by Generation with Standard Error')
+    
+    
+    exp_title = re.sub(r'.*/','', experiment_directory )       
+        
+    plt.title( exp_title +'\nMean Best Fitness by Generation with Standard Error')
     plt.grid(True)
-    plt.savefig("{0}/{1}/mean_runs_with_error_{1}.png".format(PLOTS, experiment_directory ) )
+    plt.savefig("{0}/{1}/mean_runs_with_error_{1}.png".format(PLOTS, exp_title ) )
 
 
 
@@ -269,7 +295,7 @@ def plot_activity( quantity=4 ):
     
     seed_to_fitness_map={}
     
-    fitness_and_receptors = "{}/{}/fitness_and_receptors.txt".format( DATA, experiment_directory  )
+    fitness_and_receptors = "{}/fitness_and_receptors.txt".format( experiment_directory  )
     
     total_receptors=-1
     
@@ -308,7 +334,7 @@ def plot_activity( quantity=4 ):
     top_seeds = [x[0] for x in sorted_seeds_and_fit]
     print ( top_seeds )
 
-    record_files =  glob.glob(  '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) ) 
+    record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
 
     #dictionary( "seed" -> (dictionary ( t -> (data ) )
     
@@ -453,7 +479,10 @@ def plot_activity( quantity=4 ):
         plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
         #plt.title("Fitness: {}".format(seed_to_fitness_map[seed_num] ) , fontsize=fontsize)
         
-        plt.savefig("{0}/{1}/seed_{2}_{1}.png".format(PLOTS, experiment_directory, seed_num  ) )
+        exp_title = re.sub(r'.*/','', experiment_directory )       
+            
+        
+        plt.savefig("{0}/{1}/seed_{2}_{1}.png".format(PLOTS, exp_title, seed_num  ) )
         
         if count >= 10:
          return
@@ -482,14 +511,15 @@ def main():
      
     else:
 
-     os.system( "mkdir -p {}/{}".format( PLOTS, experiment_directory ) )
+     experiment_title = re.sub(r'.*/','', experiment_directory )
+     os.system( "mkdir -p {}/{}".format( PLOTS, experiment_title ) )
 
      plot_fitness2()
      plot_activity( 4 )
 
      #email plots to jasonayoder@gmail.com
-     os.system( "./email_plots.sh {}".format( experiment_directory )  )
-
+     #this should be handled separately from the data generation
+     #os.system( "./email_plots.sh {}".format( experiment_directory )  )
 
 
 main()
