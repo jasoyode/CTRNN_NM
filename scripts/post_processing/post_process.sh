@@ -33,12 +33,14 @@ if [[ "$1" == */DATA/* ]] ; then
     echo "$dir,$label," >> $EXP_NAME.csv
   done
   
+  mkdir -p ../../PLOTS/COMPARE/
+  
   #could split on underscores and remove anything in common with all
   python3 csvreader.py $EXP_NAME.csv
   mkdir -p CSV
   mv $EXP_NAME.csv CSV/
   
-  mkdir -p ../../PLOTS/COMPARE/
+
   
   echo "Comparison Plots attached" |mutt -s "Exp: $EXP_NAME Comparison  plots attached" $( printf -- '-a %q ' ../../PLOTS/COMPARE/comparing_$EXP_NAME.png ) -- jasonayoder@gmail.com  
   
