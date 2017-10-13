@@ -11,4 +11,4 @@ module load ccm
 module unload python
 module load python/3.3.0
 
-/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/run_from_queue.sh /N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/resources/JOB_QUEUES/job_queue_JASON.txt
+/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/run_from_queue.sh /N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/resources/JOB_QUEUES/job_queue_FINAL_TEST.txt

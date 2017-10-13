@@ -6,7 +6,7 @@ if [ "$1" == ""  ]; then
 fi
 
 
-if [[ $HOSTNAME == *"redhead"* ]]; then
+if [[ $HOSTNAME == *"karst"* ]]; then
     echo "on Karst"
 
     EXP_DIR="$1"
@@ -14,9 +14,9 @@ if [[ $HOSTNAME == *"redhead"* ]]; then
     
     echo "EXP_DIR = $EXP_DIR"
     echo "SUB_DATA = $SUB_DATA"
-    exit
     
-    rsync -av --progress $EXP_DIR jasoyode@silo.cs.indiana.edu:/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/$SUB_DATA
+    
+    rsync -av --progress $EXP_DIR/ jasoyode@silo.cs.indiana.edu:/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/$SUB_DATA/
 
     ssh jasoyode@silo.cs.indiana.edu "cd /scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/post_processing/ && ./post_process.sh ../../DATA/$SUB_DATA" 
     echo "PLEASE RUN the following command on silo: "
