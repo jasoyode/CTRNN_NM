@@ -3,6 +3,7 @@ import csv
 import os
 import sys
 import copy
+import datetime
 
 #import subprocess
 #def sh( command):
@@ -63,7 +64,6 @@ def main():
   #os.system("mkdir -p {}".format( config_dir ) )
   
   os.system("mkdir -p {}/NAMED_JOBS".format(config_dir) )
-  
   
   #open the csv file which has our list of parameters to examine
   with open( parameter_list_file, 'r') as csvfile:
@@ -282,6 +282,14 @@ def main():
   #initially everything needs to be selected, nothing is currently selected, and we are starting at job0
   select_parameters( all_ppv_map, {}, single_ppv_map, template_replacements, parameter_value_to_label_maps, reversed_ordered_parameter_names )
 
+  #AFTER everything else has been done add the post-processing commands
+  with open(temporary_job_queue_file, 'a') as job_file:
+    date= datetime.datetime.today().strftime('%Y-%m-%d')
+    job_command = "cd {0}/scripts/post_processing && ./post_process.sh {0}/DATA/{1}-{2}\n".format(run_dir, date, exp_name  )
+    job_file.write( job_command  )
+    job_file.close()
+
+
 
 #make a recursive function which has a list of SELECTED parameters AND parameters TO BE SELECTED
 #when the recursive function has no more parameters TO BE SELECTED
@@ -360,7 +368,9 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           #job_command += "cd {0}/scripts/plotting/ && ./generate_all_plots.sh {0}/DATA/{1} \n".format(run_dir,  exp_name )
           #job_command += "cd {0}/scripts/plotting/ && ./send_all_emails.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
           #job_command += "cd {0}/scripts/post_processing && ./tar_and_store.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
-
+          
+          #date= datetime.datetime.today().strftime('%Y-%m-%d')
+          #job_command += "cd {0}/scripts/post_processing && ./post_process.sh {0}/DATA/{1}-{2}\n".format(run_dir, date, exp_name  )
         
           job_file.write( job_command  )
         job_file.close()
@@ -449,10 +459,9 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         with open(temporary_job_queue_file, 'a') as job_file:
           summary = summary_filename.replace(".ini", "")
           job_command =  "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, config_dir, summary_filename,  exp_name+"/"+summary )
-          #job_command += "cd {0}/scripts/plotting/ && ./generate_all_plots.sh {0}/DATA/{1} \n".format(run_dir,  exp_name )
-          #job_command += "cd {0}/scripts/plotting/ && ./send_all_emails.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
-          #job_command += "cd {0}/scripts/post_processing && ./tar_and_store.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
-
+          
+          #date= datetime.datetime.today().strftime('%Y-%m-%d')
+          #job_command += "cd {0}/scripts/post_processing && ./post_process.sh {0}/DATA/{1}-{2}\n".format(run_dir, date, exp_name  )
           
           
           job_file.write( job_command  )
@@ -473,16 +482,6 @@ def range_f(start, increment, stop):
 
 main()
 
-
-#with open('{}/check_list.txt'.format(exp_dir ), 'w') as check_file:
-#
-#  #make check list for firing emails
-#  for i in range( job_count ):
-#    n = i+1
-#    check_file.write( "job_{}.txt\n".format( n ) )
-#    
-#    
-#check_file.close()
 
 #print("don't forget to rm temp")
 #quit()

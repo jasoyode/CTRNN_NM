@@ -14,12 +14,15 @@ if [[ "$1" == */DATA/* ]] ; then
 
   for dir in $( ls $DATA_DIR  ); do
 	 COMPARING_DIRS="$COMPARING_DIRS $DATA_DIR/$dir"
+     
      #generate plots for each individual parameter set
-     echo "python3 ../plotting/csvreader.py $DATA_DIR/$dir"
+     python3 ../plotting/csvreader.py $DATA_DIR/$dir
      
-     echo "../plotting/email_plots.sh $PLOT_DIR/$dir"
+     #email individual plots
+     ../plotting/email_plots.sh $PLOT_DIR/$dir
      
-     echo "./tar_and_store.sh $DATA_DIR/$dir $PLOT_DIR/$dir "     
+     #tar and store all data and plots
+     ./tar_and_store.sh $DATA_DIR/$dir $PLOT_DIR/$dir
      
   done;
   
@@ -37,7 +40,6 @@ if [[ "$1" == */DATA/* ]] ; then
   
   #could split on underscores and remove anything in common with all
   
-  
   python3 ../plotting/csvreader.py $EXP_NAME.csv
   
   echo "Comparison Plots attached" |mutt -s "Exp: $EXP_NAME Comparison  plots attached" $( printf -- '-a %q ' ../../PLOTS/COMPARE/comparing_$EXP_NAME.png ) -- jasonayoder@gmail.com  
@@ -46,8 +48,6 @@ if [[ "$1" == */DATA/* ]] ; then
 else
   echo "You must include the path to the DATA folder (full or relative) in your argument!"
 fi
-
-
 
 
 

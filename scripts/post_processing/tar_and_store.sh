@@ -5,10 +5,11 @@
 PLOTS="PLOTS"
 DATA="DATA"
 
-if [  ["$1" == ""] || ["$2" == ""] ]; then
+if   [  "$2" == "" ] ; then
   echo "Please specify an experiment DATA and PLOTS directory!"
   exit
 fi
+
 
 DATA_DIR="$1"
 PLOT_DIR="$2"
