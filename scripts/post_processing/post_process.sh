@@ -11,18 +11,17 @@ if [[ "$1" == */DATA/* ]] ; then
   PLOT_DIR=$( echo "$DATA_DIR" | sed "s/DATA/PLOTS/" )
   
   COMPARING_DIRS=""
+  
+  ../plotting/generate_all_plots.sh $DATA_DIR
+  ../plotting/send_all_emails.sh $PLOT_DIR
 
   for dir in $( ls $DATA_DIR  ); do
 	 COMPARING_DIRS="$COMPARING_DIRS $DATA_DIR/$dir"
      
      #generate plots for each individual parameter set
-     python3 ../plotting/csvreader.py $DATA_DIR/$dir
-     
+     #python3 ../plotting/csvreader.py $DATA_DIR/$dir
      #email individual plots
-     ../plotting/email_plots.sh $PLOT_DIR/$dir
-     
-
-     
+     #../plotting/email_plots.sh $PLOT_DIR/$dir
   done;
   
   

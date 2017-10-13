@@ -460,10 +460,6 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           summary = summary_filename.replace(".ini", "")
           job_command =  "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, config_dir, summary_filename,  exp_name+"/"+summary )
           
-          #date= datetime.datetime.today().strftime('%Y-%m-%d')
-          #job_command += "cd {0}/scripts/post_processing && ./post_process.sh {0}/DATA/{1}-{2}\n".format(run_dir, date, exp_name  )
-          
-          
           job_file.write( job_command  )
         job_file.close()
 
