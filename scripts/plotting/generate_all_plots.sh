@@ -20,7 +20,7 @@ if [[ "$1" == */DATA/* ]] ; then
   EXP_DIR="$1"
   
   for dir in $( ls $EXP_DIR | grep "$FILTER" ); do
-     python csvreader.py $EXP_DIR/$dir
+     python3 csvreader.py $EXP_DIR/$dir
   done;
 
 else
