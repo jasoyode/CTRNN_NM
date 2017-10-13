@@ -34,17 +34,17 @@ if confirm != "y":
   print( "Running\n-------------------------------------------------------" )
 
 #make location to store scripts to be run
-os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_queue )
+os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_queue ) )
 
 count=0
 for job in jobs:
-  count++
+  count+=1
   if len(job) == 0:
     #do nothing
     print("skipping blank line")
   else:
 
-    os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={0} {1}\" >> JOB_SCRIPTS/{}/job_{}.script   ".format( expected_time, job, job_queue, count ) )
+    os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={0} {1}\" >> JOB_SCRIPTS/{2}/job_{3}.script   ".format( expected_time, job, job_queue, count ) )
 
     
     
