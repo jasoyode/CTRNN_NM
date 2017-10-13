@@ -44,7 +44,7 @@ if [[ "$1" == */DATA/* ]] ; then
   echo "Comparison Plots attached" |mutt -s "Exp: $EXP_NAME Comparison  plots attached" $( printf -- '-a %q ' ../../PLOTS/COMPARE/comparing_$EXP_NAME.png ) -- jasonayoder@gmail.com  
   
   #tar and store all data and plots
-  ./tar_and_store.sh $DATA_DIR $PLOT_DIR
+  #./tar_and_store.sh $DATA_DIR $PLOT_DIR
   
 
 else
