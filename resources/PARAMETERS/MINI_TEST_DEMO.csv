@@ -21,7 +21,7 @@ minModulation = -0.5
 maxModulation = 0.5
 externalModulationPeriods = 5
 discreteLevelsOfModulation = 3
-sinusoidalOscillation = false",*
+sinusoidalOscillation = true",*
 M,standard,text,"[mod]
 NeuromodulationType = 0
 [receptor]

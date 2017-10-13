@@ -16,14 +16,14 @@ else
 fi
     
 
-if [[ "$1" == */DATA/* ]] ; then
+if [[ "$1" == */PLOTS/* ]] ; then
   EXP_DIR="$1"
   
   for dir in $( ls $EXP_DIR | grep "$FILTER" ); do
-     python csvreader.py $EXP_DIR/$dir
+     ./email_plots.sh $EXP_DIR/$dir
   done;
 
 else
-  echo "You must include the path to the DATA folder (full or relative) in your argument!"
+  echo "You must include the path to the PLOTS folder (full or relative) in your argument!"
 fi
     

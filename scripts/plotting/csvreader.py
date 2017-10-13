@@ -19,28 +19,21 @@ COMPARE_MODE=0
 
 if len(sys.argv) < 2:
   print(  "Usage: "+ sys.argv[0]+ " experiment_directory_name (inside {}".format( DATA ) )
-
   quit()
 
+
 experiment_directory=sys.argv[1]
-
 experiment_title = re.sub(r'.*/','', experiment_directory )
-
-
 
 print( sys.argv )
 experiment_directories = sys.argv[1:-1]
 
 
-
 if len(experiment_title) ==0:
   print( "make sure not to leave a / at the end of the directory!" )
   quit()
-  
-
 
 comparison_name = sys.argv[-1]
-
 
 if len( sys.argv) > 2:
   COMPARE_MODE=1
@@ -57,8 +50,6 @@ if ".csv" in sys.argv[-1]:
    dir =  row['directory'] 
    label = row['label']
    experiment_directories[dir]=  label
-
-
 
 
 def plot_fitness2( ):
@@ -105,6 +96,9 @@ def plot_fitness2( ):
       plt.plot(gen, fit)
       gen_all.append( gen )
       fit_all.append( fit )
+    
+    if len(gen_all) == 0:
+     raise Exception("There was no data, are you sure you specified the correct file?")
       
     # any should work
     gen = gen_all[0]
@@ -135,13 +129,9 @@ def plot_fitness2( ):
       #print( "gen: {}  mean: {}   std: {}".format( g, gen_means[g], gen_errors[g] ) )
 
 
-
-
-
     plt.plot(gen, fit)
     plt.xlabel('Generation')
     plt.ylabel('Best Fitness')
-    
 
     
     #TODO FIX THIS
@@ -150,10 +140,10 @@ def plot_fitness2( ):
     #quit()
     
     exp_title = re.sub(r'.*/','', experiment_directory )
-    
+    exp_base = re.sub(r'.*/DATA/','', experiment_directory )
     plt.title( exp_title + '\nBest Fitness of Individual Experiment Runs')
     plt.grid(True)
-    plt.savefig("{0}/{1}/individual_runs_{1}.png".format(PLOTS,  exp_title ) )
+    plt.savefig("{0}/{1}/individual_runs_{2}.png".format(PLOTS,  exp_base, exp_title ) )
 
 
 
@@ -174,10 +164,10 @@ def plot_fitness2( ):
     
     
     exp_title = re.sub(r'.*/','', experiment_directory )       
-        
+    exp_base = re.sub(r'.*/DATA/','', experiment_directory )
     plt.title( exp_title +'\nMean Best Fitness by Generation with Standard Error')
     plt.grid(True)
-    plt.savefig("{0}/{1}/mean_runs_with_error_{1}.png".format(PLOTS, exp_title ) )
+    plt.savefig("{0}/{1}/mean_runs_with_error_{2}.png".format(PLOTS, exp_base, exp_title ) )
 
 
 
@@ -193,7 +183,8 @@ def plot_fitness( comparisonName, directories,  fromCSV=False):
      dirs=directories[:]
        
     #START FIRST IMAGE FOR PLOTTING
-    plt.figure(0)
+    fig = plt.figure(0)
+    fig.set_size_inches(11, 8)
     
     master_data = []
     
@@ -211,7 +202,7 @@ def plot_fitness( comparisonName, directories,  fromCSV=False):
      #initialize all lists in fitness by generation list to store fitnesses
      #for i in range(0, generations):
      #  fit_by_gen.append( [] )
-     seed_files = glob.glob(  '{}/{}/seed_*.txt'.format( DATA, dir  ) ) 
+     seed_files = glob.glob(  '{}/seed_*.txt'.format(  dir  ) ) 
      for seed_file in seed_files:
        gen = []
        fit = []
@@ -234,6 +225,11 @@ def plot_fitness( comparisonName, directories,  fromCSV=False):
        gen_all.append( gen )
        fit_all.append( fit )
        
+     if len(gen_all) == 0:
+      print( seed_files )
+      raise Exception("There was no data, are you sure you specified the correct file?")
+      
+     
      # any should work
      gen = gen_all[0]
 
@@ -480,9 +476,9 @@ def plot_activity( quantity=4 ):
         #plt.title("Fitness: {}".format(seed_to_fitness_map[seed_num] ) , fontsize=fontsize)
         
         exp_title = re.sub(r'.*/','', experiment_directory )       
-            
+        exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
         
-        plt.savefig("{0}/{1}/seed_{2}_{1}.png".format(PLOTS, exp_title, seed_num  ) )
+        plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
         
         if count >= 10:
          return
@@ -511,8 +507,8 @@ def main():
      
     else:
 
-     experiment_title = re.sub(r'.*/','', experiment_directory )
-     os.system( "mkdir -p {}/{}".format( PLOTS, experiment_title ) )
+     exp_base = re.sub(r'.*/DATA/','', experiment_directory )
+     os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
 
      plot_fitness2()
      plot_activity( 4 )
