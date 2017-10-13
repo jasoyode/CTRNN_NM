@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 if len(sys.argv) < 2:
   print( "Usage: {}  [jobqueue.txt] ".format( sys.argv[0])  )
@@ -33,8 +34,15 @@ confirm = input("Are you sure you wish to continue? (y/n)")
 if confirm != "y":
   print( "Running\n-------------------------------------------------------" )
 
+job_name=re.sub(r".*/","",job_queue)
+
+
+if os.path.isdir("JOB_SCRIPTS/{}".format( job_name )):
+  print( "Scripts have already been generated for that JOB_QUEUE file!\n Exiting...")
+  quit()
+
 #make location to store scripts to be run
-os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_queue ) )
+os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_name ) )
 
 count=0
 for job in jobs:
@@ -43,9 +51,9 @@ for job in jobs:
     #do nothing
     print("skipping blank line")
   else:
-
-    os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={0} {1}\" >> JOB_SCRIPTS/{2}/job_{3}.script   ".format( expected_time, job, job_queue, count ) )
-
+    os.system("echo \"#!/bin/bash\n{}\n\" >> JOB_SCRIPTS/{}/job_{}.script".format( job, job_name, count ) )
+    os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script\"".format(expected_time, job_name, count) )
+    
     
     
     
