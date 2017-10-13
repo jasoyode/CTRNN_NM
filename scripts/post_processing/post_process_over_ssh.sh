@@ -8,8 +8,9 @@ fi
 
 if [[ $HOSTNAME == *"karst"* ]]; then
     echo "on Karst"
-    SUB_DATA=$( echo "$1" | sed "s/.*DATA\///" )
     
+    SUB_DATA=$( echo "$1" | sed "s/.*DATA///" )
+    echo "\$1 = $1"
     rsync -av --progress $1 jasoyode@silo.cs.indiana.edu:/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/$SUB_DATA
     echo "SUBDATA = $SUBDATA"
     ssh jasoyode@silo.cs.indiana.edu "cd /scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/post_processing/ && ./post_process.sh ../../DATA/$SUB_DATA" 
