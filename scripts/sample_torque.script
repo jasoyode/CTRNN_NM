@@ -1,7 +1,8 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=16
-#PBS -l walltime=0:30:00
+#PBS -l walltime=0:10:00
 #PBS -N ctrnn
+#PBS -q debug
 #PBS -V
 #PBS -M jasoyode@indiana.edu
 #PBS -m abe
@@ -10,4 +11,4 @@ module load ccm
 module unload python
 module load python/3.3.0
 
-ccmrun /N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/run_from_queue.sh resources/PARAMETERS/MINI_TEST_DEMO.csv  >>  log.txt 
+/N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/run_from_queue.sh /N/dc2/scratch/jasoyode/github/jasoyode/CTRNN_NM/resources/JOB_QUEUES/job_queue_JASON.txt

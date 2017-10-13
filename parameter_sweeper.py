@@ -285,7 +285,7 @@ def main():
   #AFTER everything else has been done add the post-processing commands
   with open(temporary_job_queue_file, 'a') as job_file:
     date= datetime.datetime.today().strftime('%Y-%m-%d')
-    job_command = "cd {0}/scripts/post_processing && ./post_process.sh {0}/DATA/{1}-{2}\n".format(run_dir, date, exp_name  )
+    job_command = "cd {0}/scripts/post_processing && ./post_process_over_ssh.sh {0}/DATA/{1}-{2}\n".format(run_dir, date, exp_name  )
     job_file.write( job_command  )
     job_file.close()
 
