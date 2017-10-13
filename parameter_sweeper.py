@@ -356,10 +356,10 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
           
           summary = summary_filename.replace(".ini", "")
           job_command = "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, config_dir, summary_filename,  exp_name+"/"+summary )
-
-          job_command += "cd {0}/scripts/plotting/ && ./generate_all_plots.sh {0}/DATA/{1} \n".format(run_dir,  exp_name )
-          job_command += "cd {0}/scripts/plotting/ && ./send_all_emails.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
-          job_command += "cd {0}/scripts/post_processing && ./tar_and_store.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
+          #job_command = "cd {}/scripts/post_processing/ && post_process.sh {} "
+          #job_command += "cd {0}/scripts/plotting/ && ./generate_all_plots.sh {0}/DATA/{1} \n".format(run_dir,  exp_name )
+          #job_command += "cd {0}/scripts/plotting/ && ./send_all_emails.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
+          #job_command += "cd {0}/scripts/post_processing && ./tar_and_store.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
 
         
           job_file.write( job_command  )
@@ -449,9 +449,9 @@ def write_selected_parameters_to_file( selected_parameters_map, single_ppv_map, 
         with open(temporary_job_queue_file, 'a') as job_file:
           summary = summary_filename.replace(".ini", "")
           job_command =  "cd {} && ./runExp {}/NAMED_JOBS/{}.ini {} \n".format(run_dir, config_dir, summary_filename,  exp_name+"/"+summary )
-          job_command += "cd {0}/scripts/plotting/ && ./generate_all_plots.sh {0}/DATA/{1} \n".format(run_dir,  exp_name )
-          job_command += "cd {0}/scripts/plotting/ && ./send_all_emails.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
-          job_command += "cd {0}/scripts/post_processing && ./tar_and_store.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
+          #job_command += "cd {0}/scripts/plotting/ && ./generate_all_plots.sh {0}/DATA/{1} \n".format(run_dir,  exp_name )
+          #job_command += "cd {0}/scripts/plotting/ && ./send_all_emails.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
+          #job_command += "cd {0}/scripts/post_processing && ./tar_and_store.sh {0}/PLOTS/{1} \n".format(run_dir,  exp_name )
 
           
           
