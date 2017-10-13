@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
   
 job_queue=sys.argv[1]
 
-expected_time="1:00:00"
+expected_time="3:45:00"
 
 jobs = []
 with open( job_queue, 'r') as jobs_file:
@@ -76,5 +76,6 @@ fi
       os.system("echo \"{2}\" >> JOB_SCRIPTS/{0}/job_{1}.script".format( job_name, count, cleanup_command ) )      
       
       ##file written now it can be made run
-      os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script\"".format(expected_time, job_name, count) )      
-      
+      os.system("chmod +x JOB_SCRIPTS/{}/job_{}.script".format(job_name, count) )
+      os.system("qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script".format(expected_time, job_name, count) )      
+
