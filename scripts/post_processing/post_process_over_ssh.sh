@@ -8,10 +8,11 @@ fi
 
 if [[ $HOSTNAME == *"karst"* ]]; then
     echo "on Karst"
-    echo "$1"
-    echo "rsync -av --progress $1 jasoyode@silo.cs.indiana.edu:~/github_jasoyode/CTRNN_NM/DATA/"
+    SUB_DATA=$( echo "$1" | sed "s/.*DATA\///" )
     
-    echo "ssh jasoyode@silo.cs.indiana.edu 'cd /u/jasoyode/github_jasoyode/CTRNN_NM/scripts/post_processing/ && ./post_process.sh $1' "
+    rsync -av --progress $1 jasoyode@silo.cs.indiana.edu:~/github_jasoyode/CTRNN_NM/DATA/$SUB_DATA
+    
+    ssh jasoyode@silo.cs.indiana.edu "cd /u/jasoyode/github_jasoyode/CTRNN_NM/scripts/post_processing/ && ./post_process.sh ../../DATA/$SUB_DATA" 
 else
     echo "not on Karst!"
     ./post_process.sh $1
