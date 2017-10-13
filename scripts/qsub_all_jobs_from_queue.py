@@ -44,6 +44,8 @@ if os.path.isdir("JOB_SCRIPTS/{}".format( job_name )):
 #make location to store scripts to be run
 os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_name ) )
 
+os.system( "mkdir -p COMPLETED_SCRIPTS/{}".format( job_name ) )
+
 count=0
 for job in jobs:
   count+=1
@@ -51,9 +53,28 @@ for job in jobs:
     #do nothing
     print("skipping blank line")
   else:
-    os.system("echo \"#!/bin/bash\n{}\n\" >> JOB_SCRIPTS/{}/job_{}.script".format( job, job_name, count ) )
-    os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script\"".format(expected_time, job_name, count) )
-    
-    
-    
-    
+    #check to see if this is the final job!
+    if len(jobs) == count:
+      print("not writing final job to file, it will be called by which ever the last running script is!")
+    else:
+      
+      os.system("echo \"#!/bin/bash\n\n{}\" >> JOB_SCRIPTS/{}/job_{}.script".format( job, job_name, count ) )
+
+      cleanup_command="""
+touch scripts/COMPLETED_SCRIPTS/{0}/job_{1}.script
+#if all jobs are in the completed folder!
+script_count=\$( ls scripts/JOB_SCRIPTS/{0}/   | wc -l )
+completed_count=\$( ls scripts/COMPLETED_SCRIPTS/{0}/    | wc -l )
+
+if [ \"\$script_count\" == \"\$completed_count\" ]; then
+  #run the post processing script!
+  {2}
+fi
+ 
+""".format(job_name, count, jobs[-1]  )
+
+      os.system("echo \"{2}\" >> JOB_SCRIPTS/{0}/job_{1}.script".format( job_name, count, cleanup_command ) )      
+      
+      ##file written now it can be made run
+      os.system("echo \"qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script\"".format(expected_time, job_name, count) )      
+      

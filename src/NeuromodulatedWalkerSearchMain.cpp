@@ -445,9 +445,6 @@ void loadValuesFromConfig( INIReader &reader) {
     sinusoidalOscillation      = reader.GetBoolean("modsignal", "sinusoidalOscillation", true );
     externalModulationPeriods  = reader.GetInteger("modsignal", "externalModulationPeriods", 2 );
     
-    
-    
-    
     //cout << "maxModulation" << maxModulation << endl;
     //cout << "minModulation" << minModulation << endl;
     //cout << "RunDuration" << RunDuration << endl;
@@ -513,8 +510,6 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
       
       int seed;
       
-      
-      
       //create space for genome!
       TVector<double> genome(-1,1);
       genome.SetSize( genomeSize );
@@ -538,7 +533,6 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
         }
         
       } while (i < genomeSize &&  iss);
-      
 	
 	  string recordFilename( directory  );
       recordFilename += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
@@ -546,20 +540,12 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
       recordLog.open(  recordFilename  );
       //evaluate, but record data to specified file
       Evaluate(genome,   recordLog );
-      
       recordLog.close();
-      
       cout << "Wrote activity for best agent in seed " << seed  << " to file..." << endl;
       //DONE WRITING GENOME ACTIVITY TO FILE	
-      
-      
   }
-  
-
 
 }
-
-
 
 // The main program
 int main (int argc, const char* argv[]) {
@@ -622,6 +608,9 @@ int main (int argc, const char* argv[]) {
   
       if(st.st_mode && S_IFDIR != 0) {
         cout << dirPath  <<"  is already present! Exiting...\n";
+        //TODO
+        //INSTEAD DELETE THE LATEST SEED_ACTIVITY LOGS AND START WHERE THEY STOPPED!
+        
         exit(1);
       } 
   }
@@ -648,9 +637,6 @@ int main (int argc, const char* argv[]) {
       printf("Error creating directory!n");
       exit(1);
   }
-
-  
-  
    
   
   //verify settings are reasonable - true shows info
@@ -757,12 +743,9 @@ int main (int argc, const char* argv[]) {
       }
       bestAgentFitnessAndReceptorLogFile << endl;
       
-
-      
       expLogFile.close();
       cout << "   complete!" << endl;
       
-  
       //RUN THE BEST AGENT ON THE TASK AT HAND AND RECORD ITS NEURAL ACTIVATIONS AND MOVEMENTS
       string recordFilename( dirPath  );
       recordFilename += "/seed_" + std::to_string(startingSeed + i)  + "_recorded_activity.csv";
@@ -771,31 +754,12 @@ int main (int argc, const char* argv[]) {
       //evaluate, but record data to specified file
       Evaluate( s.BestIndividual(), recordLog );
       
-      
       recordLog.close();
-  
   
   }      
   //close best agent file
   bestAgentGenomeLogFile.close();
   bestAgentFitnessAndReceptorLogFile.close();
-  
-  
-  //generate plots for directories
-  //this should be done as post processing, independent of the simulation running
-  
-  /*
-  //run plot commands!
-  char plot_command[100];
-  strcpy( plot_command, ("cd ../scripts/plotting/ && python3 csvreader.py ") );
-  strcat( plot_command, expName );
-
-  const int plot_err = system( plot_command );
-  if (-1 == plot_err) {
-      printf("Error running plot command!");
-      exit(1);
-  }
-  */
   
   return 0;
 }
