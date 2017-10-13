@@ -6,14 +6,14 @@ if [ "$1" == ""  ]; then
 fi
 
 
-if [[ $HOSTNAME == *"karst"* ]]; then
+if [[ $HOSTNAME == *"redhead"* ]]; then
     echo "on Karst"
 
     EXP_DIR="$1"
-    SUB_DATA=$( echo "$EXP_DIR" | sed "s/.*DATA///" )
+    SUB_DATA=$( echo "$EXP_DIR" | sed "s/.*DATA\///" )
     
     echo "EXP_DIR = $EXP_DIR"
-    echo "SUBDATA = $SUBDATA"
+    echo "SUB_DATA = $SUB_DATA"
     exit
     
     rsync -av --progress $EXP_DIR jasoyode@silo.cs.indiana.edu:/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/$SUB_DATA
