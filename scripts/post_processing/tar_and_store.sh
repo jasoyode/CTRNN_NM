@@ -16,7 +16,7 @@ PLOT_DIR="$2"
 
 EXP_NAME=$( echo "$DATA_DIR" | sed "s/.*DATA\///" )
 
-export HPSS_AUTH_METHOD=kerberos
+#export HPSS_AUTH_METHOD=kerberos
 #module load hpss
 
 htar -c -P -f ${DATA}/${EXP_NAME}_data.tar ${DATA_DIR}/*

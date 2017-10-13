@@ -21,8 +21,7 @@ if [[ "$1" == */DATA/* ]] ; then
      #email individual plots
      ../plotting/email_plots.sh $PLOT_DIR/$dir
      
-     #tar and store all data and plots
-     ./tar_and_store.sh $DATA_DIR/$dir $PLOT_DIR/$dir
+
      
   done;
   
@@ -43,6 +42,9 @@ if [[ "$1" == */DATA/* ]] ; then
   python3 ../plotting/csvreader.py $EXP_NAME.csv
   
   echo "Comparison Plots attached" |mutt -s "Exp: $EXP_NAME Comparison  plots attached" $( printf -- '-a %q ' ../../PLOTS/COMPARE/comparing_$EXP_NAME.png ) -- jasonayoder@gmail.com  
+  
+  #tar and store all data and plots
+  ./tar_and_store.sh $DATA_DIR $PLOT_DIR
   
 
 else
