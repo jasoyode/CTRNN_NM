@@ -14,7 +14,7 @@ if [[ $HOSTNAME == *"karst"* ]]; then
     
     ssh jasoyode@silo.cs.indiana.edu "cd /scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/post_processing/ && ./post_process.sh ../../DATA/$SUB_DATA" 
     echo "PLEASE RUN the following command on silo: "
-    echo "./tar_and_store.sh ../../DATA/$SUB_DATA ./../PLOTS/$SUB_DATA" 
+    echo "./tar_and_store.sh ../../DATA/$SUB_DATA ../../PLOTS/$SUB_DATA" 
     
 else
     echo "not on Karst!"
