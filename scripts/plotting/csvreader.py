@@ -6,6 +6,8 @@ import glob
 import numpy
 import operator
 import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.colors import LinearSegmentedColormap
 
 #headless mode
 mpl.use('Agg')
@@ -480,6 +482,85 @@ def plot_activity( quantity=4 ):
         
         plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
         
+        
+        
+        
+        fig = plt.figure()
+
+        dyn1 = fig.gca(projection='3d')
+        
+        
+        
+        #lowest mapped to blue, zero to black, highest mapped to red
+        colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
+        
+        cdict1 = {'red':   ((0.0, 0.0, 0.0),
+                   (0.5, 0.0, 0.1),
+                   (1.0, 1.0, 1.0)),
+
+         'green': ((0.0, 0.0, 0.0),
+                   (1.0, 0.0, 0.0)),
+
+         'blue':  ((0.0, 0.0, 1.0),
+                   (0.5, 0.1, 0.0),
+                   (1.0, 0.0, 0.0))
+        }
+
+
+        
+        #n_bins = [3, 6, 10, 100]  # Discretizes the interpolation into bins
+        cmap_name = 'my_list'
+
+        # Create the colormap
+        cm = LinearSegmentedColormap.from_list( cmap_name, colors  )
+        #blue_red1 = LinearSegmentedColormap('BlueRed1', cdict1)        
+        
+        
+        co=[]
+        for m in modulation[start:stop]:
+         if m < 0:
+          co.append(  'b'   )
+         elif m > 0:
+          co.append(  'r'   )
+         else:
+          co.append(  'g'  )
+        
+        #norm1 = matplotlib.colors.Normalize(vmin=-0.5, vmax=0.5, clip=True)
+        
+        
+        dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+#        ax.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=co, label='neuron activation dynamics')
+        
+        dyn1.set_xlabel("BS")
+        dyn1.set_ylabel("FT")
+        dyn1.set_zlabel("FS")
+        
+        
+        
+        dyn1.legend()
+        
+        plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        
+        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
+        
+        
+        dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        dyn2.set_xlabel("BS")
+        dyn2.set_ylabel("FT")
+        
+        dyn3.scatter( n1_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        dyn3.set_xlabel("BS")
+        dyn3.set_ylabel("FS")
+        
+        dyn4.scatter( n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        dyn4.set_xlabel("FT")
+        dyn4.set_ylabel("FS")
+        
+        plt.tight_layout()
+        
+        plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        
+         
         if count >= 10:
          return
         

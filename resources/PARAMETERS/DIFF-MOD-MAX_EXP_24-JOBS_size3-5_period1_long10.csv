@@ -1,0 +1,50 @@
+parameter_name,value_label,type,value,default
+size,3,text,"[network]
+networkSize = 3
+neuronParameterCount = 3",*
+size,4,text,"[network]
+networkSize = 4
+neuronParameterCount = 3",*
+size,5,text,"[network]
+networkSize = 5
+neuronParameterCount = 3",*
+sim,long10run,text,"[exp]
+popSize = 1000
+generations = 500
+runs  = 10
+startingSeed = 1
+RunDuration = 2200
+StepSize = 0.1
+Stage1Threshold = 0.0126",*
+signal,SINE-1p-min-max-0.25,text,"[modsignal]
+minModulation = -0.25
+maxModulation = 0.25
+externalModulationPeriods = 1
+sinusoidalOscillation = true",*
+signal,SINE-1p-min-max-0.5,text,"[modsignal]
+minModulation = -0.5
+maxModulation = 0.5
+externalModulationPeriods = 1
+sinusoidalOscillation = true",*
+signal,SINE-1p-min-max-1.0,text,"[modsignal]
+minModulation = -1.0
+maxModulation = 1.0
+externalModulationPeriods = 1
+sinusoidalOscillation = true",*
+signal,SINE-1p-min-max-1.5,text,"[modsignal]
+minModulation = -1.5
+maxModulation = 1.5
+externalModulationPeriods = 1
+sinusoidalOscillation = true",*
+M,mod1-ON,text,"[mod]
+NeuromodulationType = 1
+[receptor]
+maxReceptor = 1
+minReceptor = 1
+discreteLevelsOfModulation = 1",*
+M,mod1-REAL,text,"[mod]
+NeuromodulationType = 1
+[receptor]
+maxReceptor = 1
+minReceptor = -1
+discreteLevelsOfModulation = -1",*
