@@ -6,7 +6,6 @@
 #define THREADED_SEARCH
 #define THREAD_COUNT 16
 
-
 #pragma once
 
 #include "VectorMatrix.h"

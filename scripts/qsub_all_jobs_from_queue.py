@@ -40,7 +40,7 @@ job_name=re.sub(r".*/","",job_queue)
 if os.path.isdir("JOB_SCRIPTS/{}".format( job_name )):
   print( "If you want to resume a job set, please remove quit() below" )
   print( "Scripts have already been generated for that JOB_QUEUE file!\n Exiting...")
-  quit()
+  #quit()
 
 #make location to store scripts to be run
 os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_name ) )
