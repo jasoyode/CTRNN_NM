@@ -3,11 +3,15 @@ import os
 import sys
 import csv
 import glob
-import numpy
+import numpy as np
 import operator
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import LinearSegmentedColormap
+from sklearn.decomposition import PCA as sklearnPCA
+from sklearn.preprocessing import StandardScaler
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
+
 
 #headless mode
 mpl.use('Agg')
@@ -118,7 +122,7 @@ def plot_fitness2( ):
       current_mean = current_mean / len(fit_all)
       means.append( current_mean )
       #verify mean calculated properly
-      assert(  abs( numpy.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
+      assert(  abs( np.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
       
 
     gen_means = []
@@ -126,8 +130,8 @@ def plot_fitness2( ):
 
 
     for g in gen: #range(0, len(fit_by_gen) ):
-      gen_means.append( numpy.mean( fit_by_gen[g]) )
-      gen_errors.append( numpy.std( fit_by_gen[g] ))
+      gen_means.append( np.mean( fit_by_gen[g]) )
+      gen_errors.append( np.std( fit_by_gen[g] ))
       #print( "gen: {}  mean: {}   std: {}".format( g, gen_means[g], gen_errors[g] ) )
 
 
@@ -149,9 +153,9 @@ def plot_fitness2( ):
 
 
 
-    gen = numpy.asarray( gen )
-    gen_means = numpy.asarray( gen_means )
-    gen_errors = numpy.asarray( gen_errors )
+    gen = np.asarray( gen )
+    gen_means = np.asarray( gen_means )
+    gen_errors = np.asarray( gen_errors )
 
 
     plt.figure(1)
@@ -170,7 +174,6 @@ def plot_fitness2( ):
     plt.title( exp_title +'\nMean Best Fitness by Generation with Standard Error')
     plt.grid(True)
     plt.savefig("{0}/{1}/mean_runs_with_error_{2}.png".format(PLOTS, exp_base, exp_title ) )
-
 
 
 
@@ -248,19 +251,19 @@ def plot_fitness( comparisonName, directories,  fromCSV=False):
        current_mean = current_mean / len(fit_all)
        means.append( current_mean )
        #verify mean calculated properly
-       assert(  abs( numpy.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
+       assert(  abs( np.mean( fit_by_gen[i]) - current_mean )  < 0.000001 )
        
 
      gen_means = []
      gen_errors = []
 
      for g in gen: 
-       gen_means.append( numpy.mean( fit_by_gen[g]) )
-       gen_errors.append( numpy.std( fit_by_gen[g] ))
+       gen_means.append( np.mean( fit_by_gen[g]) )
+       gen_errors.append( np.std( fit_by_gen[g] ))
 
-     gen = numpy.asarray( gen )
-     gen_means = numpy.asarray( gen_means )
-     gen_errors = numpy.asarray( gen_errors )
+     gen = np.asarray( gen )
+     gen_means = np.asarray( gen_means )
+     gen_errors = np.asarray( gen_errors )
 
      master_data.append(  [gen[:], gen_means[:], gen_errors[:], dir]  )
 
@@ -290,6 +293,8 @@ def plot_fitness( comparisonName, directories,  fromCSV=False):
     
 
 def plot_activity( quantity=4 ):    
+    
+    print( "Plotting activity")
     
     seed_to_fitness_map={}
     
@@ -328,8 +333,12 @@ def plot_activity( quantity=4 ):
     sorted_seeds_and_fit.reverse()
     sorted_seeds_and_fit = sorted_seeds_and_fit[ 0:quantity ]
     
+    print( "sorted_seeds_and_fit: " )
     print ( sorted_seeds_and_fit )
+    
+    
     top_seeds = [x[0] for x in sorted_seeds_and_fit]
+    print( "top_seeds: " )
     print ( top_seeds )
 
     record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
@@ -361,6 +370,10 @@ def plot_activity( quantity=4 ):
       n1_out = []
       n2_out = []
       n3_out = []
+      n4_out = []
+      n5_out = []
+      
+      pca_data = []
       
       with open( record_file  ) as csvfile:
         reader = csv.DictReader(csvfile)
@@ -376,7 +389,16 @@ def plot_activity( quantity=4 ):
           n1_out.append( float( row['n1_out'] ) );
           n2_out.append( float( row['n2_out'] ) );
           n3_out.append( float( row['n3_out'] ) );
-        
+          
+          if 'n5_out' in row:
+           n4_out.append( float( row['n4_out'] )   )
+           n5_out.append( float( row['n5_out'] )   )
+           pca_data.append(  ( float( row['n1_out'] ), float( row['n2_out'] ), float( row['n3_out'] ), float( row['n4_out'] ), float( row['n5_out'] ) ) )
+          elif 'n4_out' in row:
+           n4_out.append( float( row['n4_out'] )   )
+           pca_data.append(  ( float( row['n1_out'] ), float( row['n2_out'] ), float( row['n3_out'] ), float( row['n4_out'] ) ) )
+          else:
+           pca_data.append(  ( float( row['n1_out'] ), float( row['n2_out'] ), float( row['n3_out'] ) ) )
         
         deriv_n1 = []
         pre_val=n1_out[0]
@@ -517,19 +539,26 @@ def plot_activity( quantity=4 ):
         
         
         co=[]
+        transparency=0.25
         for m in modulation[start:stop]:
          if m < 0:
-          co.append(  'b'   )
+          co.append(  (0,0,abs(m), transparency)   )
          elif m > 0:
-          co.append(  'r'   )
+          co.append(  ( m,0,0, transparency)   )
          else:
-          co.append(  'g'  )
+          co.append(  (0,0,0, transparency)  )
         
         #norm1 = matplotlib.colors.Normalize(vmin=-0.5, vmax=0.5, clip=True)
         
+        X = [ n1_out[start:stop], n2_out[start:stop], n3_out[start:stop] ]
+        points = np.array([X[0], X[1], X[2]]).T.reshape(-1, 1, 3)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        dyn1.add_collection(Line3DCollection(segs,colors=co ))
         
-        dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-#        ax.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=co, label='neuron activation dynamics')
+        
+        #OLD WAY
+        #dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        #dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=co, label='neuron activation dynamics')
         
         dyn1.set_xlabel("BS")
         dyn1.set_ylabel("FT")
@@ -543,8 +572,14 @@ def plot_activity( quantity=4 ):
         
         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
         
-        
         dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        
+        #X = [ n1_out[start:stop], n2_out[start:stop] ]
+        #points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        #segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        #dyn2.add_collection(Line2DCollection(segs,colors=co ))
+        
+        
         dyn2.set_xlabel("BS")
         dyn2.set_ylabel("FT")
         
@@ -560,6 +595,34 @@ def plot_activity( quantity=4 ):
         
         plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
         
+        
+        
+        fig = plt.figure()
+
+        pca_3d = fig.gca(projection='3d')
+        
+        sklearn_pca = sklearnPCA(n_components=3)
+        
+        X_std = StandardScaler().fit_transform( pca_data)
+        
+        Y_sklearn = sklearn_pca.fit_transform( X_std )
+        
+        pca_x = Y_sklearn[  0]
+        pca_y = Y_sklearn[  1]
+        pca_z = Y_sklearn[  2]
+        
+        
+        
+        
+        pca_3d.scatter( pca_x, pca_y, pca_z, label='principal component analysis of neuron activation dynamics' )
+        #, c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        pca_3d.set_xlabel("PC1")
+        pca_3d.set_ylabel("PC2")
+        pca_3d.set_zlabel("PC3")
+        
+        plt.savefig("{0}/{1}/PCA_3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        
+
          
         if count >= 10:
          return

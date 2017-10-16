@@ -1,6 +1,10 @@
 // ***************************************************
 // An example of Evolving CTRNN controllers for Walkers
 // ***************************************************
+#include <cstdio>
+#include <memory>
+#include <stdexcept>
+#include <array>
 #include <algorithm>
 #include <sys/stat.h>
 #include <cstring>
@@ -66,6 +70,42 @@ ofstream recordLog;
 
 //name of experiment as passed in through command argument
 char* expName;
+
+
+// https://stackoverflow.com/questions/18100097/portable-way-to-check-if-directory-exists-windows-linux-c
+int dirExists(const char *pathname)
+{
+    struct stat info;
+
+	if( stat( pathname, &info ) != 0 ) {
+	    printf( "cannot access %s\n parent folder might not exist yet", pathname );
+		return -1;
+	}
+	else if( info.st_mode & S_IFDIR ) {  // S_ISDIR() doesn't exist on my windows 
+    	printf( "%s is a directory\n", pathname );
+		return 1;
+	} else {
+	    printf( "%s is no directory\n", pathname );
+		return 0;
+	}
+	return -1;
+}
+
+
+// https://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c-using-posix
+// Using this function to get output from command
+//
+std::string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    while (!feof(pipe.get())) {
+        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+            result += buffer.data();
+    }
+    return result;
+}
 
 
 //translate value to discrete set of values
@@ -594,87 +634,129 @@ int main (int argc, const char* argv[]) {
   
   
   //get current date to put in filename
-  time_t secs=time(0);
-  tm *t=localtime(&secs);
-  asprintf(&expName, "%04d-%02d-%02d-%s",t->tm_year+1900,t->tm_mon+1,t->tm_mday,  argv[2]     );
+  //time_t secs=time(0);
+  //tm *t=localtime(&secs);
+  //asprintf(&expName, "%04d-%02d-%02d-%s",t->tm_year+1900,t->tm_mon+1,t->tm_mday,  argv[2]     );
+  asprintf(&expName, "%s", argv[2]  );
   
 
   char dirPath[100];
   strcpy( dirPath, "DATA/");
   strcat(dirPath, expName );
   
-  struct stat st;
-  if( stat( dirPath  , &st) == 0) {
+  bool RESTARTING_MODE= dirExists( dirPath ) == 1;
   
-      if(st.st_mode && S_IFDIR != 0) {
-        cout << dirPath  <<"  is already present! Exiting...\n";
-        //TODO
+  cout << "RESTARTING_MODE: " << dirExists( dirPath ) << endl;
+  
+  if ( RESTARTING_MODE ) {
         //INSTEAD DELETE THE LATEST SEED_ACTIVITY LOGS AND START WHERE THEY STOPPED!
-        
-        exit(1);
-      } 
-  }
-  
-  char mkdir_command[100];
-  strcpy( mkdir_command, ("mkdir -p ") );
-  strcat( mkdir_command, dirPath );
-  
-  const int dir_err = system( mkdir_command );
-  if (-1 == dir_err) {
-      printf("Error creating directory!n");
-      exit(1);
-  } 
+        char restart_command[100];
+        strcpy( restart_command, ("cd scripts/ && python3 restart.py ") );
+        strcat( restart_command, expName );
+        //const int restart_err = system( restart_command );
 
-  //Copy config into the destination folder  
-  char cp_config_command[100];
-  strcpy( cp_config_command, ("cp ") );
-  strcat( cp_config_command, argv[1] );
-  strcat( cp_config_command, " DATA/" );
-  strcat( cp_config_command, expName );
+		std::string starting_seed_string = exec( restart_command );
+		int orig_starting_seed = startingSeed;
+		startingSeed = std::stoi( starting_seed_string );
+		int fewer_runs = startingSeed-orig_starting_seed;
+		runs = runs - fewer_runs;
+        cout << "Starting from seed " << starting_seed_string << " for a total of " << runs << " runs!" << endl;
+       
+  } else {
+		char mkdir_command[100];
+		strcpy( mkdir_command, ("mkdir -p ") );
+	  	strcat( mkdir_command, dirPath );
+      	const int dir_err = system( mkdir_command );
+      	
+		if (-1 == dir_err) {
+          printf("Error creating directory!n");
+          exit(1);
+      	} 
 
-  const int cp_err = system( cp_config_command );
-  if (-1 == cp_err) {
-      printf("Error creating directory!n");
-      exit(1);
   }
-   
-  
-  //verify settings are reasonable - true shows info
-  cout << "Running tests..." << endl;
-  runTests( diplayTestText );
-  
+
+
+    
+
+
+
   //******************************************************************
-  //     SETTING UP LOGGERS WITH HEADERS AT TOPS OF CSV FILES
+  //     SETTING UP LOGGER FILENAMES 
   //******************************************************************
   string bestAgentGenomeLogFilename( dirPath   );
   bestAgentGenomeLogFilename = bestAgentGenomeLogFilename + "/genomes.txt";
-  bestAgentGenomeLogFile.open( bestAgentGenomeLogFilename );
-  
-  bestAgentGenomeLogFile << "seed,";
-  
-  for (int i=1; i <= networkSize; i++ ) 
-      bestAgentGenomeLogFile << "bias" << i << ",";
-  
-  for (int i=1; i <= networkSize; i++ ) 
-      bestAgentGenomeLogFile << "timConst" << i << ",";
-  
-  for (int i=1; i <= networkSize; i++ ) 
-      bestAgentGenomeLogFile << "recep" << i << ",";
-  
-  for (int i=1; i <= networkSize; i++ ) { 
-    for (int j=1; j <= networkSize; j++ ) {
-      bestAgentGenomeLogFile << "w_" << i << "->" << j << ",";   
-    } 
-  }
-  bestAgentGenomeLogFile << endl;
+
   string bestAgentFitnessAndReceptorLogFilename( dirPath   );
   bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/fitness_and_receptors.txt";
-  bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
-  bestAgentFitnessAndReceptorLogFile << "seed,fitness,";
-  for (int i=1; i <= networkSize; i++ ) {
-    bestAgentFitnessAndReceptorLogFile << "r" << i << ",";
+
+  //******************************************************************
+  // START SETUP FROM SCRATCH - must setup HEADERS for CSV
+  //******************************************************************
+  if ( !RESTARTING_MODE ) {
+    
+    //Need to open these to write headers
+    bestAgentGenomeLogFile.open( bestAgentGenomeLogFilename );  
+    bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
+    
+  
+
+    //Copy config into the destination folder  
+    char cp_config_command[100];
+    strcpy( cp_config_command, ("cp ") );
+    strcat( cp_config_command, argv[1] );
+    strcat( cp_config_command, " DATA/" );
+    strcat( cp_config_command, expName );
+
+    const int cp_err = system( cp_config_command );
+    if (-1 == cp_err) {
+        printf("Error creating directory!n");
+        exit(1);
+    }
+     
+    
+    //verify settings are reasonable - true shows info
+    cout << "Running tests..." << endl;
+    runTests( diplayTestText );
+    
+    //Setup headers
+    bestAgentGenomeLogFile << "seed,";
+    cout << "seed," << endl;
+    
+    for (int i=1; i <= networkSize; i++ ) 
+        bestAgentGenomeLogFile << "bias" << i << ",";
+    
+    for (int i=1; i <= networkSize; i++ ) 
+        bestAgentGenomeLogFile << "timConst" << i << ",";
+    
+    for (int i=1; i <= networkSize; i++ ) 
+        bestAgentGenomeLogFile << "recep" << i << ",";
+    
+    for (int i=1; i <= networkSize; i++ ) { 
+      for (int j=1; j <= networkSize; j++ ) {
+        bestAgentGenomeLogFile << "w_" << i << "->" << j << ",";   
+      } 
+    }
+    bestAgentGenomeLogFile << endl;
+    
+    bestAgentFitnessAndReceptorLogFile << "seed,fitness,";
+    for (int i=1; i <= networkSize; i++ ) {
+      bestAgentFitnessAndReceptorLogFile << "r" << i << ",";
+    }
+    bestAgentFitnessAndReceptorLogFile << endl;
+    
+    bestAgentFitnessAndReceptorLogFile.close();
+    bestAgentGenomeLogFile.close();  
+    
+
+  //*******************************************************
+  // STOP SETUP FROM SCRATCH
+  //*******************************************************    
+    
+  } else {
+    cout << "Restarting mode!" << endl;
+  
   }
-  bestAgentFitnessAndReceptorLogFile << endl;
+  
   
   //******************************************************************************
   //   START RUNNING SIMULATIONS ACCORDING TO SETTINGS LOADED AND LOG APPROPRIATELY
@@ -682,7 +764,7 @@ int main (int argc, const char* argv[]) {
   
   for ( int i=0; i < runs; i++ ) {
       //let user know how many simulations have been run
-      cout << "Simulation #" << i << " started... ";
+      cout << "Simulation with seed #" << std::to_string(startingSeed + i) << " started... ";
       
       //setup seed logfiles
       string seedFilename( dirPath  );
@@ -724,6 +806,9 @@ int main (int argc, const char* argv[]) {
       s.SetSearchTerminationFunction(NULL);
       s.ExecuteSearch();
       
+      //ONLY OPEN FILES BETWEEN SUCCESSFUL SEARCHES!
+      bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename, std::fstream::app );
+      bestAgentGenomeLogFile.open( bestAgentGenomeLogFilename, std::fstream::app );  
         
       // Record seed of individual
       bestAgentGenomeLogFile << (startingSeed + i ) << ",";
@@ -755,11 +840,14 @@ int main (int argc, const char* argv[]) {
       Evaluate( s.BestIndividual(), recordLog );
       
       recordLog.close();
+      
+      bestAgentFitnessAndReceptorLogFile.close();
+      bestAgentGenomeLogFile.close();  
   
   }      
   //close best agent file
-  bestAgentGenomeLogFile.close();
-  bestAgentFitnessAndReceptorLogFile.close();
+  //bestAgentGenomeLogFile.close();
+  //bestAgentFitnessAndReceptorLogFile.close();
   
   return 0;
 }

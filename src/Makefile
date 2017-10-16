@@ -30,7 +30,7 @@ ini.o : ini.c ini.h
 	$(CC) $(CFLAGS) ini.c
 	
 clean:
-	\rm *.o *~ runExp
+	\rm *.o *~ ../runExp
 
 tar:
 	tar cfv runExp.tar NeuromodulatedWalkerSearchMain.cpp TSearch.cpp TSearch.h CTRNN.cpp CTRNN.h LeggedAgent.cpp LeggedAgent.h VectorMatrix.h random.h \
