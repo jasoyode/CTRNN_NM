@@ -39,12 +39,14 @@ job_name=re.sub(r".*/","",job_queue)
 
 if os.path.isdir("JOB_SCRIPTS/{}".format( job_name )):
   print( "If you want to resume a job set, please remove quit() below" )
-  print( "Scripts have already been generated for that JOB_QUEUE file!\n Exiting...")
-  #quit()
+  print( "Scripts have already been generated for that JOB_QUEUE file! Do you wish to overwrite?")
+  confirm=input("Do you wish to overwrite? (y/n)")
+  if confirm != "y":
+    quit()
+
 
 #make location to store scripts to be run
 os.system( "mkdir -p JOB_SCRIPTS/{}".format( job_name ) )
-
 os.system( "mkdir -p COMPLETED_SCRIPTS/{}".format( job_name ) )
 
 count=0
@@ -52,7 +54,8 @@ for job in jobs:
   count+=1
   
   #check if already marked as completed!
-  job_done = os.path.isfile( "scripts/COMPLETED_SCRIPTS/{0}/job_{1}.script".format( job_name, count) )
+  job_done = os.path.isfile( "COMPLETED_SCRIPTS/{0}/job_{1}.script".format( job_name, count) )
+  
   if job_done:
      print("skipping, job already completed!") 
   elif len(job) == 0:
