@@ -22,7 +22,7 @@ confirm = input("Are you sure you wish to continue? (y/n)")
 
 
 if confirm != "y":
-  print( "Ok, here are the jobs:" )
+  print( "Ok, then decide what you want to do..." )
   quit()
 
 for job in jobs:
@@ -38,6 +38,7 @@ job_name=re.sub(r".*/","",job_queue)
 
 
 if os.path.isdir("JOB_SCRIPTS/{}".format( job_name )):
+  print( "If you want to resume a job set, please remove quit() below" )
   print( "Scripts have already been generated for that JOB_QUEUE file!\n Exiting...")
   quit()
 
@@ -49,7 +50,12 @@ os.system( "mkdir -p COMPLETED_SCRIPTS/{}".format( job_name ) )
 count=0
 for job in jobs:
   count+=1
-  if len(job) == 0:
+  
+  #check if already marked as completed!
+  job_done = os.path.isfile( "scripts/COMPLETED_SCRIPTS/{0}/job_{1}.script".format( job_name, count) )
+  if job_done:
+     print("skipping, job already completed!") 
+  elif len(job) == 0:
     #do nothing
     print("skipping blank line")
   else:
@@ -77,5 +83,5 @@ fi
       
       ##file written now it can be made run
       os.system("chmod +x JOB_SCRIPTS/{}/job_{}.script".format(job_name, count) )
-      os.system("qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script".format(expected_time, job_name, count) )      
+      os.system("qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script".format(expected_time, job_name, count) )
 
