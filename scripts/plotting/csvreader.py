@@ -11,7 +11,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.preprocessing import StandardScaler
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
-
+from matplotlib.collections import LineCollection
 
 #headless mode
 mpl.use('Agg')
@@ -386,6 +386,7 @@ def plot_activity( quantity=4 ):
           footY.append( float( row['footY'] ) );
           footState.append( float( row['FootState'] ) );
           distance.append( float( row['cx'] ) );
+          
           n1_out.append( float( row['n1_out'] ) );
           n2_out.append( float( row['n2_out'] ) );
           n3_out.append( float( row['n3_out'] ) );
@@ -445,7 +446,12 @@ def plot_activity( quantity=4 ):
 
         config_plot(ax1A, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
         
-        txt = "Fitness: {}".format(seed_to_fitness_map[seed_num][0] )
+        #distance
+        fitness_calc = distance[-1]/time[-1];
+        
+        print( "Calculating fitness based upon final position instead of from file..."  )
+        #txt = "Fitness: {}".format(seed_to_fitness_map[seed_num][0] )
+        txt = "Fitness: {}".format( fitness_calc )
         
         
         
@@ -539,7 +545,10 @@ def plot_activity( quantity=4 ):
         
         
         co=[]
-        transparency=0.25
+        transparency=0.5
+        thickness=2
+        
+        
         for m in modulation[start:stop]:
          if m < 0:
           co.append(  (0,0,abs(m), transparency)   )
@@ -553,13 +562,13 @@ def plot_activity( quantity=4 ):
         X = [ n1_out[start:stop], n2_out[start:stop], n3_out[start:stop] ]
         points = np.array([X[0], X[1], X[2]]).T.reshape(-1, 1, 3)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        dyn1.add_collection(Line3DCollection(segs,colors=co ))
-        
+        lc=Line3DCollection(segs,colors=co )
+        plt.setp(lc, linewidth=thickness )
+        dyn1.add_collection( lc )
         
         #OLD WAY
         #dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         #dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=co, label='neuron activation dynamics')
-        
         dyn1.set_xlabel("BS")
         dyn1.set_ylabel("FT")
         dyn1.set_zlabel("FS")
@@ -572,24 +581,37 @@ def plot_activity( quantity=4 ):
         
         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
         
-        dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        
-        #X = [ n1_out[start:stop], n2_out[start:stop] ]
-        #points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
-        #segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        #dyn2.add_collection(Line2DCollection(segs,colors=co ))
-        
-        
+        #old scatter plot
+        #dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n1_out[start:stop], n2_out[start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn2.add_collection( lc )
         dyn2.set_xlabel("BS")
         dyn2.set_ylabel("FT")
         
-        dyn3.scatter( n1_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        #dyn3.scatter( n1_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n1_out[start:stop], n3_out[start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn3.add_collection( lc )
         dyn3.set_xlabel("BS")
         dyn3.set_ylabel("FS")
         
-        dyn4.scatter( n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        #dyn4.scatter( n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n2_out[start:stop], n3_out[start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn4.add_collection( lc )
         dyn4.set_xlabel("FT")
         dyn4.set_ylabel("FS")
+        
         
         plt.tight_layout()
         
@@ -654,7 +676,7 @@ def main():
      exp_base = re.sub(r'.*/DATA/','', experiment_directory )
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
 
-     plot_fitness2()
+     #plot_fitness2()
      plot_activity( 4 )
 
      #email plots to jasonayoder@gmail.com
