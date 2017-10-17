@@ -794,7 +794,7 @@ int main (int argc, const char* argv[]) {
       s.SetMaxExpectedOffspring(1.1);
       s.SetElitistFraction(0.1);
       s.SetSearchConstraint(1);
-      s.SetCheckpointInterval(5);
+      s.SetCheckpointInterval(0);
         
       // Stage 1 //
       s.SetSearchTerminationFunction(MyTerminationFunction);
