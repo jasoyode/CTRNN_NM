@@ -57,7 +57,7 @@ for job in jobs:
   job_done = os.path.isfile( "COMPLETED_SCRIPTS/{0}/job_{1}.script".format( job_name, count) )
   
   if job_done:
-     print("skipping, job already completed!") 
+     print("skipping, job "+str(count)+" already completed!") 
   elif len(job) == 0:
     #do nothing
     print("skipping blank line")
@@ -67,7 +67,7 @@ for job in jobs:
       print("not writing final job to file, it will be called by which ever the last running script is!")
     else:
       
-      os.system("echo \"#!/bin/bash\n\n{}\" >> JOB_SCRIPTS/{}/job_{}.script".format( job, job_name, count ) )
+      os.system("echo \"#!/bin/bash\n\n{}\" > JOB_SCRIPTS/{}/job_{}.script".format( job, job_name, count ) )
 
       cleanup_command="""
 touch scripts/COMPLETED_SCRIPTS/{0}/job_{1}.script
@@ -86,5 +86,6 @@ fi
       
       ##file written now it can be made run
       os.system("chmod +x JOB_SCRIPTS/{}/job_{}.script".format(job_name, count) )
-      os.system("qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm -l nodes=1:ppn=16,walltime={} JOB_SCRIPTS/{}/job_{}.script".format(expected_time, job_name, count) )
+      print( "Launching job "+str(count)  )
+      os.system("qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm_{1}_{2} -l nodes=1:ppn=16,walltime={0} JOB_SCRIPTS/{1}/job_{2}.script".format(expected_time, job_name, count) )
 

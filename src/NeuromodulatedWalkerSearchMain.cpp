@@ -852,7 +852,7 @@ int main (int argc, const char* argv[]) {
       s.SetElitistFraction(0.1);
       s.SetSearchConstraint(1);
       s.SetCheckpointInterval( 0 );
-      
+
       // Stage 1 //
       s.SetSearchTerminationFunction(MyTerminationFunction);
       s.ExecuteSearch();
