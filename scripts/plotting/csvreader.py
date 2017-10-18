@@ -49,6 +49,7 @@ if ".csv" in sys.argv[-1]:
  comparison_name = comparison_name.replace(".csv","")
  COMPARE_MODE=2
  experiment_directories={}
+ experiment_styles={}
  
  with open( sys.argv[-1]  ) as csvfile:
   reader = csv.DictReader(csvfile)
@@ -56,6 +57,11 @@ if ".csv" in sys.argv[-1]:
    dir =  row['directory'] 
    label = row['label']
    experiment_directories[dir]=  label
+   
+   if "color" in row:
+    print( "yes!")
+    #quit()
+    experiment_styles[dir] = (  row['color'], row['style'] )
 
 
 def plot_fitness2( ):
@@ -179,7 +185,7 @@ def plot_fitness2( ):
 
     #print( '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) )
 
-def plot_fitness( comparisonName, directories,  fromCSV=False):
+def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
     
     dirs=[]
     if fromCSV:
@@ -274,13 +280,21 @@ def plot_fitness( comparisonName, directories,  fromCSV=False):
      
      
      if fromCSV:
-      plt.plot(g, gm , label=directories[dir] )
+      #plt.plot(g, gm , label=directories[dir] )
+      if len( styles_dict.keys() ) > 0:
+       print( "color: " + styles_dict[dir][0] )
+       print( "style: " + styles_dict[dir][1] )
+       plt.plot(g, gm , label=directories[dir], color=styles_dict[dir][0], linestyle=styles_dict[dir][1] )
+       plt.fill_between(g, gm-ge, gm+ge, alpha=0.1, facecolor=styles_dict[dir][0])
+      else:
+       plt.plot(g, gm , label=directories[dir] )
+       plt.fill_between(g, gm-ge, gm+ge, alpha=0.1)  # facecolor='b',
      else:
       plt.plot(g, gm , label=dir )
-     
-     #shaded region indicates standard deviation
-     plt.fill_between(g, gm-ge, gm+ge, alpha=0.1)  # facecolor='b',
+      #shaded region indicates standard deviation
+      plt.fill_between(g, gm-ge, gm+ge, alpha=0.1)  # facecolor='b',
     
+     
     
     plt.xlabel('Generation')
     plt.ylabel('Best Mean Fitness')
@@ -666,10 +680,10 @@ def main():
     #make sure folder exists
     if COMPARE_MODE==1:
      os.system( "mkdir -p {}/{}".format( PLOTS, "COMPARE" ) )
-     plot_fitness(comparison_name, experiment_directories)
+     plot_fitness(comparison_name, experiment_directories )
      
     elif COMPARE_MODE==2: 
-     plot_fitness(comparison_name, experiment_directories, True)
+     plot_fitness(comparison_name, experiment_directories, experiment_styles, True)
      
     else:
 

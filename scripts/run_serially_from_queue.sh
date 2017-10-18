@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#need to be in base folder to run ./runExp
+cd ..
+
 if [ "$1" == "" ]; then
   echo "Usage  $0  [JOB_QUEUE_FILE.txt]"
   exit

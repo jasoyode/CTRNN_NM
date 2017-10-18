@@ -19,8 +19,8 @@ DONE	6. Make a plot of the cyclic trajectory of 3 output neurons in 3d space
 Analysis Todo
 
 		1. create datasets of the neuron's output without the effects of modulation
-		2. generate testing mode of primary executable for different modulation conditions
-		3. generate 2/3d plots of 4,5 neurons with PCA
+DONE	2. generate testing mode of primary executable for different modulation conditions
+???		3. generate 2/3d plots of 4,5 neurons with PCA
 			https://plot.ly/ipython-notebooks/principal-component-analysis/
 
 BigRed2
@@ -29,7 +29,7 @@ DONE	0. make job queue to run jobs
 DONE	1. create script to launch jobs
 PARTIAL	2. setup to sync to SDA upon competion
 DONE	3. figure out proper cpu/thread settings
-		4. change script to not use date
+DONE	4. change script to not use date
 		5. change script to email plots after completion, for individual runs
 
 Project setup
@@ -37,3 +37,9 @@ Project setup
 		1. Setup proper C++ package structure
 		2. Cleanup misc unneeded files
 DONE	3. do proper pre and post processing
+
+Simulate
+
+DONE	1. modulation levels
+DONE	2. oscillation rate
+underway3. long generation

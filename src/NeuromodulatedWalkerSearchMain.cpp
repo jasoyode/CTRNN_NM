@@ -509,6 +509,11 @@ void loadValuesFromConfig( INIReader &reader) {
 void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label) {
   
 //  string lbl( label );
+
+  cout << "directory" <<directory << endl;
+  cout << "label" <<label << endl;
+//  cout << "" << << endl;
+
   
   //use array works
   char dirPath[200];
@@ -623,7 +628,14 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
           //cout << "i:" << i << endl;
           //cout << "lower: "<<genome.LowerBound() << endl;
           //cout << "upper: "<<genome.UpperBound() << endl;
-          genome(i) = stof( subs );
+          
+          try {
+            genome(i) = stof( subs );
+          } catch (const std::invalid_argument& ia) {
+              cout << "Invalid argument: " << ia.what() << '\n';
+              cout << "Did you select an appropriately sized config file?" << "\n";
+              std::exit(-1);
+          }
           //cout << " genome[" << i << "]:" << genome(i) << endl ;
           i++;
         }

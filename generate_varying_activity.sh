@@ -7,15 +7,17 @@ if [ "$1" == "" ]; then
   exit
 fi
 
+TEST_DIR="$1"
+
 FILTER=""
 
 for temp in $( ls $INIs |grep "$FILTER" ); do
 
   echo $temp
   
-  label=$( echo $temp | sed "s/temptest_//" | sed "s/.ini//" )
+  label=$( echo  $INIs/$temp | sed "s/temptest_//" | sed "s/.ini//" )
   
-  ./runExp $INIs/$temp $TEST_DIR/ $label
+  echo "./runExp $INIs/$temp $TEST_DIR/ $label"
 
 done
 

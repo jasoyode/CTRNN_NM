@@ -44,7 +44,7 @@ if len(sys.argv) > 4:
 print( "Job name: {}\nTemplate: {}\nParameter List: {}".format( exp_name, template, parameter_list_file ) )
 
 
-temporary_job_queue_file="resources/JOB_QUEUES/job_queue_"+exp_name+".txt"
+temporary_job_queue_file="resources/JOB_QUEUES/"+exp_name+".txt"
 
 #job_path='{}/JOBS_DIR/job_{}.properties'.format(exp_dir, job_count )
 
