@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INIs="TestINIs"
+INIs="TestINIs/size3/"
 
 if [ "$1" == "" ]; then
   echo "Must provide a path to a folder inside of DATA/!" 
@@ -13,11 +13,11 @@ FILTER=""
 
 for temp in $( ls $INIs |grep "$FILTER" ); do
 
-  echo $temp
+  #echo $temp
   
-  label=$( echo  $INIs/$temp | sed "s/temptest_//" | sed "s/.ini//" )
+  label=$( echo  $INIs/$temp | sed "s/.*temptest_//" | sed "s/.ini//" )
   
-  echo "./runExp $INIs/$temp $TEST_DIR/ $label"
+  ./runExp $INIs/$temp $TEST_DIR/ $label
 
 done
 

@@ -678,24 +678,24 @@ int main (int argc, const char* argv[]) {
   if (argc >= 4) {
     cout << "special mode: generate activity from genomes in directory: " << dirPath << endl;
     cout << "Do you wish to continue ? (y/n)" << endl;
-    char proceed;
-    cin >> proceed;
+    //char proceed;
+    //cin >> proceed;
     
     char* label;
     asprintf(&label, "%s", argv[3]  );
     
-    if (proceed == 'y') {
-      cout << "Proceeding to generate activity from genomes in directory: " << dirPath << endl;
-      generateActivityLogsFromGenomes( argv[1], dirPath, label );
+    //if (proceed == 'y') {
+    cout << "Proceeding to generate activity from genomes in directory: " << dirPath << endl;
+    generateActivityLogsFromGenomes( argv[1], dirPath, label );
       
-      cout << "generateActivityLogsFromGenomes completed..."<<endl;
+    cout << "generateActivityLogsFromGenomes completed..."<<endl;
       
-      return -1;
-    } else {
-      // Tell the user how to run the program
-      std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
-      return 1;
-    }
+    return -1;
+    //} else {
+    //  // Tell the user how to run the program
+    //  std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
+    // / return 1;
+    //}
   }
   
   // Print the user's name:
