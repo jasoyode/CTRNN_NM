@@ -87,5 +87,5 @@ fi
       ##file written now it can be made run
       os.system("chmod +x JOB_SCRIPTS/{}/job_{}.script".format(job_name, count) )
       print( "Launching job "+str(count)  )
-      os.system("qsub -m abe -M jasoyode@indiana.edu -N ctrnn_nm_{1}_{2} -l nodes=1:ppn=16,walltime={0} JOB_SCRIPTS/{1}/job_{2}.script".format(expected_time, job_name, count) )
+      os.system("qsub -m abe -M jasoyode@indiana.edu -N {2}_{1} -o logs/{1}_{2}.o -e logs/{1}_{2}.e -l nodes=1:ppn=16,walltime={0} JOB_SCRIPTS/{1}/job_{2}.script".format(expected_time, job_name, count) )
 
