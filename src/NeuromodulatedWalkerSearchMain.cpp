@@ -506,8 +506,55 @@ void loadValuesFromConfig( INIReader &reader) {
 }
 
 
-void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
-  cout << "inside func" << directory << endl;
+void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label) {
+  
+//  string lbl( label );
+
+  cout << "directory" <<directory << endl;
+  cout << "label" <<label << endl;
+//  cout << "" << << endl;
+
+  
+  //use array works
+  char dirPath[200];
+  strcpy( dirPath, "DATA/");
+  strcat(dirPath, expName );
+  strcat(dirPath, "/" );
+  strcat(dirPath, label );
+  
+  
+  char mkdir_command[100];
+  strcpy( mkdir_command, ("mkdir -p ") );
+  strcat( mkdir_command, dirPath );
+  const int dir_err = system( mkdir_command );
+     	
+  if (-1 == dir_err) {
+    printf("Error creating directory!n");
+    exit(1);
+  } 
+  
+  //Copy config into the destination folder  
+  char cp_fitness_and_receptors_command[200];
+  strcpy( cp_fitness_and_receptors_command, ("cp ") );
+  strcat( cp_fitness_and_receptors_command, "DATA/" );
+  strcat( cp_fitness_and_receptors_command, expName );
+  strcat( cp_fitness_and_receptors_command, "/fitness_and_receptors.txt DATA/" );
+  strcat( cp_fitness_and_receptors_command, expName );
+  strcat( cp_fitness_and_receptors_command, "/" );
+  strcat( cp_fitness_and_receptors_command, label );
+  strcat( cp_fitness_and_receptors_command, "/fitness_and_receptors.txt" );
+  
+  
+  const int cp_err = system( cp_fitness_and_receptors_command );
+  if (-1 == cp_err) {
+      printf("Error copying files to new directory!n");
+      exit(1);
+  }
+   
+  
+  
+  cout << "Generating activity data from directory: " << directory << endl;
+  cout << "Generating Standard and Alterated Testing" << endl; 
   
   //use argument passed in to load from config file
   INIReader reader( ini   );
@@ -518,6 +565,8 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
     return;
   }
   
+  
+  
   //load global variable values from reader
   cout <<"trying loadvalues" << endl;
   loadValuesFromConfig( reader );  
@@ -525,7 +574,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
   
   int genomeSize = (networkSize*neuronParameterCount + networkSize*networkSize);
   
-  cout << "TVector of size: " << genomeSize << " must be created!" << endl;
+  //cout << "TVector of size: " << genomeSize << " must be created!" << endl;
 
   char genomesFile[100];
   strcpy(genomesFile, directory);
@@ -537,7 +586,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
   bool first=true;
   
   for( std::string line; getline( infile, line ); )  {
-      
+      //cout << "line: " << line << endl;
       //...for each line in input...
       // each line is a separate genome previously recorded
       //the first line is a header
@@ -547,40 +596,60 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
       }
       //remove commas and replace with white space
       std::replace( line.begin(), line.end(), ',', ' '); // replace all ',' to ' '
-      
       int seed;
+
+	  //int pos = line.find(' ');
+	  //cout << "pos: " << pos << endl;
+      //std::string genome_string = line.substr( pos );
       
+      //cout << "Genome size: " << genomeSize <<  endl;
+	  //cout << "genome string: " << genome_string << endl;
+		
       //create space for genome!
-      TVector<double> genome(-1,1);
+      TVector<double> genome(1,1);
       genome.SetSize( genomeSize );
       
+      //istringstream iss( genome_string );
       istringstream iss( line );
-      bool first_val = true;
-      int i=0;
       
-      do {
+      /////////////////////
+      bool first_val = true;
+      int i=1;
+      
+      while (i <=  genomeSize &&  iss) {
         string subs;
         iss >> subs;
-        //cout << "sub: " << subs << endl;
         if ( first_val) {
           first_val = false;
           seed = stoi( subs );
           cout << "Seed set to be: " << seed << endl;
         } else {
+          //cout << genome.Size() << endl;
+          //cout << "i:" << i << endl;
+          //cout << "lower: "<<genome.LowerBound() << endl;
+          //cout << "upper: "<<genome.UpperBound() << endl;
+          
+          try {
+            genome(i) = stof( subs );
+          } catch (const std::invalid_argument& ia) {
+              cout << "Invalid argument: " << ia.what() << '\n';
+              cout << "Did you select an appropriately sized config file?" << "\n";
+              std::exit(-1);
+          }
+          //cout << " genome[" << i << "]:" << genome(i) << endl ;
           i++;
-          genome[i] = stof( subs );
-          cout << "genome["<<i<<"]: " << genome[i] << endl;
         }
         
-      } while (i < genomeSize &&  iss);
-	
-	  string recordFilename( directory  );
-      recordFilename += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
-      
-      recordLog.open(  recordFilename  );
-      //evaluate, but record data to specified file
+      } 
+	  
+	  //create from base path each time
+      string recordFilename2( dirPath  );
+	  
+      recordFilename2 += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
+      recordLog.open(  recordFilename2  );
       Evaluate(genome,   recordLog );
       recordLog.close();
+      
       cout << "Wrote activity for best agent in seed " << seed  << " to file..." << endl;
       //DONE WRITING GENOME ACTIVITY TO FILE	
   }
@@ -590,33 +659,43 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory) {
 // The main program
 int main (int argc, const char* argv[]) {
   
-  
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
     std::cerr << "OR" << std::endl;
-    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY YES" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY LABEL" << std::endl;
     return 1;
   }
+  
+  asprintf(&expName, "%s", argv[2]  );
+
+
+  char dirPath[200];
+  strcpy( dirPath, "DATA/");
+  strcat(dirPath, expName );
+  
    
   // Check the number of parameters
   if (argc >= 4) {
-    cout << "special mode: generate activity from genomes in directory: " << argv[2] << endl;
+    cout << "special mode: generate activity from genomes in directory: " << dirPath << endl;
     cout << "Do you wish to continue ? (y/n)" << endl;
-    char proceed;
-    cin >> proceed;
+    //char proceed;
+    //cin >> proceed;
     
-    if (proceed == 'y') {
-      cout << "Proceeding to generate activity from genomes in directory: " << argv[2] << endl;
-      generateActivityLogsFromGenomes( argv[1], argv[2] );
+    char* label;
+    asprintf(&label, "%s", argv[3]  );
+    
+    //if (proceed == 'y') {
+    cout << "Proceeding to generate activity from genomes in directory: " << dirPath << endl;
+    generateActivityLogsFromGenomes( argv[1], dirPath, label );
       
-      cout << "generateActivityLogsFromGenomes completed..."<<endl;
+    cout << "generateActivityLogsFromGenomes completed..."<<endl;
       
-      return -1;
-    } else {
-      // Tell the user how to run the program
-      std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
-      return 1;
-    }
+    return -1;
+    //} else {
+    //  // Tell the user how to run the program
+    //  std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
+    // / return 1;
+    //}
   }
   
   // Print the user's name:
@@ -637,12 +716,8 @@ int main (int argc, const char* argv[]) {
   //time_t secs=time(0);
   //tm *t=localtime(&secs);
   //asprintf(&expName, "%04d-%02d-%02d-%s",t->tm_year+1900,t->tm_mon+1,t->tm_mday,  argv[2]     );
-  asprintf(&expName, "%s", argv[2]  );
-  
 
-  char dirPath[100];
-  strcpy( dirPath, "DATA/");
-  strcat(dirPath, expName );
+
   
   bool RESTARTING_MODE= dirExists( dirPath ) == 1;
   
@@ -672,12 +747,7 @@ int main (int argc, const char* argv[]) {
           printf("Error creating directory!n");
           exit(1);
       	} 
-
   }
-
-
-    
-
 
 
   //******************************************************************
@@ -698,8 +768,7 @@ int main (int argc, const char* argv[]) {
     bestAgentGenomeLogFile.open( bestAgentGenomeLogFilename );  
     bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
     
-  
-
+    
     //Copy config into the destination folder  
     char cp_config_command[100];
     strcpy( cp_config_command, ("cp ") );
@@ -794,8 +863,8 @@ int main (int argc, const char* argv[]) {
       s.SetMaxExpectedOffspring(1.1);
       s.SetElitistFraction(0.1);
       s.SetSearchConstraint(1);
-      s.SetCheckpointInterval(0);
-        
+      s.SetCheckpointInterval( 0 );
+
       // Stage 1 //
       s.SetSearchTerminationFunction(MyTerminationFunction);
       s.ExecuteSearch();
