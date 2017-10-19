@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INIs="TestINIs/size3/"
+INIs="TestINIs/TestingChamber/"
 
 if [ "$1" == "" ]; then
   echo "Must provide a path to a folder inside of DATA/!" 

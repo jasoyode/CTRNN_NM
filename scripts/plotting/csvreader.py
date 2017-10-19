@@ -45,7 +45,7 @@ if len( sys.argv) > 2:
   COMPARE_MODE=1
 
 
-if ".csv" in sys.argv[-1]:
+if ".csv" in sys.argv[-1] and len( sys.argv) <= 2:
  comparison_name = comparison_name.replace(".csv","")
  COMPARE_MODE=2
  experiment_directories={}
@@ -62,6 +62,31 @@ if ".csv" in sys.argv[-1]:
     print( "yes!")
     #quit()
     experiment_styles[dir] = (  row['color'], row['style'] )
+
+#if we have a CSV file but have multiple arguments
+#then we are running special testing analysis on one arch's seeds only
+if len( sys.argv) > 2 and ".csv" in sys.argv[-1]:
+ COMPARE_MODE=3
+ directory=sys.argv[1]
+ csv_path=sys.argv[2]
+ 
+ testing_dict={}
+ 
+ with open( sys.argv[-1]  ) as csvfile:
+  reader = csv.DictReader(csvfile)
+  for row in reader:
+   if not 'column' in row:
+    print("Are you sure you specified the correct csv file? It must have a 'column' in the header to work in this mode")
+    quit()
+   
+   dir =  row['directory'] 
+   label = row['label']
+   r=row['row']
+   c=row['column']
+   testing_dict[dir]= ( label, r, c )
+   
+
+
 
 
 def plot_fitness2( ):
@@ -662,7 +687,381 @@ def plot_activity( quantity=4 ):
          
         if count >= 10:
          return
+
+def plot_activity2( testing_dict, quantity=4 ):    
+    
+    print( "Plotting activity2")
+    
+    seed_to_fitness_map={}
+    fitness_and_receptors = "{}/fitness_and_receptors.txt".format( experiment_directory  )
+    total_receptors=-1
+    with open( fitness_and_receptors  ) as fitness_file:
+     fit_reader = csv.DictReader(fitness_file)
+     for row in fit_reader:
+      entry = []
+      f = float( row['fitness'] )
+      entry.append( f )
+      if total_receptors == -1:
+       r=1
+       while "r"+str(r) in row:
+        r+=1
+        total_receptors=r
+      #total_receptors
+      for r in range(1, total_receptors):
+       if "r"+str(r) in row:
+        entry.append( float( row['r'+str(r)   ]  ) )
+       else:
+        print("why??")
+        quit()
+      
+      
+      seed_to_fitness_map[  int( row['seed'] ) ] =  entry ;
+    
+    sorted_seeds_and_fit =  sorted(seed_to_fitness_map.items(), key=operator.itemgetter(1,0) )
+    sorted_seeds_and_fit.reverse()
+    sorted_seeds_and_fit = sorted_seeds_and_fit[ 0:quantity ]
+    
+    print( "sorted_seeds_and_fit: " )
+    print ( sorted_seeds_and_fit )
+    
+    
+    top_seeds = [x[0] for x in sorted_seeds_and_fit]
+    print( "top_seeds: " )
+    print ( top_seeds )
+
+    record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
+
+    count=0
+    
+    #this will store ALL the data needed for all the various plots to be accessed at a later time
+    seed_data_dict = {}
+    
+    #loop through all seed activity files in folder
+    for record_file in record_files:
+      seed_num = re.sub('.*seed_', '', record_file )
+      seed_num = re.sub('_.*', '', seed_num )
+      seed_num= int(  seed_num )
+      #only generate plots for top X
+      if seed_num not in top_seeds:
+       continue
+      
+      seed_data_dict[ seed_num ] = {}
+      
+      for testing_dir in testing_dict.keys():
+       print( "Get all data from {} for seed {}".format(  testing_dir, seed_num ) )
+       
+       #                SEED       TESTING_DIR      DATA
+       
+       #print("XXXXXXXXXXXXXXXXXXXXX", len(seed_data_dict[ seed_num ].keys()  ))
+       
+       seed_data_dict[ seed_num ][ testing_dir ] =  {}
+       
+       #print("XXXXXXXXXXXXXXXXXXXXXZZZZZZZZZZ", len(seed_data_dict[ seed_num ].keys()  ))
+       
+       
+       #current_dict = seed_data_dict[ seed_num ][ testing_dir ]
+       #seed_data_dict[ seed_num ][ testing_dir ]["time"] = []
+       #continue
+       
+       #print( "--------------")
+       #print( seed_data_dict[ seed_num ][ testing_dir ]  )
+       #print( "--------------")
+       #print( seed_data_dict )
+       
+       #stats to track from data file
+       stats=[ "time", "modulation", "jointX", "jointY", "footX", "footY", "footState", "distance","n1_out" , "n2_out" ,"n3_out", "n4_out","n5_out", "deriv_n1", "deriv_n2", "deriv_n3" ]
+       
+       for stat in stats:
+        seed_data_dict[ seed_num ][ testing_dir ][ stat ] = []
         
+       data_csv_path="{}/seed_{}_recorded_activity.csv".format( testing_dir, seed_num )
+       
+       print( "Opening:" ) 
+       print( data_csv_path  )
+       #quit()
+        
+       with open( data_csv_path  ) as csvfile:
+         reader = csv.DictReader(csvfile)
+         for row in reader:
+           seed_data_dict[ seed_num ][ testing_dir ]["time"].append( float( row['time'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["modulation"].append( float( row['modulation'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["jointX"].append( float( row['jointX'] )  / 10 );
+           seed_data_dict[ seed_num ][ testing_dir ]["jointY"].append( float( row['jointY'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["footX"].append( float( row['footX'] ) / 10 );
+           seed_data_dict[ seed_num ][ testing_dir ]["footY"].append( float( row['footY'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["footState"].append( float( row['FootState'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["distance"].append( float( row['cx'] ) );
+           
+           seed_data_dict[ seed_num ][ testing_dir ]["n1_out"].append( float( row['n1_out'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["n2_out"].append( float( row['n2_out'] ) );
+           seed_data_dict[ seed_num ][ testing_dir ]["n3_out"].append( float( row['n3_out'] ) );
+           
+           if 'n5_out' in row:
+            seed_data_dict[ seed_num ][ testing_dir ]["n4_out"].append( float( row['n4_out'] )   )
+            seed_data_dict[ seed_num ][ testing_dir ]["n5_out"].append( float( row['n5_out'] )   )
+           elif 'n4_out' in row:
+            seed_data_dict[ seed_num ][ testing_dir ]["n4_out"].append( float( row['n4_out'] )   )
+         
+          #deriv_n1 = []
+         pre_val= seed_data_dict[ seed_num ][ testing_dir ]["n1_out"][0]
+         for val in  seed_data_dict[ seed_num ][ testing_dir ]["n1_out"]:
+          seed_data_dict[ seed_num ][ testing_dir ]["deriv_n1"].append( val - pre_val )
+          pre_val=val
+         
+         #deriv_n2 = []
+         pre_val=seed_data_dict[ seed_num ][ testing_dir ]["n2_out"][0]
+         for val in  seed_data_dict[ seed_num ][ testing_dir ]["n2_out"]:
+          seed_data_dict[ seed_num ][ testing_dir ]["deriv_n2"].append( val - pre_val )
+          pre_val=val
+         
+         #deriv_n3 = []
+         pre_val=seed_data_dict[ seed_num ][ testing_dir ]["n3_out"][0]
+         for val in  seed_data_dict[ seed_num ][ testing_dir ]["n3_out"]:
+          seed_data_dict[ seed_num ][ testing_dir ]["deriv_n3"].append( val - pre_val )
+          pre_val=val
+      
+       #print( seed_data_dict[ seed_num ][ testing_dir ]["footX"]  )
+       #quit()
+###############################################
+# DATA PROCESSED AND LOADED INTO seed_data_dict
+###############################################       
+       
+      plt.close('all')
+      
+        
+      #FIRST AGG PLOT
+      fig = plt.figure(1)
+      
+      #GET MAX VALUES TO KNOW THE GRID EXPECTED
+      max_row=0
+      max_col=0
+      for testing_dir in testing_dict.keys():
+       if int(testing_dict[testing_dir][1]) > max_row:
+        max_row = int(testing_dict[testing_dir][1])
+       if int(testing_dict[testing_dir][2]) > max_col:
+        max_col = int(testing_dict[testing_dir][2])
+      max_row+=1
+      max_col+=1
+      
+      #
+      #
+      # 
+      for testing_dir in testing_dict.keys():
+       print(   testing_dict[testing_dir][1]+" , "+testing_dict[testing_dir][2]+" , "+ str(count) )
+       rr=testing_dict[testing_dir][1]
+       cc=testing_dict[testing_dir][2]
+       
+       n=( int(rr)*2+ int(cc)+1 )
+       #ax = fig.add_subplot( 3, 2, n )
+       ax = fig.add_subplot( max_row, max_col, n )
+        
+       #print( "seed_num: {} \ntesting_dir: {}\n seed_data_dict[ seed_num ].keys(): {}".format(seed_num, testing_dir, seed_data_dict[ seed_num ].keys() ))
+        
+       plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["modulation"] )      # Or whatever you want in the subplot
+       plt.title(  testing_dict[testing_dir][0]    )
+       
+      plt.tight_layout()
+      plt.savefig("demo_simple_seed_{}.png".format( seed_num  ) )
+      
+      plt.close('all')
+      
+        
+      #FIRST AGG PLOT
+      fig = plt.figure(2)
+      
+      fig.set_size_inches(8, 11)
+
+      
+      for testing_dir in testing_dict.keys():
+       rr=testing_dict[testing_dir][1]
+       cc=testing_dict[testing_dir][2]
+       n=( int(rr)*2+ int(cc)+1 )
+       ax = fig.add_subplot( max_row, max_col, n,  projection='3d' )
+        
+      
+      
+#       ax = fig.gca(projection='3d')
+       #lowest mapped to blue, zero to black, highest mapped to red
+       colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
+        
+       cdict1 = {'red':   ((0.0, 0.0, 0.0),
+                  (0.5, 0.0, 0.1),
+                  (1.0, 1.0, 1.0)),
+
+        'green': ((0.0, 0.0, 0.0),
+                  (1.0, 0.0, 0.0)),
+        'blue':  ((0.0, 0.0, 1.0),
+                  (0.5, 0.1, 0.0),
+                  (1.0, 0.0, 0.0))
+       }
+       cmap_name = 'my_list'
+       # Create the colormap
+       cm = LinearSegmentedColormap.from_list( cmap_name, colors  )
+       co=[]
+       transparency=0.5
+       thickness=2
+       start=0
+       stop=-1
+       
+       seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
+       
+       for m in seed_data_dict[ seed_num ][ testing_dir ]["modulation"][start:stop]:
+        if m < 0:
+         co.append(  (0,0,abs(m), transparency)   )
+        elif m > 0:
+         co.append(  ( m,0,0, transparency)   )
+        else:
+         co.append(  (0,0,0, transparency)  )
+       
+       #norm1 = matplotlib.colors.Normalize(vmin=-0.5, vmax=0.5, clip=True)
+       
+       X = [ seed_data_dict[ seed_num ][ testing_dir ]["n1_out"][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n2_out"][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n3_out"][start:stop] ]
+       
+       points = np.array([X[0], X[1], X[2]]).T.reshape(-1, 1, 3)
+       segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+       lc=Line3DCollection(segs,colors=co )
+       plt.setp(lc, linewidth=thickness )
+       ax.add_collection( lc )
+       
+       #OLD WAY
+       ax.set_xlabel("BS")
+       ax.set_ylabel("FT")
+       ax.set_zlabel("FS")
+       
+       #plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["modulation"] )      # Or whatever you want in the subplot
+       plt.title(  testing_dict[testing_dir][0]    )
+      
+       
+       
+       ax.legend()
+       
+      #plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+      plt.tight_layout()
+      plt.savefig("demo_seed_{}.png".format( seed_num  ) )
+      
+      
+      
+      
+       
+      #quit()
+"""
+        
+        plt.xlabel('Time')
+    #    plt.ylabel('Distance Travelled')
+        #VIEWING WINDOW
+        start=0
+        stop=-1
+        time = time[start:stop]
+        fontsize=12
+        
+        
+        
+        config_plot(ax1A, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        #distance
+        
+        fitness_calc = distance[-1]/time[-1];
+        print( "Calculating fitness based upon final position instead of from file..."  )
+        txt = "Fitness: {}".format( fitness_calc )
+        
+        
+        ymin, ymax = ax1A.get_ylim()
+        xmin, xmax = ax1A.get_xlim()
+        width=xmax-xmin
+        height=ymax-ymin
+        
+        x=xmin+width/10
+        y=ymax+height/10
+        
+        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
+        
+        
+        bs_r = "OFF" if (seed_to_fitness_map[seed_num][1] == 0.0) else  str( seed_to_fitness_map[seed_num][1]  )
+        ft_r = "OFF" if (seed_to_fitness_map[seed_num][2] == 0.0) else  str( seed_to_fitness_map[seed_num][2]  )
+        fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
+        
+        
+        config_plot(ax2A, time, n1_out[start:stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+        config_plot(ax3A, time, n2_out[start:stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+        config_plot(ax4A, time, n3_out[start:stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+        
+        config_plot(ax5A, time, deriv_n1[start:stop], r"$\Delta$ BS", " delta BS over time", fontsize)
+        config_plot(ax5A, time, deriv_n2[start:stop], r"$\Delta$ FT", " delta FT over time", fontsize)
+        config_plot(ax5A, time, deriv_n3[start:stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        
+
+        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+        
+        
+        config_plot(ax1B, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        ax1B.text(x, y, txt, fontsize=12, ha="left", va="top")
+        
+        
+        config_plot(ax2B, time, footState[start:stop], "FootState", "FootState over time", fontsize)
+        config_plot(ax3B, time, jointX[start:stop], "jointX", "jointX over time", fontsize)
+        config_plot(ax4B, time, footX[start:stop], "FootX", "footX over time", fontsize)
+        config_plot(ax5B, time, footY[start:stop], "FootY", "footY over time",  fontsize)
+        
+        plt.tight_layout()
+        
+        #legend = plt.legend(loc='upper right', shadow=True)
+        legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
+        
+        
+        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        #plt.title("Fitness: {}".format(seed_to_fitness_map[seed_num] ) , fontsize=fontsize)
+        
+        exp_title = re.sub(r'.*/','', experiment_directory )       
+        exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
+        
+        plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        
+        
+        fig = plt.figure()
+
+        
+        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
+        
+        #old scatter plot
+        #dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n1_out[start:stop], n2_out[start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn2.add_collection( lc )
+        dyn2.set_xlabel("BS")
+        dyn2.set_ylabel("FT")
+        
+        #dyn3.scatter( n1_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n1_out[start:stop], n3_out[start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn3.add_collection( lc )
+        dyn3.set_xlabel("BS")
+        dyn3.set_ylabel("FS")
+        
+        #dyn4.scatter( n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n2_out[start:stop], n3_out[start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn4.add_collection( lc )
+        dyn4.set_xlabel("FT")
+        dyn4.set_ylabel("FS")
+        
+        
+        plt.tight_layout()
+        
+        plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        
+
+         
+        if count >= 10:
+         return
+"""        
         
 
 
@@ -684,6 +1083,12 @@ def main():
      
     elif COMPARE_MODE==2: 
      plot_fitness(comparison_name, experiment_directories, experiment_styles, True)
+     
+    elif COMPARE_MODE==3:
+     print( "Special Plotting Testing Results Mode:\nWill plot different attributes for seeds in {}\n   according to the specifications in {}".format( directory, csv_path ))
+     print( testing_dict )
+     plot_activity2( testing_dict  )
+     quit()
      
     else:
 
