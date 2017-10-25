@@ -66,6 +66,7 @@ if ".csv" in sys.argv[-1] and len( sys.argv) <= 2:
 #if we have a CSV file but have multiple arguments
 #then we are running special testing analysis on one arch's seeds only
 if len( sys.argv) > 2 and ".csv" in sys.argv[-1]:
+ comparison_name = comparison_name.replace(".csv","")
  COMPARE_MODE=3
  directory=sys.argv[1]
  csv_path=sys.argv[2]
@@ -688,7 +689,7 @@ def plot_activity( quantity=4 ):
         if count >= 10:
          return
 
-def plot_activity2( testing_dict, quantity=4 ):    
+def plot_activity2( testing_dict, quantity=10 ):    
     
     print( "Plotting activity2")
     
@@ -829,8 +830,6 @@ def plot_activity2( testing_dict, quantity=4 ):
       plt.close('all')
       
         
-      #FIRST AGG PLOT
-      fig = plt.figure(1)
       
       #GET MAX VALUES TO KNOW THE GRID EXPECTED
       max_row=0
@@ -846,24 +845,56 @@ def plot_activity2( testing_dict, quantity=4 ):
       #
       #
       # 
-      for testing_dir in testing_dict.keys():
-       print(   testing_dict[testing_dir][1]+" , "+testing_dict[testing_dir][2]+" , "+ str(count) )
-       rr=testing_dict[testing_dir][1]
-       cc=testing_dict[testing_dir][2]
-       
-       n=( int(rr)*2+ int(cc)+1 )
-       #ax = fig.add_subplot( 3, 2, n )
-       ax = fig.add_subplot( max_row, max_col, n )
-        
-       #print( "seed_num: {} \ntesting_dir: {}\n seed_data_dict[ seed_num ].keys(): {}".format(seed_num, testing_dir, seed_data_dict[ seed_num ].keys() ))
-        
-       plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["modulation"] )      # Or whatever you want in the subplot
-       plt.title(  testing_dict[testing_dir][0]    )
-       
-      plt.tight_layout()
-      plt.savefig("demo_simple_seed_{}.png".format( seed_num  ) )
+      plot_data_types=["distance",  "derivs" ]  #"n1_out", "n2_out" ,"n3_out", "derivs"]
+
+      for st in plot_data_types:
+
+       #FIRST AGG PLOT
+       fig = plt.figure(1)
+       fig.set_size_inches(8, 11)
+
+
       
-      plt.close('all')
+       #######################################
+       for testing_dir in testing_dict.keys():
+        print(   testing_dict[testing_dir][1]+" , "+testing_dict[testing_dir][2]  )
+        rr=int(testing_dict[testing_dir][1])
+        cc=int(testing_dict[testing_dir][2])
+        
+        n=( rr* max_col  + cc+1 )
+        #ax = fig.add_subplot( 3, 2, n )
+        ax = fig.add_subplot( max_row, max_col, n )
+         
+        #print( "seed_num: {} \ntesting_dir: {}\n seed_data_dict[ seed_num ].keys(): {}".format(seed_num, testing_dir, seed_data_dict[ seed_num ].keys() ))
+        
+        if st == "derivs":
+         
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n1"], label=r"$\Delta$ BS" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n2"], label=r"$\Delta$ FT" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n3"], label=r"$\Delta$ FS" )
+         ax.set_ylabel( r'$\Delta$ neuron outputs' )   #, fontsize=fontsize )
+         legend = ax.legend(loc='center right' )
+         
+        else:
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ][ st] )      # Or whatever you want in the subplot
+         
+        plt.title(  testing_dict[testing_dir][0]    )
+        
+       plt.tight_layout()
+       
+       exp_title = re.sub(r'.*/','', experiment_directory )
+       exp_base = re.sub(r'.*/DATA/','', experiment_directory )
+       
+       #plt.savefig("demo_simple_seed_{}.png".format( seed_num  ) )
+       
+       os.system("mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name) )
+       plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+       
+       plt.close('all')
+       ######################################
+      
+      
+      
       
         
       #FIRST AGG PLOT
@@ -873,14 +904,13 @@ def plot_activity2( testing_dict, quantity=4 ):
 
       
       for testing_dir in testing_dict.keys():
-       rr=testing_dict[testing_dir][1]
-       cc=testing_dict[testing_dir][2]
-       n=( int(rr)*2+ int(cc)+1 )
+       rr=int(testing_dict[testing_dir][1])
+       cc=int(testing_dict[testing_dir][2])
+       n=( rr*max_col+ cc+1 )
        ax = fig.add_subplot( max_row, max_col, n,  projection='3d' )
         
       
       
-#       ax = fig.gca(projection='3d')
        #lowest mapped to blue, zero to black, highest mapped to red
        colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
         
@@ -894,6 +924,7 @@ def plot_activity2( testing_dict, quantity=4 ):
                   (0.5, 0.1, 0.0),
                   (1.0, 0.0, 0.0))
        }
+       
        cmap_name = 'my_list'
        # Create the colormap
        cm = LinearSegmentedColormap.from_list( cmap_name, colors  )
@@ -937,132 +968,78 @@ def plot_activity2( testing_dict, quantity=4 ):
        
       #plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
       plt.tight_layout()
-      plt.savefig("demo_seed_{}.png".format( seed_num  ) )
+      #plt.savefig("demo_seed_{}.png".format( seed_num  ) )
+      plt.savefig("{0}/TESTS/{1}/{4}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name  ) )
       
-      
-      
-      
-       
-      #quit()
-"""
+      plt.close('all')
+
         
-        plt.xlabel('Time')
-    #    plt.ylabel('Distance Travelled')
-        #VIEWING WINDOW
+      fig = plt.figure(3)
+      fig.set_size_inches(8, 11)
+      
+      #STARTHERE
+      data2d= [ [ ["n1_out","BS"], ["n2_out","FT"] ], [ ["n1_out","BS"], ["n3_out","FS"] ],  [ ["n2_out","FT"], ["n3_out","FS"] ] ]
+      
+      for pair in data2d:
+       
+       plt.close('all')
+       fig = plt.figure(3)
+       fig.set_size_inches(8, 11)
+       
+       n_a=pair[0][0]
+       n_b=pair[1][0]
+       label_a=pair[0][1]
+       label_b=pair[1][1]
+       
+       
+       for testing_dir in testing_dict.keys():
+        rr=int(testing_dict[testing_dir][1])
+        cc=int(testing_dict[testing_dir][2])
+        n=( rr*max_col+ cc+1 )
+        ax = fig.add_subplot( max_row, max_col, n )
+ #####################      
+        #lowest mapped to blue, zero to black, highest mapped to red
+        colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
+        cdict1 = {'red':   ((0.0, 0.0, 0.0),
+                   (0.5, 0.0, 0.1),
+                   (1.0, 1.0, 1.0)),
+
+         'green': ((0.0, 0.0, 0.0),
+                   (1.0, 0.0, 0.0)),
+         'blue':  ((0.0, 0.0, 1.0),
+                   (0.5, 0.1, 0.0),
+                   (1.0, 0.0, 0.0))
+        }
+        cmap_name = 'my_list'
+        # Create the colormap
+        cm = LinearSegmentedColormap.from_list( cmap_name, colors  )
+        co=[]
+        transparency=0.5
+        thickness=2
         start=0
         stop=-1
-        time = time[start:stop]
-        fontsize=12
-        
-        
-        
-        config_plot(ax1A, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
-        #distance
-        
-        fitness_calc = distance[-1]/time[-1];
-        print( "Calculating fitness based upon final position instead of from file..."  )
-        txt = "Fitness: {}".format( fitness_calc )
-        
-        
-        ymin, ymax = ax1A.get_ylim()
-        xmin, xmax = ax1A.get_xlim()
-        width=xmax-xmin
-        height=ymax-ymin
-        
-        x=xmin+width/10
-        y=ymax+height/10
-        
-        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
-        
-        
-        bs_r = "OFF" if (seed_to_fitness_map[seed_num][1] == 0.0) else  str( seed_to_fitness_map[seed_num][1]  )
-        ft_r = "OFF" if (seed_to_fitness_map[seed_num][2] == 0.0) else  str( seed_to_fitness_map[seed_num][2]  )
-        fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
-        
-        
-        config_plot(ax2A, time, n1_out[start:stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-        config_plot(ax3A, time, n2_out[start:stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
-        config_plot(ax4A, time, n3_out[start:stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
-        
-        config_plot(ax5A, time, deriv_n1[start:stop], r"$\Delta$ BS", " delta BS over time", fontsize)
-        config_plot(ax5A, time, deriv_n2[start:stop], r"$\Delta$ FT", " delta FT over time", fontsize)
-        config_plot(ax5A, time, deriv_n3[start:stop], r"$\Delta$ FS", " delta FS over time", fontsize)
-        
-
-        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
-        
-        
-        config_plot(ax1B, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
-        ax1B.text(x, y, txt, fontsize=12, ha="left", va="top")
-        
-        
-        config_plot(ax2B, time, footState[start:stop], "FootState", "FootState over time", fontsize)
-        config_plot(ax3B, time, jointX[start:stop], "jointX", "jointX over time", fontsize)
-        config_plot(ax4B, time, footX[start:stop], "FootX", "footX over time", fontsize)
-        config_plot(ax5B, time, footY[start:stop], "FootY", "footY over time",  fontsize)
-        
-        plt.tight_layout()
-        
-        #legend = plt.legend(loc='upper right', shadow=True)
-        legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
-        
-        
-        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
-        #plt.title("Fitness: {}".format(seed_to_fitness_map[seed_num] ) , fontsize=fontsize)
-        
-        exp_title = re.sub(r'.*/','', experiment_directory )       
-        exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
-        
-        plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
-        
-        
-        fig = plt.figure()
-
-        
-        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
-        
-        #old scatter plot
-        #dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n1_out[start:stop], n2_out[start:stop] ]
+        seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
+        for m in seed_data_dict[ seed_num ][ testing_dir ]["modulation"][start:stop]:
+         if m < 0:
+          co.append(  (0,0,abs(m), transparency)   )
+         elif m > 0:
+          co.append(  ( m,0,0, transparency)   )
+         else:
+          co.append(  (0,0,0, transparency)  )
+ #####################      
+        X = [ seed_data_dict[ seed_num ][ testing_dir ][n_a][start:stop], seed_data_dict[ seed_num ][ testing_dir ][n_b][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
-        dyn2.add_collection( lc )
-        dyn2.set_xlabel("BS")
-        dyn2.set_ylabel("FT")
+        ax.add_collection( lc )
+        ax.set_xlabel(label_a)
+        ax.set_ylabel(label_b)
+        plt.title(  testing_dict[testing_dir][0]  )
         
-        #dyn3.scatter( n1_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n1_out[start:stop], n3_out[start:stop] ]
-        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
-        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
-        plt.setp(lc, linewidth=thickness )
-        dyn3.add_collection( lc )
-        dyn3.set_xlabel("BS")
-        dyn3.set_ylabel("FS")
-        
-        #dyn4.scatter( n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n2_out[start:stop], n3_out[start:stop] ]
-        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
-        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
-        plt.setp(lc, linewidth=thickness )
-        dyn4.add_collection( lc )
-        dyn4.set_xlabel("FT")
-        dyn4.set_ylabel("FS")
-        
-        
-        plt.tight_layout()
-        
-        plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
-        
-
-         
-        if count >= 10:
-         return
-"""        
-        
+       plt.tight_layout()
+       plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, label_a+"-"+label_b  ) )
+       
 
 
 def config_plot(ax, time, data, ylabel, title,  fontsize=12):

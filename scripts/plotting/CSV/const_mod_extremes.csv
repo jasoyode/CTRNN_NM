@@ -1,0 +1,5 @@
+directory,label,row,column,
+../../DATA/GENS-2000/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/,NORMAL,0,0,
+../../DATA/GENS-2000/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/const_-0.0/,OFF,0,1,
+../../DATA/GENS-2000/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/const_-0.6/,neg_0.6,1,0,
+../../DATA/GENS-2000/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/const_0.6/,pos_0.6,1,1,

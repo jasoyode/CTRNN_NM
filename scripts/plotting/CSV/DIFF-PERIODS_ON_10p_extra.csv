@@ -1,0 +1,7 @@
+directory,label,color,style
+../../DATA/DIFF-PERIODS/JOB_size-3_sim-long10run_signal-SINE-10p_M-mod1-ON,3-neurons_10-Period_Mod-ON,b,-,
+../../DATA/DIFF-PERIODS/JOB_size-4_sim-long10run_signal-SINE-10p_M-mod1-ON,4-neurons_10-Period_Mod-ON,r,-,
+../../DATA/DIFF-PERIODS/JOB_size-5_sim-long10run_signal-SINE-10p_M-mod1-ON,5-neurons_10-Period_Mod-ON,g,-,
+../../DATA/FIRST/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard,3-neurons_Standard,black,-,
+../../DATA/FIRST/JOB_size-4_sim-long10run_signal-SINE-1p_M-standard,4-neurons_Standard,brown,-,
+../../DATA/FIRST/JOB_size-5_sim-long10run_signal-SINE-1p_M-standard,5-neurons_Standard,gray,-,
