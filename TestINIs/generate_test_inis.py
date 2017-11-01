@@ -1,6 +1,7 @@
 import os
 
 
+folder="TestingModulationLevelsSize3"
 tmpl="temptest_tmpl.ini"
 
 levels=[]
@@ -11,7 +12,7 @@ inc=0.1
 
 i = min
 
-while i < max:
+while i <= max:
   levels.append( round( i, 3) )
   i += inc
 
@@ -20,5 +21,5 @@ print( levels )
 #AAA_MIN
 
 for level in levels:
-  os.system( "cat {0} | sed \"s/AAA_MIN/{1}/\"    |  sed  \"s/BBB_MAX/{1}/\" > TestingChamber/temptest_const_{1}.ini  ".format( tmpl, level ) )
+  os.system( "cat {0} | sed \"s/AAA_MIN/{1}/\"    |  sed  \"s/BBB_MAX/{1}/\" > {2}/temptest_const_{1}.ini  ".format( tmpl, level, folder ) )
   

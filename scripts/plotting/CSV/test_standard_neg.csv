@@ -1,7 +1,7 @@
 directory,label,row,column,
-../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard/const_-0.0,normal,0,0,
-../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard/const_-0.1,neg_0.1,1,0
-../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard/const_-0.2,neg_0.2,2,0
-../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard/const_-0.3,neg_0.3,3,0
-../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard/const_-0.4,neg_0.4,4,0
-../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard/const_-0.5,neg_0.5,5,0
+XXX/const_-0.0,normal,0,0,
+XXX/const_-0.1,neg_0.1,1,0
+XXX/const_-0.2,neg_0.2,2,0
+XXX/const_-0.3,neg_0.3,3,0
+XXX/const_-0.4,neg_0.4,4,0
+XXX/const_-0.5,neg_0.5,5,0

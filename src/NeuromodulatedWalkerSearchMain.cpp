@@ -65,6 +65,8 @@ int startingSeed;
 //file handle to write result to file
 ofstream expLogFile;
 ofstream bestAgentGenomeLogFile;
+ofstream bestAgentPhenotypeLogFile;
+
 ofstream bestAgentFitnessAndReceptorLogFile;
 ofstream recordLog;
 
@@ -132,6 +134,56 @@ double TranslateDoubleToDiscreteValues( double d, int levels ) {
     //cout <<  maxReceptor << endl;
     return maxReceptor;
 }
+
+
+//*****************************************
+//
+//*****************************************
+//Evaluate the performance of externally modulated CTRNN controllers with walking task
+void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
+{
+    //*
+	// Create a CTRNN 
+	// then set values based upon the vector passed in
+	//TVector<double> pheno(1, (networkSize*neuronParameterCount + networkSize*networkSize) );
+	
+//	pheno.SetSize( networkSize );
+    int paramCount=0;
+    
+    //*
+    //first N search parameters are biases
+    for (int i=1; i<= networkSize; i++) {
+       //setup individual neuron settings, incrementing the vector index as we go
+       paramCount++;
+       pheno(paramCount) = MapSearchParameter(v[paramCount], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
+    }
+    //second N search parameters are timing constants
+    for (int i=1; i<= networkSize; i++) {       
+       paramCount++;
+       pheno(paramCount) =  MapSearchParameter(v[paramCount], minTimingConstant, maxTimingConstant)  ;
+
+    }
+    //third N search parameters are receptor strengths
+    for (int i=1; i<= networkSize; i++) {
+       //this is the double value that regulates how much neurons are impacted by the modulation signal
+       paramCount++;
+       double receptorStrength = TranslateDoubleToDiscreteValues(   MapSearchParameter(v[paramCount], minReceptor, maxReceptor), discreteLevelsOfModulation );
+       pheno(paramCount) = receptorStrength  ;
+       //continuous - original
+       //c.SetNeuronReceptor(i, MapSearchParameter(v[paramCount], minReceptor, maxReceptor) ) ;
+    }
+    //remaining search parameters are synaptic weights
+    for (int i=1; i<= networkSize; i++) {
+       for (int j=1; j<= networkSize; j++) {
+         paramCount++;
+         pheno(paramCount) = MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
+       }
+    }
+    
+    return;
+}
+
+
 
 
 //*****************************************************
@@ -286,7 +338,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
     //RECORDING BEST PERF
     //setup header for logfile when passed
     if (recordLog ) {
-      recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx";
+      recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx,angle,omega";
       for (int i=1; i <= networkSize; i++) {
         recordLog << ",n" << i << "_out";
       }
@@ -321,7 +373,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
           recordLog << time << "," << modulationLevel << ",";
           recordLog << Insect.Leg.JointX << "," << Insect.Leg.JointY << ",";
           recordLog << Insect.Leg.FootX << "," << Insect.Leg.FootY << ",";
-          recordLog << Insect.Leg.FootState << "," << Insect.cx;
+          recordLog << Insect.Leg.FootState << "," << Insect.cx << "," << Insect.Leg.Angle << "," << Insect.Leg.Omega;
           //write outputs of neurons
           for (int i=1; i <= networkSize; i++) {
             recordLog << "," <<   Insect.NervousSystem.outputs[i]   ;
@@ -507,13 +559,10 @@ void loadValuesFromConfig( INIReader &reader) {
 
 
 void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label) {
-  
 //  string lbl( label );
-
   cout << "directory" <<directory << endl;
   cout << "label" <<label << endl;
 //  cout << "" << << endl;
-
   
   //use array works
   char dirPath[200];
@@ -550,7 +599,6 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       printf("Error copying files to new directory!n");
       exit(1);
   }
-   
   
   
   cout << "Generating activity data from directory: " << directory << endl;
@@ -573,6 +621,29 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
   cout << StepSize << " ..";
   
   int genomeSize = (networkSize*neuronParameterCount + networkSize*networkSize);
+  
+  string phenotypeFilename( dirPath  );
+  phenotypeFilename += "/phenotypes.txt";
+      
+  bestAgentPhenotypeLogFile.open( phenotypeFilename, std::fstream::trunc );  
+
+  
+  bestAgentPhenotypeLogFile << "seed,";
+  cout << "seed," << endl;
+  for (int i=1; i <= networkSize; i++ ) 
+      bestAgentPhenotypeLogFile << "bias" << i << ",";
+  for (int i=1; i <= networkSize; i++ ) 
+      bestAgentPhenotypeLogFile << "timConst" << i << ",";
+  for (int i=1; i <= networkSize; i++ ) 
+      bestAgentPhenotypeLogFile << "recep" << i << ",";
+  for (int i=1; i <= networkSize; i++ ) { 
+    for (int j=1; j <= networkSize; j++ ) {
+      bestAgentPhenotypeLogFile << "w_" << i << "->" << j << ",";   
+    } 
+  }
+  bestAgentPhenotypeLogFile << endl;
+  bestAgentPhenotypeLogFile.close();  
+
   
   //cout << "TVector of size: " << genomeSize << " must be created!" << endl;
 
@@ -598,13 +669,6 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       std::replace( line.begin(), line.end(), ',', ' '); // replace all ',' to ' '
       int seed;
 
-	  //int pos = line.find(' ');
-	  //cout << "pos: " << pos << endl;
-      //std::string genome_string = line.substr( pos );
-      
-      //cout << "Genome size: " << genomeSize <<  endl;
-	  //cout << "genome string: " << genome_string << endl;
-		
       //create space for genome!
       TVector<double> genome(1,1);
       genome.SetSize( genomeSize );
@@ -640,7 +704,31 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
           i++;
         }
         
-      } 
+      }
+      
+      TVector<double> phenotype(1, genomeSize);
+      
+      translate_to_phenotype( genome, phenotype );
+      cout << "phenotype converted!" << endl;
+      
+      
+      string phenotypeFilename( dirPath  );
+      phenotypeFilename += "/phenotypes.txt";
+      
+      bestAgentPhenotypeLogFile.open( phenotypeFilename, std::fstream::app );  
+      bestAgentPhenotypeLogFile << ( seed ) << ",";
+      for (int i=1; i <= phenotype.Size(); i++ ) {
+        bestAgentPhenotypeLogFile << phenotype[i] << ",";
+      }
+      bestAgentPhenotypeLogFile <<  endl;
+      bestAgentPhenotypeLogFile.close();
+      
+      
+      
+      
+      
+      
+      
 	  
 	  //create from base path each time
       string recordFilename2( dirPath  );
@@ -685,6 +773,12 @@ int main (int argc, const char* argv[]) {
     asprintf(&label, "%s", argv[3]  );
     
     //if (proceed == 'y') {
+    
+    
+    
+    
+        
+    
     cout << "Proceeding to generate activity from genomes in directory: " << dirPath << endl;
     generateActivityLogsFromGenomes( argv[1], dirPath, label );
       
@@ -755,6 +849,11 @@ int main (int argc, const char* argv[]) {
   //******************************************************************
   string bestAgentGenomeLogFilename( dirPath   );
   bestAgentGenomeLogFilename = bestAgentGenomeLogFilename + "/genomes.txt";
+  
+  string bestAgentPhenotypeLogFilename( dirPath   );
+  bestAgentPhenotypeLogFilename = bestAgentPhenotypeLogFilename + "/phenotypes.txt";
+  
+  
 
   string bestAgentFitnessAndReceptorLogFilename( dirPath   );
   bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/fitness_and_receptors.txt";
@@ -766,6 +865,8 @@ int main (int argc, const char* argv[]) {
     
     //Need to open these to write headers
     bestAgentGenomeLogFile.open( bestAgentGenomeLogFilename );  
+    bestAgentPhenotypeLogFile.open( bestAgentPhenotypeLogFilename );  
+    
     bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
     
     
@@ -787,6 +888,7 @@ int main (int argc, const char* argv[]) {
     cout << "Running tests..." << endl;
     runTests( diplayTestText );
     
+    ////////////////////////////////////
     //Setup headers
     bestAgentGenomeLogFile << "seed,";
     cout << "seed," << endl;
@@ -809,12 +911,35 @@ int main (int argc, const char* argv[]) {
     
     bestAgentFitnessAndReceptorLogFile << "seed,fitness,";
     for (int i=1; i <= networkSize; i++ ) {
+      //TODO CHANGE TO PHENO
       bestAgentFitnessAndReceptorLogFile << "r" << i << ",";
     }
     bestAgentFitnessAndReceptorLogFile << endl;
     
     bestAgentFitnessAndReceptorLogFile.close();
     bestAgentGenomeLogFile.close();  
+    
+    //Setup headers
+    bestAgentPhenotypeLogFile << "seed,";
+    cout << "seed," << endl;
+    
+    for (int i=1; i <= networkSize; i++ ) 
+        bestAgentPhenotypeLogFile << "bias" << i << ",";
+    
+    for (int i=1; i <= networkSize; i++ ) 
+        bestAgentPhenotypeLogFile << "timConst" << i << ",";
+    
+    for (int i=1; i <= networkSize; i++ ) 
+        bestAgentPhenotypeLogFile << "recep" << i << ",";
+    
+    for (int i=1; i <= networkSize; i++ ) { 
+      for (int j=1; j <= networkSize; j++ ) {
+        bestAgentPhenotypeLogFile << "w_" << i << "->" << j << ",";   
+      } 
+    }
+    bestAgentPhenotypeLogFile << endl;
+    bestAgentPhenotypeLogFile.close();  
+    
     
 
   //*******************************************************
@@ -877,8 +1002,8 @@ int main (int argc, const char* argv[]) {
       
       //ONLY OPEN FILES BETWEEN SUCCESSFUL SEARCHES!
       bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename, std::fstream::app );
+      
       bestAgentGenomeLogFile.open( bestAgentGenomeLogFilename, std::fstream::app );  
-        
       // Record seed of individual
       bestAgentGenomeLogFile << (startingSeed + i ) << ",";
       TVector<double> &genome = s.BestIndividual();
@@ -886,6 +1011,28 @@ int main (int argc, const char* argv[]) {
         bestAgentGenomeLogFile << genome[i] << ",";
       }
       bestAgentGenomeLogFile <<  endl;
+      /////////////////////
+      
+      bestAgentPhenotypeLogFile.open( bestAgentPhenotypeLogFilename, std::fstream::app );  
+      // Record seed of individual
+      bestAgentPhenotypeLogFile << (startingSeed + i ) << ",";
+      
+      TVector<double> phenotype(1, (networkSize*neuronParameterCount + networkSize*networkSize) );
+      
+      translate_to_phenotype( s.BestIndividual(), phenotype );
+      
+      //TVector<double> pheno(1, (networkSize*neuronParameterCount + networkSize*networkSize) );
+      
+      
+      for (int i=1; i <= phenotype.Size(); i++ ) {
+        bestAgentPhenotypeLogFile << phenotype[i] << ",";
+      }
+      bestAgentPhenotypeLogFile <<  endl;
+      bestAgentPhenotypeLogFile.close();
+      
+      
+      ////////////////////
+      
       bestAgentFitnessAndReceptorLogFile << (startingSeed + i ) << ",";
       bestAgentFitnessAndReceptorLogFile <<   s.BestPerformance() << ",";
       

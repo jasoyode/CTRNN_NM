@@ -13,6 +13,8 @@ from sklearn.preprocessing import StandardScaler
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.collections import LineCollection
 
+PI=3.141592653589
+
 #headless mode
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -207,8 +209,6 @@ def plot_fitness2( ):
     plt.grid(True)
     plt.savefig("{0}/{1}/mean_runs_with_error_{2}.png".format(PLOTS, exp_base, exp_title ) )
 
-
-
     #print( '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) )
 
 def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
@@ -218,7 +218,7 @@ def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
      dirs=sorted( directories.keys() )
     else:
      dirs=directories[:]
-       
+    
     #START FIRST IMAGE FOR PLOTTING
     fig = plt.figure(0)
     fig.set_size_inches(11, 8)
@@ -332,19 +332,22 @@ def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
 
     
 
-def plot_activity( quantity=4 ):    
-    
+def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
+
+    #VIEWING WINDOW
+    start=0
+    stop=-1
+
+    #short_start=0
+    #short_stop=1000
+
     print( "Plotting activity")
-    
     seed_to_fitness_map={}
-    
     fitness_and_receptors = "{}/fitness_and_receptors.txt".format( experiment_directory  )
-    
     total_receptors=-1
     
     with open( fitness_and_receptors  ) as fitness_file:
      fit_reader = csv.DictReader(fitness_file)
-     
      
      for row in fit_reader:
       entry = []
@@ -364,9 +367,35 @@ def plot_activity( quantity=4 ):
        else:
         print("why??")
         quit()
-      
-      
       seed_to_fitness_map[  int( row['seed'] ) ] =  entry ;
+      
+###########################  setup genome map
+    seed_to_genome_map = {}
+    genomes = "{}/genomes.txt".format( experiment_directory  )
+    total_neurons=-1
+    with open( genomes  ) as genomes_file:
+     genome_reader = csv.DictReader(genomes_file)
+     
+     for row in genome_reader:
+      entry = {}
+      
+      #calculate total_neurons one time
+      if total_neurons == -1:
+       n=1
+       #check until bias# not found
+       while "bias"+str(n) in row:
+        total_neurons=n
+        n+=1
+        
+      #total_genomes
+      for i in range(1, total_neurons+1):
+       for j in range( 1, total_neurons+1 ):
+        entry["w{}{}".format(i,j)  ] = float( row[ "w_{}->{}".format(i,j) ] )
+       entry["recep{}".format(i)  ] = float( row[ "recep{}".format(i) ] )
+      
+      seed_to_genome_map[  int( row['seed'] ) ] =  entry ;
+      
+#######################    
     
     sorted_seeds_and_fit =  sorted(seed_to_fitness_map.items(), key=operator.itemgetter(1,0) )
     
@@ -375,7 +404,6 @@ def plot_activity( quantity=4 ):
     
     print( "sorted_seeds_and_fit: " )
     print ( sorted_seeds_and_fit )
-    
     
     top_seeds = [x[0] for x in sorted_seeds_and_fit]
     print( "top_seeds: " )
@@ -407,93 +435,114 @@ def plot_activity( quantity=4 ):
       footY  = []
       footState = []
       distance    = []
-      n1_out = []
-      n2_out = []
-      n3_out = []
-      n4_out = []
-      n5_out = []
+      
+      n_out = {}
+      for i in range(1, total_neurons+1):
+       n_out[i] = []
+      
+      n_input = {}
+      n_input[1] = []
+      n_input[2] = []
+      n_input[3] = []
+      
+      angle = []
       
       pca_data = []
+      angle_omega = []
+      
+      
+      max_angle=0
+      min_angle=0
       
       with open( record_file  ) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-          time.append( float( row['time'] ) );
-          modulation.append( float( row['modulation'] ) );
-          jointX.append( float( row['jointX'] )  / 10 );
-          jointY.append( float( row['jointY'] ) );
-          footX.append( float( row['footX'] ) / 10 );
-          footY.append( float( row['footY'] ) );
-          footState.append( float( row['FootState'] ) );
-          distance.append( float( row['cx'] ) );
+          time.append( float( row['time'] ) )
+          modulation.append( float( row['modulation'] ) )
+          jointX.append( float( row['jointX'] )  )
+          jointY.append( float( row['jointY'] ) )
+          footX.append( float( row['footX'] )  )
+          footY.append( float( row['footY'] ) )
+          footState.append( float( row['FootState'] ) )
+          distance.append( float( row['cx'] ) )
+          angle.append( float( row['angle']   ) )
+          angle_omega.append( float( row['omega']   ) )
           
-          n1_out.append( float( row['n1_out'] ) );
-          n2_out.append( float( row['n2_out'] ) );
-          n3_out.append( float( row['n3_out'] ) );
+          
+          n_out[1].append( float( row['n1_out'] ) );
+          n_out[2].append( float( row['n2_out'] ) );
+          n_out[3].append( float( row['n3_out'] ) );
+          
+
+          #total_neurons
+          for i in range(1, total_neurons+1 ):
+           summed_input =0
+           for j in range(1, total_neurons+1 ):
+            if i != j:
+             #get the latest   OUTPUT  X by
+             #TODO CALCULATE BASED ON RECEPTOR STRENGTH
+             receptor_str = seed_to_genome_map[seed_num]["recep{}".format(i)]
+             
+             receptor_str = 1
+             
+             if receptor_str != 1:
+              print("Why receptor strength not 1?")
+              quit()
+             
+             summed_input +=  (1 + receptor_str*modulation[-1] ) * ( n_out[j][-1] * seed_to_genome_map[seed_num]["w{}{}".format(j,i)] ) 
+             
+           #add calculated input to dataset for input to neuron i
+           n_input[i].append( summed_input )
+           
+          #CLEANUP change to use dictionary and loops
           
           if 'n5_out' in row:
-           n4_out.append( float( row['n4_out'] )   )
-           n5_out.append( float( row['n5_out'] )   )
+           n_out[4].append( float( row['n4_out'] )   )
+           n_out[5].append( float( row['n5_out'] )   )
            pca_data.append(  ( float( row['n1_out'] ), float( row['n2_out'] ), float( row['n3_out'] ), float( row['n4_out'] ), float( row['n5_out'] ) ) )
           elif 'n4_out' in row:
-           n4_out.append( float( row['n4_out'] )   )
+           n_out[4].append( float( row['n4_out'] )   )
            pca_data.append(  ( float( row['n1_out'] ), float( row['n2_out'] ), float( row['n3_out'] ), float( row['n4_out'] ) ) )
           else:
            pca_data.append(  ( float( row['n1_out'] ), float( row['n2_out'] ), float( row['n3_out'] ) ) )
+        #print( n_input[1] )
+        #quit()
+        #CLEANUP change to use dictionary and loops
         
         deriv_n1 = []
-        pre_val=n1_out[0]
-        for val in  n1_out:
+        pre_val=n_out[1][0]
+        for val in  n_out[1]:
          deriv_n1.append( val - pre_val )
          pre_val=val
         
         deriv_n2 = []
-        pre_val=n2_out[0]
-        for val in  n2_out:
+        pre_val=n_out[2][0]
+        for val in  n_out[2]:
          deriv_n2.append( val - pre_val )
          pre_val=val
         
         deriv_n3 = []
-        pre_val=n3_out[0]
-        for val in  n3_out:
+        pre_val=n_out[3][0]
+        for val in  n_out[3]:
          deriv_n3.append( val - pre_val )
          pre_val=val
         
         
-        
+####################################        
         plt.close('all')
-        
         fig, ( (ax1A, ax1B), (ax2A, ax2B), (ax3A,ax3B), (ax4A, ax4B), (ax5A, ax5B) ) = plt.subplots(nrows=5, ncols=2, figsize=(8, 11) )
-        
-        #plt.figure(2)
-        
-        #plt.gca().set_color_cycle(['red', 'green', 'blue', 'yellow'])
-        
-        
         plt.xlabel('Time')
-    #    plt.ylabel('Distance Travelled')
         
-        #VIEWING WINDOW
-        start=0
-        stop=-1
-        
-        time = time[start:stop]
-        
-        
+        #time = time
         fontsize=12
-        
-        
 
-        config_plot(ax1A, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
-        
+        config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
         #distance
         fitness_calc = distance[-1]/time[-1];
         
         print( "Calculating fitness based upon final position instead of from file..."  )
         #txt = "Fitness: {}".format(seed_to_fitness_map[seed_num][0] )
         txt = "Fitness: {}".format( fitness_calc )
-        
-        
         
         ymin, ymax = ax1A.get_ylim()
         xmin, xmax = ax1A.get_xlim()
@@ -502,62 +551,114 @@ def plot_activity( quantity=4 ):
         
         x=xmin+width/10
         y=ymax+height/10
-        
         ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
-        
         
         bs_r = "OFF" if (seed_to_fitness_map[seed_num][1] == 0.0) else  str( seed_to_fitness_map[seed_num][1]  )
         ft_r = "OFF" if (seed_to_fitness_map[seed_num][2] == 0.0) else  str( seed_to_fitness_map[seed_num][2]  )
         fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
         
         
-        config_plot(ax2A, time, n1_out[start:stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-        config_plot(ax3A, time, n2_out[start:stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
-        config_plot(ax4A, time, n3_out[start:stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
         
-        config_plot(ax5A, time, deriv_n1[start:stop], r"$\Delta$ BS", " delta BS over time", fontsize)
-        config_plot(ax5A, time, deriv_n2[start:stop], r"$\Delta$ FT", " delta FT over time", fontsize)
-        config_plot(ax5A, time, deriv_n3[start:stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
         
 
         ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
         
         
-        config_plot(ax1B, time, modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        config_plot(ax1B, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
         ax1B.text(x, y, txt, fontsize=12, ha="left", va="top")
         
         
-        config_plot(ax2B, time, footState[start:stop], "FootState", "FootState over time", fontsize)
-        config_plot(ax3B, time, jointX[start:stop], "jointX", "jointX over time", fontsize)
-        config_plot(ax4B, time, footX[start:stop], "FootX", "footX over time", fontsize)
-        config_plot(ax5B, time, footY[start:stop], "FootY", "footY over time",  fontsize)
-        #config_plot(ax, time, jointY[start:stop], "jointY", " jointY over time", fontsize)
-        
+        config_plot(ax2B, time[short_start:short_stop], footState[short_start:short_stop], "FootState", "FootState over time", fontsize)
+        config_plot(ax3B, time[short_start:short_stop], jointX[short_start:short_stop], "jointX", "jointX over time", fontsize)
+        config_plot(ax4B, time[short_start:short_stop], footX[short_start:short_stop], "FootX", "footX over time", fontsize)
+        config_plot(ax5B, time[short_start:short_stop], footY[short_start:short_stop], "FootY", "footY over time",  fontsize)
         
         plt.tight_layout()
         
-    #    plt.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-        
-        #legend = plt.legend(loc='upper right', shadow=True)
-        legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
-        
-        
-        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
-        #plt.title("Fitness: {}".format(seed_to_fitness_map[seed_num] ) , fontsize=fontsize)
+        #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
         
         exp_title = re.sub(r'.*/','', experiment_directory )       
         exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
         
         plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+##################################################
+# just plot the activity of output neurons
+##################################################
+        
+
+        plt.close('all')
+        fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A) ) = plt.subplots(nrows=5, ncols=1, figsize=(8, 11) )        
+        plt.xlabel('Time')
+        
+        config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        
+        ymin, ymax = ax1A.get_ylim()
+        xmin, xmax = ax1A.get_xlim()
+        width=xmax-xmin
+        height=ymax-ymin
+        
+        ax1A.axvline(x=time[short_start], color='green')
+        ax1A.axvline(x=time[short_stop],  color='green')
+        
+        #ax1A.fill_between( time[start:stop], time[short_start], time[short_stop], facecolor='green', interpolate=True )
+        
+        x=xmin+width/10
+        y=ymax+height/10
+        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
+        
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+        
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        
+        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+        
+        plt.tight_layout()
+        legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
+        #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        
+        plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
         
         
+################################################
+        #angle plots
+        plt.close('all')
+        fig, ( ( ax1B) ) = plt.subplots(nrows=1, ncols=1 )
+        plt.xlabel(r"$\Theta$")
+        fontsize=12
+        fitness_calc = distance[-1]/time[-1];
+        print( "Calculating fitness based upon final position instead of from file..."  )
+        txt = "Fitness: {}".format( fitness_calc )
+        ymin, ymax = ax1A.get_ylim()
+        xmin, xmax = ax1A.get_xlim()
+        width=xmax-xmin
+        height=ymax-ymin
+        x=xmin+width/10
+        y=ymax+height/10
+        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
+        config_plot(ax1B, angle[short_start:short_stop], angle_omega[short_start:short_stop], r"$\.\Theta$", "angle over time", fontsize)
+        plt.tight_layout()
+        legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
+        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        exp_title = re.sub(r'.*/','', experiment_directory )       
+        exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
+        plt.savefig("{0}/{1}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+#############################################################
         
         
         fig = plt.figure()
 
         dyn1 = fig.gca(projection='3d')
-        
-        
         
         #lowest mapped to blue, zero to black, highest mapped to red
         colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
@@ -599,7 +700,7 @@ def plot_activity( quantity=4 ):
         
         #norm1 = matplotlib.colors.Normalize(vmin=-0.5, vmax=0.5, clip=True)
         
-        X = [ n1_out[start:stop], n2_out[start:stop], n3_out[start:stop] ]
+        X = [ n_out[1][start:stop], n_out[2][start:stop], n_out[3][start:stop] ]
         points = np.array([X[0], X[1], X[2]]).T.reshape(-1, 1, 3)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc=Line3DCollection(segs,colors=co )
@@ -607,8 +708,8 @@ def plot_activity( quantity=4 ):
         dyn1.add_collection( lc )
         
         #OLD WAY
-        #dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        #dyn1.scatter( n1_out[start:stop], n2_out[start:stop], n3_out[start:stop], c=co, label='neuron activation dynamics')
+        #dyn1.scatter( n_out[1][start:stop], n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        #dyn1.scatter( n_out[1][start:stop], n_out[2][start:stop], n_out[3][start:stop], c=co, label='neuron activation dynamics')
         dyn1.set_xlabel("BS")
         dyn1.set_ylabel("FT")
         dyn1.set_zlabel("FS")
@@ -619,11 +720,14 @@ def plot_activity( quantity=4 ):
         
         plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
         
+        #######################################################
+        # 2d plots
+        
         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
         
         #old scatter plot
-        #dyn2.scatter( n1_out[start:stop], n2_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n1_out[start:stop], n2_out[start:stop] ]
+        #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n_out[1][start:stop], n_out[2][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
@@ -632,8 +736,8 @@ def plot_activity( quantity=4 ):
         dyn2.set_xlabel("BS")
         dyn2.set_ylabel("FT")
         
-        #dyn3.scatter( n1_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n1_out[start:stop], n3_out[start:stop] ]
+        #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n_out[1][start:stop], n_out[3][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
@@ -642,8 +746,8 @@ def plot_activity( quantity=4 ):
         dyn3.set_xlabel("BS")
         dyn3.set_ylabel("FS")
         
-        #dyn4.scatter( n2_out[start:stop], n3_out[start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n2_out[start:stop], n3_out[start:stop] ]
+        #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n_out[2][start:stop], n_out[3][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
@@ -652,15 +756,60 @@ def plot_activity( quantity=4 ):
         dyn4.set_xlabel("FT")
         dyn4.set_ylabel("FS")
         
-        
         plt.tight_layout()
         
         plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
         
         
+        #######################################################
+        # 2d plots fixed
         
+        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
+        
+        X_LIM = 2
+        
+        #old scatter plot
+        #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n_input[1][start:stop], n_out[1][start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn2.add_collection( lc )
+        dyn2.set_xlabel("FT+FS")
+        dyn2.set_ylabel("BS")
+        dyn2.set_xlim(-X_LIM, X_LIM )
+        
+        #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n_input[2][start:stop], n_out[2][start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn3.add_collection( lc )
+        dyn3.set_xlabel("BS+FS")
+        dyn3.set_ylabel("FT")
+        dyn3.set_xlim(-X_LIM,X_LIM)
+        
+        #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+        X = [ n_input[3][start:stop], n_out[3][start:stop] ]
+        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        plt.setp(lc, linewidth=thickness )
+        dyn4.add_collection( lc )
+        dyn4.set_xlabel("BS+FT")
+        dyn4.set_ylabel("FS")
+        dyn4.set_xlim(-X_LIM,X_LIM)
+        
+        plt.tight_layout()
+        
+        plt.savefig("{0}/{1}/summed_dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        
+        
+        #not working
+        """        
         fig = plt.figure()
-
         pca_3d = fig.gca(projection='3d')
         
         sklearn_pca = sklearnPCA(n_components=3)
@@ -674,8 +823,6 @@ def plot_activity( quantity=4 ):
         pca_z = Y_sklearn[  2]
         
         
-        
-        
         pca_3d.scatter( pca_x, pca_y, pca_z, label='principal component analysis of neuron activation dynamics' )
         #, c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         pca_3d.set_xlabel("PC1")
@@ -683,13 +830,21 @@ def plot_activity( quantity=4 ):
         pca_3d.set_zlabel("PC3")
         
         plt.savefig("{0}/{1}/PCA_3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
-        
+"""        
+      
 
-         
-        if count >= 10:
+        if count > quantity:
          return
 
-def plot_activity2( testing_dict, quantity=10 ):    
+      print( min_angle )
+      print( max_angle )   
+
+def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):    
+    
+    start=0
+    stop=-1
+    fontsize=12
+    txt = "no txt"
     
     print( "Plotting activity2")
     
@@ -721,6 +876,30 @@ def plot_activity2( testing_dict, quantity=10 ):
     sorted_seeds_and_fit =  sorted(seed_to_fitness_map.items(), key=operator.itemgetter(1,0) )
     sorted_seeds_and_fit.reverse()
     sorted_seeds_and_fit = sorted_seeds_and_fit[ 0:quantity ]
+
+###########################  setup genome map
+    seed_to_genome_map = {}
+    genomes = "{}/genomes.txt".format( experiment_directory  )
+    total_neurons=-1
+    with open( genomes  ) as genomes_file:
+     genome_reader = csv.DictReader(genomes_file)
+     for row in genome_reader:
+      entry = {}
+      #calculate total_neurons one time
+      if total_neurons == -1:
+       n=1
+       #check until bias# not found
+       while "bias"+str(n) in row:
+        total_neurons=n
+        n+=1
+      #total_genomes
+      for i in range(1, total_neurons+1):
+       for j in range( 1, total_neurons+1 ):
+        entry["w{}{}".format(i,j)  ] = float( row[ "w_{}->{}".format(i,j) ] )
+       entry["recep{}".format(i)  ] = float( row[ "recep{}".format(i) ] )
+      seed_to_genome_map[  int( row['seed'] ) ] =  entry ;
+#######################    
+
     
     print( "sorted_seeds_and_fit: " )
     print ( sorted_seeds_and_fit )
@@ -752,28 +931,29 @@ def plot_activity2( testing_dict, quantity=10 ):
        print( "Get all data from {} for seed {}".format(  testing_dir, seed_num ) )
        
        #                SEED       TESTING_DIR      DATA
-       
-       #print("XXXXXXXXXXXXXXXXXXXXX", len(seed_data_dict[ seed_num ].keys()  ))
-       
        seed_data_dict[ seed_num ][ testing_dir ] =  {}
-       
-       #print("XXXXXXXXXXXXXXXXXXXXXZZZZZZZZZZ", len(seed_data_dict[ seed_num ].keys()  ))
-       
-       
-       #current_dict = seed_data_dict[ seed_num ][ testing_dir ]
-       #seed_data_dict[ seed_num ][ testing_dir ]["time"] = []
-       #continue
-       
-       #print( "--------------")
-       #print( seed_data_dict[ seed_num ][ testing_dir ]  )
-       #print( "--------------")
-       #print( seed_data_dict )
+       seed_data_dict[ seed_num ][ testing_dir ]["n_out"] = {}
+       seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"] = {}
+       seed_data_dict[ seed_num ][ testing_dir ]["n_input"] = {}
        
        #stats to track from data file
-       stats=[ "time", "modulation", "jointX", "jointY", "footX", "footY", "footState", "distance","n1_out" , "n2_out" ,"n3_out", "n4_out","n5_out", "deriv_n1", "deriv_n2", "deriv_n3" ]
+       stats=[ "time", "modulation", "jointX", "jointY", "footX", "footY", "footState", "distance","angle", "omega" ]
+       
+       
+       for i in range(1, total_neurons+1):
+        seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i] = []
+        seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][i] = []
+        seed_data_dict[ seed_num ][ testing_dir ]["n_input"][i] = []
+       
        
        for stat in stats:
         seed_data_dict[ seed_num ][ testing_dir ][ stat ] = []
+       
+       print( seed_data_dict[ seed_num ][ testing_dir ] )
+       
+       if not 'angle' in seed_data_dict[ seed_num ][ testing_dir ] :
+        print("no angle found in {}".format(testing_dir) )
+        quit()
         
        data_csv_path="{}/seed_{}_recorded_activity.csv".format( testing_dir, seed_num )
        
@@ -793,36 +973,49 @@ def plot_activity2( testing_dict, quantity=10 ):
            seed_data_dict[ seed_num ][ testing_dir ]["footState"].append( float( row['FootState'] ) );
            seed_data_dict[ seed_num ][ testing_dir ]["distance"].append( float( row['cx'] ) );
            
-           seed_data_dict[ seed_num ][ testing_dir ]["n1_out"].append( float( row['n1_out'] ) );
-           seed_data_dict[ seed_num ][ testing_dir ]["n2_out"].append( float( row['n2_out'] ) );
-           seed_data_dict[ seed_num ][ testing_dir ]["n3_out"].append( float( row['n3_out'] ) );
+           if not "angle" in  row:
+            seed_data_dict[ seed_num ][ testing_dir ]["angle"].append( 0)
+            seed_data_dict[ seed_num ][ testing_dir ]["omega"].append( 0)
+            
+           else:
+            seed_data_dict[ seed_num ][ testing_dir ]["angle"].append( float( row['angle'] ) );
+            seed_data_dict[ seed_num ][ testing_dir ]["omega"].append( float( row['omega'] ) );
            
-           if 'n5_out' in row:
-            seed_data_dict[ seed_num ][ testing_dir ]["n4_out"].append( float( row['n4_out'] )   )
-            seed_data_dict[ seed_num ][ testing_dir ]["n5_out"].append( float( row['n5_out'] )   )
-           elif 'n4_out' in row:
-            seed_data_dict[ seed_num ][ testing_dir ]["n4_out"].append( float( row['n4_out'] )   )
+           
+           for i in range(1, total_neurons+1):
+            seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i].append( float( row['n{}_out'.format(i)] ) );
+           
+            
+           #####calculate the total input to given neurons
+           
+           #total_neurons
+           for i in range(1, total_neurons+1 ):
+            summed_input =0
+            for j in range(1, total_neurons+1 ):
+             if i != j:
+              #get the latest   OUTPUT  X by
+              #TODO CALCULATE BASED ON RECEPTOR STRENGTH
+              receptor_str = seed_to_genome_map[seed_num]["recep{}".format(i)]
+              
+              receptor_str = 1
+              
+              if receptor_str != 1:
+               print("Why receptor strength not 1?")
+               quit()
+              
+              
+              summed_input +=  (1 + receptor_str*seed_data_dict[ seed_num ][ testing_dir ]["modulation"][-1] ) * ( seed_data_dict[ seed_num ][ testing_dir ]["n_out"][j][-1] * seed_to_genome_map[seed_num]["w{}{}".format(j,i)] ) 
+              
+            #add calculated input to dataset for input to neuron i
+            seed_data_dict[ seed_num ][ testing_dir ]["n_input"][i].append( summed_input )
+           
+            
+         for i in range(1, total_neurons+1):
+          pre_val= seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i][0]
+          for val in  seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i]:
+           seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][i].append( val - pre_val )
+           pre_val=val
          
-          #deriv_n1 = []
-         pre_val= seed_data_dict[ seed_num ][ testing_dir ]["n1_out"][0]
-         for val in  seed_data_dict[ seed_num ][ testing_dir ]["n1_out"]:
-          seed_data_dict[ seed_num ][ testing_dir ]["deriv_n1"].append( val - pre_val )
-          pre_val=val
-         
-         #deriv_n2 = []
-         pre_val=seed_data_dict[ seed_num ][ testing_dir ]["n2_out"][0]
-         for val in  seed_data_dict[ seed_num ][ testing_dir ]["n2_out"]:
-          seed_data_dict[ seed_num ][ testing_dir ]["deriv_n2"].append( val - pre_val )
-          pre_val=val
-         
-         #deriv_n3 = []
-         pre_val=seed_data_dict[ seed_num ][ testing_dir ]["n3_out"][0]
-         for val in  seed_data_dict[ seed_num ][ testing_dir ]["n3_out"]:
-          seed_data_dict[ seed_num ][ testing_dir ]["deriv_n3"].append( val - pre_val )
-          pre_val=val
-      
-       #print( seed_data_dict[ seed_num ][ testing_dir ]["footX"]  )
-       #quit()
 ###############################################
 # DATA PROCESSED AND LOADED INTO seed_data_dict
 ###############################################       
@@ -847,6 +1040,7 @@ def plot_activity2( testing_dict, quantity=10 ):
       # 
       plot_data_types=["distance",  "derivs" ]  #"n1_out", "n2_out" ,"n3_out", "derivs"]
 
+
       for st in plot_data_types:
 
        #FIRST AGG PLOT
@@ -869,15 +1063,15 @@ def plot_activity2( testing_dict, quantity=10 ):
         
         if st == "derivs":
          
-         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n1"], label=r"$\Delta$ BS" )
-         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n2"], label=r"$\Delta$ FT" )
-         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n3"], label=r"$\Delta$ FS" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][1][short_start:short_stop], label=r"$\Delta$ BS" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][2][short_start:short_stop], label=r"$\Delta$ FT" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][3][short_start:short_stop], label=r"$\Delta$ FS" )
          ax.set_ylabel( r'$\Delta$ neuron outputs' )   #, fontsize=fontsize )
          legend = ax.legend(loc='center right' )
          
         else:
-         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ][ st] )      # Or whatever you want in the subplot
-         
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][start:stop], seed_data_dict[ seed_num ][ testing_dir ][ st][start:stop] )      # Or whatever you want in the subplot
+         ax.set_ylabel( st )
         plt.title(  testing_dict[testing_dir][0]    )
         
        plt.tight_layout()
@@ -892,24 +1086,100 @@ def plot_activity2( testing_dict, quantity=10 ):
        
        plt.close('all')
        ######################################
+       
+##################################################
+# just plot the activity of output neurons
+##################################################
+
+
+
+      plt.close('all')
       
       
+      fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A) ) = plt.subplots(nrows=5, ncols=1, figsize=(8, 11) )        
+      plt.xlabel('Time')
       
       
-        
+      #multiple plots
+      for testing_dir in testing_dict.keys():
+       
+       
+       time=seed_data_dict[ seed_num ][ testing_dir ]["time"]
+       modulation=seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
+       n_out={}
+       
+       n_out[1]=seed_data_dict[ seed_num ][ testing_dir ]["n_out"][1]
+       n_out[2]=seed_data_dict[ seed_num ][ testing_dir ]["n_out"][2]      
+       n_out[3]=seed_data_dict[ seed_num ][ testing_dir ]["n_out"][3]
+       deriv_n1=seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][1]
+       deriv_n2=seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][2]
+       deriv_n3=seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][3]
+       
+       transparency  =0.5
+       mod_color =(0,0,0)
+       m = seed_data_dict[ seed_num ][ testing_dir ]["modulation"][0]
+       
+       if m < 0:
+        mod_color = (0,0,abs(m), transparency )
+       elif m > 0:
+        mod_color = (m,0,0, transparency)  
+       else:
+        mod_color = (0,0,0, transparency)  
+       
+       config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize, True, mod_color)
+       
+       ymin, ymax = ax1A.get_ylim()
+       xmin, xmax = ax1A.get_xlim()
+       width=xmax-xmin
+       height=ymax-ymin
+       
+       ax1A.axvline(x=time[short_start], color='green')
+       ax1A.axvline(x=time[short_stop],  color='green')
+       
+       #ax1A.fill_between( time[start:stop], time[short_start], time[short_stop], facecolor='green', interpolate=True )
+       
+       x=xmin+width/10
+       y=ymax+height/10
+       
+       
+       #CLEANUP
+       #config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+       #config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+       #config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+       
+       config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r: 1)", "BackSwing neuron output over time", fontsize, True, mod_color)
+       config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r: 1)", "FootLift neuron output over time",  fontsize, True, mod_color)
+       config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r: 1)", "ForwardSwing neuron output over time", fontsize, True, mod_color)
+       
+       
+       
+       config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize, True, mod_color)
+       config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize, True, mod_color)
+       config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, True, mod_color)
+      
+      ax1A.text(x, y, txt, fontsize=12, ha="left", va="top") 
+      
+      ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+      
+      plt.tight_layout()
+      #legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
+      #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+      
+      #plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+      plt.savefig("{0}/TESTS/{1}/{5}/neurons_act_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+      
+      
+###########################################################
+
       #FIRST AGG PLOT
       fig = plt.figure(2)
-      
       fig.set_size_inches(8, 11)
-
       
       for testing_dir in testing_dict.keys():
        rr=int(testing_dict[testing_dir][1])
        cc=int(testing_dict[testing_dir][2])
        n=( rr*max_col+ cc+1 )
        ax = fig.add_subplot( max_row, max_col, n,  projection='3d' )
-        
-      
       
        #lowest mapped to blue, zero to black, highest mapped to red
        colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
@@ -934,7 +1204,7 @@ def plot_activity2( testing_dict, quantity=10 ):
        start=0
        stop=-1
        
-       seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
+       #seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
        
        for m in seed_data_dict[ seed_num ][ testing_dir ]["modulation"][start:stop]:
         if m < 0:
@@ -946,7 +1216,7 @@ def plot_activity2( testing_dict, quantity=10 ):
        
        #norm1 = matplotlib.colors.Normalize(vmin=-0.5, vmax=0.5, clip=True)
        
-       X = [ seed_data_dict[ seed_num ][ testing_dir ]["n1_out"][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n2_out"][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n3_out"][start:stop] ]
+       X = [ seed_data_dict[ seed_num ][ testing_dir ]["n_out"][1][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n_out"][2][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n_out"][3][start:stop] ]
        
        points = np.array([X[0], X[1], X[2]]).T.reshape(-1, 1, 3)
        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
@@ -972,32 +1242,27 @@ def plot_activity2( testing_dict, quantity=10 ):
       plt.savefig("{0}/TESTS/{1}/{4}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name  ) )
       
       plt.close('all')
-
-        
       fig = plt.figure(3)
       fig.set_size_inches(8, 11)
       
-      #STARTHERE
-      data2d= [ [ ["n1_out","BS"], ["n2_out","FT"] ], [ ["n1_out","BS"], ["n3_out","FS"] ],  [ ["n2_out","FT"], ["n3_out","FS"] ] ]
+      
+      ##############FIX THESE
+      data2d= [  [1,"BS"], [2,"FT"] , [3,"FS"] ]
       
       for pair in data2d:
-       
        plt.close('all')
        fig = plt.figure(3)
        fig.set_size_inches(8, 11)
-       
-       n_a=pair[0][0]
-       n_b=pair[1][0]
-       label_a=pair[0][1]
-       label_b=pair[1][1]
-       
+       num=pair[0]
+       label=pair[1]
        
        for testing_dir in testing_dict.keys():
         rr=int(testing_dict[testing_dir][1])
         cc=int(testing_dict[testing_dir][2])
         n=( rr*max_col+ cc+1 )
         ax = fig.add_subplot( max_row, max_col, n )
- #####################      
+
+#####################       COLOR SETUP
         #lowest mapped to blue, zero to black, highest mapped to red
         colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
         cdict1 = {'red':   ((0.0, 0.0, 0.0),
@@ -1026,28 +1291,71 @@ def plot_activity2( testing_dict, quantity=10 ):
           co.append(  ( m,0,0, transparency)   )
          else:
           co.append(  (0,0,0, transparency)  )
- #####################      
-        X = [ seed_data_dict[ seed_num ][ testing_dir ][n_a][start:stop], seed_data_dict[ seed_num ][ testing_dir ][n_b][start:stop] ]
+#####################      
+        
+        X_LIM=2
+        
+        X = [ seed_data_dict[ seed_num ][ testing_dir ]["n_input"][num][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n_out"][num][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         ax.add_collection( lc )
-        ax.set_xlabel(label_a)
-        ax.set_ylabel(label_b)
+        ax.set_xlabel( label+ " input"  )
+        ax.set_ylabel( label+ " ouput"  )
+        
+        ax.set_xlim(-X_LIM, X_LIM )
         plt.title(  testing_dict[testing_dir][0]  )
         
        plt.tight_layout()
-       plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, label_a+"-"+label_b  ) )
+       plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, "n"+label  ) )
+      
+      
+      plt.close('all')
+      
+      fig, ( ( ax1B) ) = plt.subplots(nrows=1, ncols=1 )
+      
+      for testing_dir in testing_dict.keys(): 
        
+       transparency  =0.5
+       mod_color =(0,0,0)
+       m = seed_data_dict[ seed_num ][ testing_dir ]["modulation"][0]
+       
+       if m < 0:
+        mod_color = (0,0,abs(m), transparency )
+       elif m > 0:
+        mod_color = (m,0,0, transparency)  
+       else:
+        mod_color = (0,0,0, transparency)  
+       
+       
+       angle=seed_data_dict[ seed_num ][ testing_dir ]["angle"]
+       angle_omega=seed_data_dict[ seed_num ][ testing_dir ]["omega"]
+       distance=seed_data_dict[ seed_num ][ testing_dir ]["distance"]
+       time=seed_data_dict[ seed_num ][ testing_dir ]["time"]
+       fontsize=12
+       ax1B.plot( angle, angle_omega, color=mod_color )
+
+       
+      plt.tight_layout()
+      legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
+      plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+      plt.savefig("{0}/TESTS/{1}/{4}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title,  comparison_name  ) )
 
 
-def config_plot(ax, time, data, ylabel, title,  fontsize=12):
-     ax.plot( time, data, label=ylabel )
+def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_color=() ):
+
+     if len(mod_color) <= 0:
+      ax.plot( time, data, label=ylabel )
+     else:
+      #print( "using color"+ mod_color )
+      #quit()
+      ax.plot( time, data, label=ylabel, color=mod_color )
      #ax.locator_params(nbins=3)
      #ax.set_xlabel('time', fontsize=fontsize)
-     ax.set_ylabel( ylabel , fontsize=fontsize)
-     legend = ax.legend(loc='center right' )
+     if not simple:
+      ax.set_ylabel( ylabel , fontsize=fontsize)
+      legend = ax.legend(loc='center right' )
      #ax.set_title(title, fontsize=fontsize)
 
 def main():
@@ -1064,16 +1372,16 @@ def main():
     elif COMPARE_MODE==3:
      print( "Special Plotting Testing Results Mode:\nWill plot different attributes for seeds in {}\n   according to the specifications in {}".format( directory, csv_path ))
      print( testing_dict )
-     plot_activity2( testing_dict  )
+     plot_activity2( testing_dict, 1, 0, 500  )
      quit()
      
     else:
 
      exp_base = re.sub(r'.*/DATA/','', experiment_directory )
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
-
+     print("plot_actvity ") 
      #plot_fitness2()
-     plot_activity( 4 )
+     plot_activity( 10, 0, 2000 )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation
