@@ -139,18 +139,10 @@ double TranslateDoubleToDiscreteValues( double d, int levels ) {
 //*****************************************
 //
 //*****************************************
-//Evaluate the performance of externally modulated CTRNN controllers with walking task
+// Translate the second vector to be the phenotype of the genotype v
 void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
 {
-    //*
-	// Create a CTRNN 
-	// then set values based upon the vector passed in
-	//TVector<double> pheno(1, (networkSize*neuronParameterCount + networkSize*networkSize) );
-	
-//	pheno.SetSize( networkSize );
     int paramCount=0;
-    
-    //*
     //first N search parameters are biases
     for (int i=1; i<= networkSize; i++) {
        //setup individual neuron settings, incrementing the vector index as we go
@@ -161,7 +153,6 @@ void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
     for (int i=1; i<= networkSize; i++) {       
        paramCount++;
        pheno(paramCount) =  MapSearchParameter(v[paramCount], minTimingConstant, maxTimingConstant)  ;
-
     }
     //third N search parameters are receptor strengths
     for (int i=1; i<= networkSize; i++) {
@@ -169,8 +160,6 @@ void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
        paramCount++;
        double receptorStrength = TranslateDoubleToDiscreteValues(   MapSearchParameter(v[paramCount], minReceptor, maxReceptor), discreteLevelsOfModulation );
        pheno(paramCount) = receptorStrength  ;
-       //continuous - original
-       //c.SetNeuronReceptor(i, MapSearchParameter(v[paramCount], minReceptor, maxReceptor) ) ;
     }
     //remaining search parameters are synaptic weights
     for (int i=1; i<= networkSize; i++) {
@@ -179,7 +168,6 @@ void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
          pheno(paramCount) = MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
        }
     }
-    
     return;
 }
 
@@ -274,14 +262,16 @@ double Evaluate(TVector<double> &v, RandomState &rs)
 
 
 
-
-
 ///**************************************************
 // This is the version that records to a log file
 //***************************************************
 //Evaluate the performance of externally modulated CTRNN controllers with walking task
-double Evaluate(TVector<double> &v, ofstream &recordLog)
+double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
 {
+    bool fileOut = true;
+    if (&recordLog == &std::cout) {
+      fileOut = false;
+    }
 	// Create a CTRNN 
 	// then set values based upon the vector passed in
 	CTRNN c( networkSize );
@@ -337,7 +327,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
     
     //RECORDING BEST PERF
     //setup header for logfile when passed
-    if (recordLog ) {
+    if ( fileOut ) { // recordLog ) {
       recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx,angle,omega";
       for (int i=1; i <= networkSize; i++) {
         recordLog << ",n" << i << "_out";
@@ -369,7 +359,7 @@ double Evaluate(TVector<double> &v, ofstream &recordLog)
         }
         
         //RECORDING BEST PERF
-        if ( recordLog ) {
+        if ( fileOut ) { // recordLog ) {
           recordLog << time << "," << modulationLevel << ",";
           recordLog << Insect.Leg.JointX << "," << Insect.Leg.JointY << ",";
           recordLog << Insect.Leg.FootX << "," << Insect.Leg.FootY << ",";
@@ -396,11 +386,27 @@ int MyTerminationFunction(int Generation,  double BestPerf,  double AvgPerf,  do
 
 
 
+//Evaluate a mutation, by specifying a particular position mutate and by a certain amount
+double EvaluateMutants(TVector<double> &v, int parameterNum, double mutation ) {
+    TVector<double> mutatedVector( v );
+    mutatedVector(parameterNum) = mutatedVector(parameterNum) + mutation;
+    return Evaluate(mutatedVector);
+}
+
+double EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, int parameterNum2, double mutation2 ) {
+    TVector<double> mutatedVector( v );
+    mutatedVector(parameterNum1) = mutatedVector(parameterNum1) + mutation1;
+    mutatedVector(parameterNum2) = mutatedVector(parameterNum2) + mutation2;
+    return Evaluate(mutatedVector);
+}
+
+
+
 void runTests(bool showTests) {
     
     //for linear increment oscillation
     double modVel= modulationStepSize;
-    //for instantenous modulation level
+    //for instantaneous modulation level
     double modulationLevel = 0;
     //how often to show the current modulation level
     int displayFreq = 100;
@@ -558,11 +564,9 @@ void loadValuesFromConfig( INIReader &reader) {
 }
 
 
-void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label) {
-//  string lbl( label );
+void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label, int start1=1, int stop1=1, int start2=1, int stop2=2) {
   cout << "directory" <<directory << endl;
   cout << "label" <<label << endl;
-//  cout << "" << << endl;
   
   //use array works
   char dirPath[200];
@@ -612,8 +616,6 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
     std::cout << "Can't load '.ini' file!\n";
     return;
   }
-  
-  
   
   //load global variable values from reader
   cout <<"trying loadvalues" << endl;
@@ -723,20 +725,92 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       bestAgentPhenotypeLogFile <<  endl;
       bestAgentPhenotypeLogFile.close();
       
-      
-      
-      
-      
-      
-      
 	  
 	  //create from base path each time
       string recordFilename2( dirPath  );
-	  
       recordFilename2 += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
       recordLog.open(  recordFilename2  );
-      Evaluate(genome,   recordLog );
+      
+      //store original for comparison
+      double origFit = Evaluate(genome,   recordLog );
+      
       recordLog.close();
+      
+      
+      //Parameter Mutation Landscape
+      //int BEST_SEED=49;
+      //if (seed == BEST_SEED ) {
+      
+      //bias1	bias2	bias3	timConst1	timConst2	timConst3	recep1	recep2	recep3	w_1->1	w_1->2	w_1->3	w_2->1	w_2->2	w_2->3	w_3->1	w_3->2	w_3->3
+      //1		2		3		4			5			6			7		8		9		10		11		12		13		14		15		16		17		18      
+      
+      std::map <int, string> param_map;
+      
+      param_map[1] = "bias1";
+      param_map[2] = "bias2";
+      param_map[3] = "bias3";
+      param_map[4] = "timingConst1";
+      param_map[5] = "timingConst2";
+      param_map[6] = "timingConst3";
+      param_map[7] = "recep1";
+      param_map[8] = "recep2";
+      param_map[9] = "recep3";
+      param_map[10] = "w1->1";
+      param_map[11] = "w1->2";
+      param_map[12] = "w1->3";
+      param_map[13] = "w2->1";
+      param_map[14] = "w2->2";
+      param_map[15] = "w2->3";
+      param_map[16] = "w3->1";
+      param_map[17] = "w3->2";
+      param_map[18] = "w3->3";
+      
+      
+      
+      int sliceAMax = stop1;
+      int sliceBMax = stop2;
+      int sliceAStart = start1;
+      int sliceBStart = start2;
+      
+///////////////////////////      
+      for (int sliceA = sliceAStart; sliceA <= sliceAMax; sliceA++ ) {
+        for (int sliceB = sliceBStart; sliceB <= sliceBMax; sliceB++ ) {
+          
+          if (sliceA != sliceB && sliceA < sliceB) {
+          ////////////
+            cout << "starting i,j:" << sliceA << "," << sliceB << endl;
+            
+            string recordMutationsFilename( dirPath  );
+            
+            //can run and generate plots on all of these
+            recordMutationsFilename += "/seed_" + std::to_string( seed ) +"_X-" + param_map[ sliceA ] + "_Y-" + param_map[ sliceB ]+  + "_mutations.csv";
+            //recordMutationsFilename += "/seed_" + std::to_string( seed ) + "_mutations.csv";
+            
+            recordLog.open(  recordMutationsFilename  );
+            recordLog << "param1,param2,fitness," << endl;
+                  
+            cout << "0,0," << origFit << "," << endl;
+            
+            double min=-1;
+            double max=1;
+            double inc = 0.01;
+            
+            for (double i=min; i<max; i+= inc ) {
+              cout << "i: " << i << endl;
+              for (double j=min; j<max; j+= inc ) {
+              
+                 double mutFit = EvaluateMutants( genome, sliceA, i, sliceB, j );
+                 
+                 recordLog << i << "," << j << "," << mutFit << "," << endl;
+              }
+            }
+            recordLog.close();
+          /////////////////////  
+          }            
+          
+        }
+      }
+ /////////////////////////     
       
       cout << "Wrote activity for best agent in seed " << seed  << " to file..." << endl;
       //DONE WRITING GENOME ACTIVITY TO FILE	
@@ -777,10 +851,17 @@ int main (int argc, const char* argv[]) {
     
     
     
-        
+    if ( argc >=8 ) {
+      cout << "using " << argv[4] << " " << argv[5] << " " <<argv[6] << " " <<argv[7] << " " << endl;
+      generateActivityLogsFromGenomes( argv[1], dirPath, label, atoi(argv[4]) , atoi(argv[5]), atoi(argv[6]), atoi(argv[7]) );
+      
+    } else {
+    
+      generateActivityLogsFromGenomes( argv[1], dirPath, label );
+
+    }
     
     cout << "Proceeding to generate activity from genomes in directory: " << dirPath << endl;
-    generateActivityLogsFromGenomes( argv[1], dirPath, label );
       
     cout << "generateActivityLogsFromGenomes completed..."<<endl;
       

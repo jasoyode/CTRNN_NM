@@ -47,7 +47,12 @@ if len( sys.argv) > 2:
   COMPARE_MODE=1
 
 
-if ".csv" in sys.argv[-1] and len( sys.argv) <= 2:
+if len( sys.argv) <= 2 and "mutations.csv" in sys.argv[-1]:
+ COMPARE_MODE=4
+ MUTATION_FILE=sys.argv[-1]
+ 
+
+elif ".csv" in sys.argv[-1] and len( sys.argv) <= 2:
  comparison_name = comparison_name.replace(".csv","")
  COMPARE_MODE=2
  experiment_directories={}
@@ -67,6 +72,10 @@ if ".csv" in sys.argv[-1] and len( sys.argv) <= 2:
 
 #if we have a CSV file but have multiple arguments
 #then we are running special testing analysis on one arch's seeds only
+
+
+
+
 if len( sys.argv) > 2 and ".csv" in sys.argv[-1]:
  comparison_name = comparison_name.replace(".csv","")
  COMPARE_MODE=3
@@ -1342,6 +1351,61 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
       plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
       plt.savefig("{0}/TESTS/{1}/{4}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title,  comparison_name  ) )
 
+def plot_fitness_landscape( mutation_file_path) :
+
+ BEST_PERF=0.628
+
+ with open( mutation_file_path  ) as mutation_fitnesss_file:
+     mutation_fitness_reader = csv.DictReader( mutation_fitnesss_file )
+     X=[]
+     Y=[]
+     Z=[]
+     colors =[]
+     
+     for row in mutation_fitness_reader:
+      X.append(  float( row['param1'] ) )
+      Y.append(  float( row['param2'] ) )
+      Z.append(  float( row['fitness'] ) )
+      
+      
+      
+      norm_fit = float(row['fitness']) / BEST_PERF
+      if norm_fit < 0:
+       norm_fit=0
+      colors.append( [ norm_fit, norm_fit, norm_fit, 0.5] )
+ 
+ X.append( 0 )
+ Y.append( 0 )
+ colors.append( [1.0,0,0, 1.0] )
+ 
+ 
+ xlabel= "param1"
+ ylabel= "param1"
+ zlabel= "fitness"
+ title = "fitness of mutations" 
+ 
+ #plt = plt.figure()
+ #fig.patch.set_facecolor('white')
+ #ax = fig.add_subplot(111, projection='3d')
+ #ax.plot_surface(X,Y,Z)
+ plt.scatter( X,Y, s=5,c=colors )
+ 
+ plt.xlabel(xlabel)
+ plt.ylabel(ylabel)
+ #ax.set_zlabel(zlabel)
+ #ax.set_title(title)
+ 
+ title = re.sub(r'.*/','', mutation_file_path )
+ plt.title( title )
+ 
+ savefile = re.sub(r'mutations.csv','mutation_fitness_landscape.png', mutation_file_path )
+ 
+ print( savefile )
+ plt.savefig( savefile )
+ 
+ plt.close()
+
+
 
 def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_color=() ):
 
@@ -1375,6 +1439,11 @@ def main():
      plot_activity2( testing_dict, 1, 0, 500  )
      quit()
      
+    elif COMPARE_MODE==4:
+     print( "Generating plot of the fitness landscape..."  )
+     plot_fitness_landscape( MUTATION_FILE )
+     
+    
     else:
 
      exp_base = re.sub(r'.*/DATA/','', experiment_directory )
