@@ -450,9 +450,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
        n_out[i] = []
       
       n_input = {}
-      n_input[1] = []
-      n_input[2] = []
-      n_input[3] = []
+      for i in range(1, total_neurons +1 ):
+       n_input[i] = []
       
       angle = []
       
@@ -478,10 +477,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
           angle_omega.append( float( row['omega']   ) )
           
           
-          n_out[1].append( float( row['n1_out'] ) );
-          n_out[2].append( float( row['n2_out'] ) );
-          n_out[3].append( float( row['n3_out'] ) );
-          
+          for i in range(1, total_neurons +1 ):
+           n_out[i].append( float( row['n{}_out'.format(i) ] ) );
 
           #total_neurons
           for i in range(1, total_neurons+1 ):
@@ -497,6 +494,11 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
              if receptor_str != 1:
               print("Why receptor strength not 1?")
               quit()
+             
+             #print( "j: {}  i: {}".format(j, i) )
+             #print( n_out[j][-1] )
+             #print( seed_to_genome_map[seed_num] )
+             #print( "w{}{}".format(j,i) )
              
              summed_input +=  (1 + receptor_str*modulation[-1] ) * ( n_out[j][-1] * seed_to_genome_map[seed_num]["w{}{}".format(j,i)] ) 
              
@@ -1374,13 +1376,25 @@ def plot_fitness_landscape( mutation_file_path) :
        norm_fit=0
       colors.append( [ norm_fit, norm_fit, norm_fit, 0.5] )
  
- X.append( 0 )
- Y.append( 0 )
- colors.append( [1.0,0,0, 1.0] )
+ #Make final data point (the original parameter value) be RED
+ #X.append( X[-1] )
+ #Y.append( Y[-1] )
+ colors[-1] = [1.0,0,0, 1.0] 
+ 
+ # seed_49_X-timingConst2_Y-timingConst3_mutations.csv
+ 
+ param_text = re.sub(r'.*/','', mutation_file_path )
  
  
- xlabel= "param1"
- ylabel= "param1"
+ 
+ 
+ xlabel= re.sub(r'.*_X-','', param_text )
+ xlabel= re.sub(r'_Y.*','', xlabel )
+
+ ylabel= re.sub(r'.*_Y-','', param_text )
+ ylabel= re.sub(r'_mutations.csv','', ylabel )
+ 
+ 
  zlabel= "fitness"
  title = "fitness of mutations" 
  
@@ -1388,13 +1402,10 @@ def plot_fitness_landscape( mutation_file_path) :
  #fig.patch.set_facecolor('white')
  #ax = fig.add_subplot(111, projection='3d')
  #ax.plot_surface(X,Y,Z)
+
  plt.scatter( X,Y, s=5,c=colors )
- 
  plt.xlabel(xlabel)
  plt.ylabel(ylabel)
- #ax.set_zlabel(zlabel)
- #ax.set_title(title)
- 
  title = re.sub(r'.*/','', mutation_file_path )
  plt.title( title )
  

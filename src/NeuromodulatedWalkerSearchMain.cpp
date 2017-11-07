@@ -44,6 +44,11 @@ double minNeuronBiasAndWeights;
 double maxNeuronBiasAndWeights;
 double minTimingConstant;
 double maxTimingConstant;
+double minSensorWeights;
+double maxSensorWeights;
+bool mixedPatternGen;
+
+
 int networkSize;
 int neuronParameterCount;
 int maxReceptor;
@@ -78,9 +83,8 @@ char* expName;
 int dirExists(const char *pathname)
 {
     struct stat info;
-
 	if( stat( pathname, &info ) != 0 ) {
-	    printf( "cannot access %s\n parent folder might not exist yet", pathname );
+	    printf( "cannot access %s\n parent folder might not exist yet\n", pathname );
 		return -1;
 	}
 	else if( info.st_mode & S_IFDIR ) {  // S_ISDIR() doesn't exist on my windows 
@@ -109,7 +113,6 @@ std::string exec(const char* cmd) {
     return result;
 }
 
-
 //translate value to discrete set of values
 //    level -1 = return continuous value
 //    levels 2  =  {min, max}
@@ -119,12 +122,10 @@ double TranslateDoubleToDiscreteValues( double d, int levels ) {
     if (levels == -1 ) {
         return d;
     }
-
     //cout << "d:" << d << " mapped to ";
     double range = maxReceptor - minReceptor;
     double discreteIncrement = range / ( levels -1 );
     double increment = range / levels;
-
     for (int i=1; i< levels; i++ ) {
         if ( d <   (minReceptor + i*increment )   ) {
             //cout <<  (minReceptor +  discreteIncrement*(i-1) )  << endl;
@@ -161,6 +162,7 @@ void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
        double receptorStrength = TranslateDoubleToDiscreteValues(   MapSearchParameter(v[paramCount], minReceptor, maxReceptor), discreteLevelsOfModulation );
        pheno(paramCount) = receptorStrength  ;
     }
+    
     //remaining search parameters are synaptic weights
     for (int i=1; i<= networkSize; i++) {
        for (int j=1; j<= networkSize; j++) {
@@ -168,6 +170,13 @@ void translate_to_phenotype(TVector<double> &v, TVector<double> &pheno)
          pheno(paramCount) = MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
        }
     }
+    
+    //remaining search parameters are sensor synaptic weights
+    for (int i=1; i<= networkSize; i++) {
+       paramCount++;
+       pheno(paramCount) = MapSearchParameter(v[ paramCount  ], minSensorWeights, maxSensorWeights ) ;
+    }
+    
     return;
 }
 
@@ -214,6 +223,18 @@ double Evaluate(TVector<double> &v, RandomState &rs)
          c.SetConnectionWeight(i, j, MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) );
        }
     }
+    
+    
+    //map to track the weights of the sensors
+    //std::map <int, double> sensorWeights;
+    TVector<double> sensorWeights(1, networkSize);
+    
+    //remaining search parameters are sensor synaptic weights
+    for (int i=1; i<= networkSize; i++) {
+      paramCount++;
+      sensorWeights(i)= MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
+    }
+    
 
     // Randomize the circuit - causes segfault if you don't pass rs
     c.RandomizeCircuitState(-0.5,0.5, rs);
@@ -235,6 +256,19 @@ double Evaluate(TVector<double> &v, RandomState &rs)
 
     
     for (double time = 0; time < RunDuration; time += StepSize) {
+      // void SetNeuronExternalInput(int i, double value) {externalinputs[i] = value;};
+      // for 1 to n ...   c.SetNeuronExternalInput( i,   weight_i* Insect.Leg.Angle );
+      // external input modulated by default
+      //Provide input from sensors regardless of modulation
+      for (int i=1; i<= networkSize; i++) {
+        //if not mixedPatternGen always on, otherwise only set to angle in first half of run
+        if ( !mixedPatternGen || time < RunDuration/2 ) {
+          c.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+        } else {
+          c.SetNeuronExternalInput( i, 0 );
+        }
+      }
+    
       //use global modulatioEnabled to determine whether to use modulation step or not
       if (  NeuromodulationType != 0 ) {
           if ( sinusoidalOscillation ) {
@@ -249,6 +283,8 @@ double Evaluate(TVector<double> &v, RandomState &rs)
               } 
               modulationLevel += modVel;        
           }
+
+          
           //I use method chaining to pass this all the way down to the CTRNN where I define a special ModulatedStep function          
           Insect.ModulatedStep(StepSize, modulationLevel, NeuromodulationType);
         } else {
@@ -260,6 +296,8 @@ double Evaluate(TVector<double> &v, RandomState &rs)
 	return Insect.cx/RunDuration;
 }
 
+
+// TODO: add method that takes a CTRNN and vector and loads it
 
 
 ///**************************************************
@@ -305,6 +343,17 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
          c.SetConnectionWeight(i, j, MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) );
        }
     }
+    
+    //map to track the weights of the sensors
+    //std::map <int, double> sensorWeights;
+    TVector<double> sensorWeights(1, networkSize);
+    
+    //remaining search parameters are sensor synaptic weights
+    for (int i=1; i<= networkSize; i++) {
+      paramCount++;
+      sensorWeights(i)= MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
+    }
+    
    
     // Randomize the circuit - 
     c.RandomizeCircuitState(-0.5,0.5);
@@ -337,6 +386,20 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
     }
 
     for (double time = 0; time < RunDuration; time += StepSize) {
+      // void SetNeuronExternalInput(int i, double value) {externalinputs[i] = value;};
+      // for 1 to n ...   c.SetNeuronExternalInput( i,   weight_i* Insect.Leg.Angle );
+      // external input modulated by default
+      //Provide input from sensors regardless of modulation
+      for (int i=1; i<= networkSize; i++) {
+        //if not mixedPatternGen always on, otherwise only set to angle in first half of run
+        if ( !mixedPatternGen || time < RunDuration/2 ) {
+          c.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+        } else {
+          c.SetNeuronExternalInput( i, 0 );
+        }
+      }
+      
+      
       //use global modulatioEnabled to determine whether to use modulation step or not
       if (  NeuromodulationType != 0 ) {
           if ( sinusoidalOscillation ) {
@@ -366,7 +429,7 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
           recordLog << Insect.Leg.FootState << "," << Insect.cx << "," << Insect.Leg.Angle << "," << Insect.Leg.Omega;
           //write outputs of neurons
           for (int i=1; i <= networkSize; i++) {
-            recordLog << "," <<   Insect.NervousSystem.outputs[i]   ;
+            recordLog << "," <<   Insect.NervousSystem.outputs[i] ;
           }
           recordLog << endl;
         }
@@ -387,17 +450,107 @@ int MyTerminationFunction(int Generation,  double BestPerf,  double AvgPerf,  do
 
 
 //Evaluate a mutation, by specifying a particular position mutate and by a certain amount
-double EvaluateMutants(TVector<double> &v, int parameterNum, double mutation ) {
+double EvaluateMutants2(TVector<double> &v, int parameterNum, double mutation ) {
     TVector<double> mutatedVector( v );
-    mutatedVector(parameterNum) = mutatedVector(parameterNum) + mutation;
+    mutatedVector(parameterNum) =  mutation;
     return Evaluate(mutatedVector);
 }
 
-double EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, int parameterNum2, double mutation2 ) {
+string EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, int parameterNum2, double mutation2 ) {
     TVector<double> mutatedVector( v );
-    mutatedVector(parameterNum1) = mutatedVector(parameterNum1) + mutation1;
-    mutatedVector(parameterNum2) = mutatedVector(parameterNum2) + mutation2;
-    return Evaluate(mutatedVector);
+    
+    
+    /*
+    param_map[19] = "wALL";
+    param_map[20] = "w*-to-1";
+    param_map[21] = "w*-to-2";
+    param_map[22] = "w*-to-3";
+    param_map[23] = "w*-to-1or2";
+    param_map[24] = "w*-to-1or3";
+    param_map[25] = "w*-to-2or3";
+    */
+    
+    //sets upper and lower percentage modifier
+    double MAX = 0.5;
+    
+    
+    //cout << "parameterNum1" <<parameterNum1 << endl;
+    //exit(-1);
+    
+    if (parameterNum1 == 19 ) {
+      //cout << "ADJUST ALL WEIGHTS IN NETWORK BY %" <<endl;
+      for (int i=10; i<19; i++) {
+        mutatedVector(i) = mutatedVector(i) * (1 + mutation1*MAX );
+      }
+      
+    } else {
+      mutatedVector(parameterNum1) = mutation1;
+    }
+    
+    if (parameterNum2 == 19 ) {
+      //cout << "ADJUST ALL WEIGHTS IN NETWORK BY %" <<endl;
+      for (int i=10; i<19; i++) {
+        mutatedVector(i) = mutatedVector(i) * (1 + mutation2*MAX );
+      }
+      
+    } else {
+      mutatedVector(parameterNum2) = mutation2;
+    }
+    
+    double fitness = Evaluate(mutatedVector);
+    int genomeSize = v.Size();
+    
+    //translate resultant network into phenotype
+    TVector<double> phenotype(1, genomeSize);
+    translate_to_phenotype( mutatedVector, phenotype );
+    
+    //STARTHERE NEED TO FIX OUT OF BOUNDS
+    
+    double paramVal1=-1;
+    double paramVal2=-1;
+    
+    if (parameterNum1 == 19 ) {
+      paramVal1 = 1 + mutation1*MAX;
+    } else {
+      paramVal1 = phenotype(parameterNum1);
+    }
+    
+    if (parameterNum2 == 19 ) {
+      paramVal2 = 1 + mutation2*MAX;
+    } else {
+      paramVal2 = phenotype(parameterNum2);
+    }
+    
+    
+    //DEBUGGING
+    TVector<double> phenotype_orig(1, genomeSize);
+    translate_to_phenotype( v, phenotype_orig );
+    
+    
+    ostringstream stream;
+    stream << paramVal1 <<  "," << paramVal2 << "," << fitness << ",";
+    string s = stream.str();
+    
+    
+    
+    /*
+    if (minNeuronBiasAndWeights > phenotype(parameterNum1) || minNeuronBiasAndWeights > phenotype(parameterNum2)  ) {
+      cout << "Genome1:  " << v(parameterNum1) << " + " << mutation1 << " = " << mutatedVector(parameterNum1) << endl;
+      cout << "Phenome1: " << phenotype_orig(parameterNum1) << " + " << mutation1 << " = " << phenotype(parameterNum1) << endl;
+      cout << "Genome2:  " << v(parameterNum2) << " + " << mutation2 << " = " << mutatedVector(parameterNum2) << endl;
+      cout << "Phenome2: " << phenotype_orig(parameterNum2) << " + " << mutation2 << " = " << phenotype(parameterNum2) << endl;
+      cout << "  Fitness " << fitness << endl;
+      cout << "     " << s << endl;
+      cout << "minNeuronBiasAndWeights " << minNeuronBiasAndWeights <<endl;
+      
+      
+      cout << "What is happening?" << phenotype(parameterNum1) << "   " << phenotype(parameterNum2)  <<endl;;
+      exit(-1);
+    }
+    */
+    
+    
+    return s;
 }
 
 
@@ -527,6 +680,15 @@ void loadValuesFromConfig( INIReader &reader) {
     maxNeuronBiasAndWeights = reader.GetReal("ctrnn", "maxNeuronBiasAndWeights", 16 );
     minTimingConstant       = reader.GetReal("ctrnn", "minTimingConstant", 0.5 );
     maxTimingConstant       = reader.GetReal("ctrnn", "maxTimingConstant", 10 );
+    
+    minSensorWeights = reader.GetReal("ctrnn", "minSensorWeights", 0 );
+    maxSensorWeights = reader.GetReal("ctrnn", "maxSensorWeights", 0 );
+    mixedPatternGen =  reader.GetBoolean("ctrnn", "mixedPatternGen", false );
+    
+    cout << "minNeuronBiasAndWeights=" << minNeuronBiasAndWeights << endl;
+    //exit(-1);
+    
+    
     
     networkSize                = reader.GetInteger("network","networkSize", 0);
     neuronParameterCount       = reader.GetInteger("network","neuronParameterCount", 3);
@@ -755,16 +917,23 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       param_map[7] = "recep1";
       param_map[8] = "recep2";
       param_map[9] = "recep3";
-      param_map[10] = "w1->1";
-      param_map[11] = "w1->2";
-      param_map[12] = "w1->3";
-      param_map[13] = "w2->1";
-      param_map[14] = "w2->2";
-      param_map[15] = "w2->3";
-      param_map[16] = "w3->1";
-      param_map[17] = "w3->2";
-      param_map[18] = "w3->3";
+      param_map[10] = "w1-to-1";
+      param_map[11] = "w1-to-2";
+      param_map[12] = "w1-to-3";
+      param_map[13] = "w2-to-1";
+      param_map[14] = "w2-to-2";
+      param_map[15] = "w2-to-3";
+      param_map[16] = "w3-to-1";
+      param_map[17] = "w3-to-2";
+      param_map[18] = "w3-to-3";
       
+      param_map[19] = "wALL";
+      param_map[20] = "w*-to-1";
+      param_map[21] = "w*-to-2";
+      param_map[22] = "w*-to-3";
+      param_map[23] = "w*-to-1or2";
+      param_map[24] = "w*-to-1or3";
+      param_map[25] = "w*-to-2or3";
       
       
       int sliceAMax = stop1;
@@ -799,11 +968,36 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
               cout << "i: " << i << endl;
               for (double j=min; j<max; j+= inc ) {
               
-                 double mutFit = EvaluateMutants( genome, sliceA, i, sliceB, j );
+                 //set to exactly
+                 if ( abs(i) < inc/10 && abs(j) < inc/10 ) {
+                   i=0;
+                   j=0;
+                 }
                  
-                 recordLog << i << "," << j << "," << mutFit << "," << endl;
+                 //could have it return a string with the data below instead?
+                 //double mutFit = EvaluateMutants( genome, sliceA, i, sliceB, j );
+                 string results = EvaluateMutants( genome, sliceA, i, sliceB, j );
+                 recordLog << results << endl;
+                 
+                 //recordLog << i << "," << j << "," << mutFit << "," << endl;
               }
             }
+            
+            TVector<double> phenotype(1, genomeSize);
+            translate_to_phenotype( genome, phenotype );
+            
+            if (sliceB == 19 ) {
+              //ADD ORIGINAL AT END!
+              recordLog << phenotype(sliceA) << "," << 1 << "," << origFit << ",";
+            } else {
+              //ADD ORIGINAL AT END!
+              recordLog << phenotype(sliceA) << "," << phenotype(sliceB) << "," << origFit << ",";
+            }
+            
+            
+            
+            
+            
             recordLog.close();
           /////////////////////  
           }            

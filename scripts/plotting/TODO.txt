@@ -1,0 +1,9 @@
+TODO:
+1. rework the launch code at the top to be WAAAY more clear
+2. rework code to remove code duplication
+3. possible include a csv config mode to handle everything
+4. one more to generate every single thing all at once
+5. re-work the placement dirs so that everything has a folder
+6. improve commenting and general cleanliness of code
+7. try to prepare for release to public?
+

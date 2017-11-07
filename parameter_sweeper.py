@@ -21,10 +21,11 @@ template=sys.argv[2]
 parameter_list_file=sys.argv[3]
 
 
+reg_dir="/scratch/jasoyode/"
 
-exp_dir="/u/jasoyode/github_jasoyode/CTRNN_NM/DATA/{}".format( exp_name )
-config_dir="/u/jasoyode/github_jasoyode/CTRNN_NM/CONFIG/{}".format( exp_name )
-run_dir="/u/jasoyode/github_jasoyode/CTRNN_NM/"
+exp_dir="{}github_jasoyode/CTRNN_NM/DATA/{}".format(reg_dir, exp_name )
+config_dir="{}/github_jasoyode/CTRNN_NM/CONFIG/{}".format(reg_dir, exp_name )
+run_dir="{}/github_jasoyode/CTRNN_NM/".format( reg_dir )
 
 bigred2=os.path.isdir("/N/dc2/scratch/")
 
