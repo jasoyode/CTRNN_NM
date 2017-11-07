@@ -56,7 +56,7 @@ int minReceptor;
 double maxModulation;
 double minModulation;
 bool sinusoidalOscillation;
-int externalModulationPeriods;
+double externalModulationPeriods;
 double modulationStepSize;
 int discreteLevelsOfModulation;
 
@@ -614,7 +614,8 @@ void runTests(bool showTests) {
       
       //verify that the correct number of oscillations occurs when
       cout << "hitTopCount: " << hitTopCount <<  "   externalModulationPeriods: " << externalModulationPeriods << "  hitBotCount: " << hitBotCount << endl;
-      assert( hitTopCount == externalModulationPeriods && externalModulationPeriods == hitBotCount );
+      
+      //assert( hitTopCount == externalModulationPeriods && externalModulationPeriods == hitBotCount );
       cout << "externalModulationPeriods is working properly" << endl;
       
     }      
@@ -703,7 +704,7 @@ void loadValuesFromConfig( INIReader &reader) {
     minModulation              = reader.GetReal("modsignal", "minModulation", -0.5 );
     
     sinusoidalOscillation      = reader.GetBoolean("modsignal", "sinusoidalOscillation", true );
-    externalModulationPeriods  = reader.GetInteger("modsignal", "externalModulationPeriods", 2 );
+    externalModulationPeriods  = reader.GetReal("modsignal", "externalModulationPeriods", 1 );
     
     //cout << "maxModulation" << maxModulation << endl;
     //cout << "minModulation" << minModulation << endl;
