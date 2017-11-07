@@ -805,6 +805,12 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       bestAgentPhenotypeLogFile << "w_" << i << "->" << j << ",";   
     } 
   }
+  
+  for (int i=1; i <= networkSize; i++ ) { 
+    bestAgentGenomeLogFile << "w_AS->" << i << ",";   
+  }
+  
+  
   bestAgentPhenotypeLogFile << endl;
   bestAgentPhenotypeLogFile.close();  
 
@@ -1182,6 +1188,12 @@ int main (int argc, const char* argv[]) {
         bestAgentGenomeLogFile << "w_" << i << "->" << j << ",";   
       } 
     }
+    
+    for (int i=1; i <= networkSize; i++ ) { 
+        bestAgentGenomeLogFile << "w_AS->" << i << ",";   
+    }
+    
+    
     bestAgentGenomeLogFile << endl;
     
     bestAgentFitnessAndReceptorLogFile << "seed,fitness,";
@@ -1212,6 +1224,12 @@ int main (int argc, const char* argv[]) {
         bestAgentPhenotypeLogFile << "w_" << i << "->" << j << ",";   
       } 
     }
+    
+    for (int i=1; i <= networkSize; i++ ) { 
+      bestAgentPhenotypeLogFile << "w_AS->" << i << ",";   
+    }
+    
+    
     bestAgentPhenotypeLogFile << endl;
     bestAgentPhenotypeLogFile.close();  
     
