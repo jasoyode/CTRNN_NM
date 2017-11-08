@@ -232,10 +232,9 @@ double Evaluate(TVector<double> &v, RandomState &rs)
     //remaining search parameters are sensor synaptic weights
     for (int i=1; i<= networkSize; i++) {
       paramCount++;
-      sensorWeights(i)= MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
+      sensorWeights(i)= MapSearchParameter(v[ paramCount  ], minSensorWeights, maxSensorWeights ) ;
     }
     
-
     // Randomize the circuit - causes segfault if you don't pass rs
     c.RandomizeCircuitState(-0.5,0.5, rs);
 
@@ -263,9 +262,9 @@ double Evaluate(TVector<double> &v, RandomState &rs)
       for (int i=1; i<= networkSize; i++) {
         //if not mixedPatternGen always on, otherwise only set to angle in first half of run
         if ( !mixedPatternGen || time < RunDuration/2 ) {
-          c.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+          Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
         } else {
-          c.SetNeuronExternalInput( i, 0 );
+          Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
         }
       }
     
@@ -283,7 +282,6 @@ double Evaluate(TVector<double> &v, RandomState &rs)
               } 
               modulationLevel += modVel;        
           }
-
           
           //I use method chaining to pass this all the way down to the CTRNN where I define a special ModulatedStep function          
           Insect.ModulatedStep(StepSize, modulationLevel, NeuromodulationType);
@@ -351,7 +349,7 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
     //remaining search parameters are sensor synaptic weights
     for (int i=1; i<= networkSize; i++) {
       paramCount++;
-      sensorWeights(i)= MapSearchParameter(v[ paramCount  ], minNeuronBiasAndWeights,maxNeuronBiasAndWeights) ;
+      sensorWeights(i)= MapSearchParameter(v[ paramCount  ], minSensorWeights, maxSensorWeights ) ;
     }
     
    
@@ -393,9 +391,9 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
       for (int i=1; i<= networkSize; i++) {
         //if not mixedPatternGen always on, otherwise only set to angle in first half of run
         if ( !mixedPatternGen || time < RunDuration/2 ) {
-          c.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+          Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
         } else {
-          c.SetNeuronExternalInput( i, 0 );
+          Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
         }
       }
       
@@ -682,11 +680,15 @@ void loadValuesFromConfig( INIReader &reader) {
     minTimingConstant       = reader.GetReal("ctrnn", "minTimingConstant", 0.5 );
     maxTimingConstant       = reader.GetReal("ctrnn", "maxTimingConstant", 10 );
     
+    
     minSensorWeights = reader.GetReal("ctrnn", "minSensorWeights", 0 );
     maxSensorWeights = reader.GetReal("ctrnn", "maxSensorWeights", 0 );
     mixedPatternGen =  reader.GetBoolean("ctrnn", "mixedPatternGen", false );
     
     cout << "minNeuronBiasAndWeights=" << minNeuronBiasAndWeights << endl;
+    cout << "minSensorWeights" <<minSensorWeights << endl;
+    cout << "maxSensorWeights" <<maxSensorWeights << endl;
+    cout << "mixedPatternGen" <<mixedPatternGen << endl;
     //exit(-1);
     
     
