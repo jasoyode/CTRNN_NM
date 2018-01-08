@@ -685,10 +685,10 @@ void loadValuesFromConfig( INIReader &reader) {
     maxSensorWeights = reader.GetReal("ctrnn", "maxSensorWeights", 0 );
     mixedPatternGen =  reader.GetBoolean("ctrnn", "mixedPatternGen", false );
     
-    cout << "minNeuronBiasAndWeights=" << minNeuronBiasAndWeights << endl;
-    cout << "minSensorWeights" <<minSensorWeights << endl;
-    cout << "maxSensorWeights" <<maxSensorWeights << endl;
-    cout << "mixedPatternGen" <<mixedPatternGen << endl;
+    //cout << "minNeuronBiasAndWeights=" << minNeuronBiasAndWeights << endl;
+    //cout << "minSensorWeights" <<minSensorWeights << endl;
+    //cout << "maxSensorWeights" <<maxSensorWeights << endl;
+    //cout << "mixedPatternGen" <<mixedPatternGen << endl;
     //exit(-1);
     
     
@@ -729,14 +729,17 @@ void loadValuesFromConfig( INIReader &reader) {
 }
 
 
-void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label, int start1=1, int stop1=1, int start2=1, int stop2=2) {
-  cout << "directory" <<directory << endl;
-  cout << "label" <<label << endl;
+void generateActivityLogsFromGenomes(const char* ini, const char* directory, const char* label, int start1=-1, int stop1=-2, int start2=-1, int stop2=-2) {
+
+  cout << "generateActivityLogsFromGenomes " << endl;
+  cout << "directory: " <<directory << endl;
+  cout << "label: " <<label << endl;
   
   //use array works
   char dirPath[200];
-  strcpy( dirPath, "DATA/");
-  strcat(dirPath, expName );
+  //strcpy( dirPath, "DATA/");
+  //strcat(dirPath, expName );
+  strcpy( dirPath, expName);
   strcat(dirPath, "/" );
   strcat(dirPath, label );
   
@@ -751,12 +754,29 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
     exit(1);
   } 
   
+  
+  if ( start1 != -1 ) {
+    cout << "Parameters: " << start1 << " -> " << stop1 << ", " << start2 << " -> " << stop2 << endl;
+  } else {
+    cout << "Non-mutation mode running." << endl;
+    string bestAgentFitnessAndReceptorLogFilename( dirPath   );
+    bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/seeds_tested_fitness.csv";
+          
+    bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
+    bestAgentFitnessAndReceptorLogFile << "seed,fitness," << endl;
+    bestAgentFitnessAndReceptorLogFile.close();
+                            
+  }
+  
+  
+  
   //Copy config into the destination folder  
   char cp_fitness_and_receptors_command[200];
   strcpy( cp_fitness_and_receptors_command, ("cp ") );
-  strcat( cp_fitness_and_receptors_command, "DATA/" );
+  //strcat( cp_fitness_and_receptors_command, "DATA/" );
   strcat( cp_fitness_and_receptors_command, expName );
-  strcat( cp_fitness_and_receptors_command, "/fitness_and_receptors.txt DATA/" );
+  //strcat( cp_fitness_and_receptors_command, "/fitness_and_receptors.txt DATA/" );
+  strcat( cp_fitness_and_receptors_command, "/fitness_and_receptors.txt " );
   strcat( cp_fitness_and_receptors_command, expName );
   strcat( cp_fitness_and_receptors_command, "/" );
   strcat( cp_fitness_and_receptors_command, label );
@@ -771,7 +791,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
   
   
   cout << "Generating activity data from directory: " << directory << endl;
-  cout << "Generating Standard and Alterated Testing" << endl; 
+  cout << "Generating Standard and Altered Testing" << endl; 
   
   //use argument passed in to load from config file
   INIReader reader( ini   );
@@ -783,9 +803,9 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
   }
   
   //load global variable values from reader
-  cout <<"trying loadvalues" << endl;
+  cout <<"trying to load values from config " << endl;
   loadValuesFromConfig( reader );  
-  cout << StepSize << " ..";
+  //cout << StepSize << " ..";
   
   int genomeSize = (networkSize*neuronParameterCount + networkSize*networkSize);
   
@@ -882,7 +902,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       TVector<double> phenotype(1, genomeSize);
       
       translate_to_phenotype( genome, phenotype );
-      cout << "phenotype converted!" << endl;
+      //cout << "phenotype converted!" << endl;
       
       
       string phenotypeFilename( dirPath  );
@@ -902,18 +922,32 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       recordFilename2 += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
       recordLog.open(  recordFilename2  );
       
-      //store original for comparison
+      //store generated data (original or test) for comparison
       double origFit = Evaluate(genome,   recordLog );
+      
+      cout << "origFit: " << origFit << endl;
       
       recordLog.close();
       
       
+      
+      string bestAgentFitnessAndReceptorLogFilename( dirPath   );
+      bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/seeds_tested_fitness.csv";
+
+      bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename, std::fstream::app );
+      bestAgentFitnessAndReceptorLogFile << std::to_string( seed )  << "," << origFit <<  "," << endl;
+      bestAgentFitnessAndReceptorLogFile.close();
+      
+
       //Parameter Mutation Landscape
       //int BEST_SEED=49;
       //if (seed == BEST_SEED ) {
       
-      //bias1	bias2	bias3	timConst1	timConst2	timConst3	recep1	recep2	recep3	w_1->1	w_1->2	w_1->3	w_2->1	w_2->2	w_2->3	w_3->1	w_3->2	w_3->3
-      //1		2		3		4			5			6			7		8		9		10		11		12		13		14		15		16		17		18      
+      //bias1	bias2	bias3	timConst1	timConst2	timConst3	recep1	recep2	recep3	
+      //1		2		3		4			5			6			7		8		9		
+      
+      //w_1->1	w_1->2	w_1->3	w_2->1	w_2->2	w_2->3	w_3->1	w_3->2	w_3->3  ALL_weights
+      //10		11		12		13		14		15		16		17		18      19
       
       std::map <int, string> param_map;
       
@@ -950,7 +984,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       int sliceAStart = start1;
       int sliceBStart = start2;
       
-///////////////////////////      
+/////////////////////////// 
       for (int sliceA = sliceAStart; sliceA <= sliceAMax; sliceA++ ) {
         for (int sliceB = sliceBStart; sliceB <= sliceBMax; sliceB++ ) {
           
@@ -1024,10 +1058,18 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
 // The main program
 int main (int argc, const char* argv[]) {
   
+  // This program has three different use cases:
+  // 1. generate new data using a particular configuration and storing in a particular directory (experiment name)
+  // 2. generate testing data using a directory with genomes inside of it and giving it a label (to be stored inside experiment folder)
+  // 3. generate parameter space mutation plots, where different genetic parameters are varied (or all weights shifted)
+  
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
     std::cerr << "OR" << std::endl;
     std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY LABEL" << std::endl;
+    std::cerr << "OR" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY LABEL [#] [#] [#] [#]" << std::endl;
+    
     return 1;
   }
   
@@ -1035,31 +1077,36 @@ int main (int argc, const char* argv[]) {
 
 
   char dirPath[200];
-  strcpy( dirPath, "DATA/");
-  strcat(dirPath, expName );
+  //strcpy( dirPath, "DATA/");
+  //strcat(dirPath, expName );
   
-   
+  strcpy( dirPath, expName );
+  
+  cout << "diPath: " << dirPath << endl;
+  
+  cout << "argc=: " << argc << endl;
+  
   // Check the number of parameters
   if (argc >= 4) {
-    cout << "special mode: generate activity from genomes in directory: " << dirPath << endl;
-    cout << "Do you wish to continue ? (y/n)" << endl;
+    cout << "Running in Special mode: will generate activity from genomes in directory: " << dirPath << endl;
+    
+    //cout << "Do you wish to continue ? (y/n)" << endl;
     //char proceed;
     //cin >> proceed;
     
     char* label;
     asprintf(&label, "%s", argv[3]  );
     
-    //if (proceed == 'y') {
-    
-    
-    
     
     if ( argc >=8 ) {
-      cout << "using " << argv[4] << " " << argv[5] << " " <<argv[6] << " " <<argv[7] << " " << endl;
+      cout << "Generating Parameter Space data and will mutate the following: " <<endl;
+      cout << "Parameters: " << argv[4] << " " << argv[5] << " " <<argv[6] << " " <<argv[7] << " " << endl;
+      exit(-1);
       generateActivityLogsFromGenomes( argv[1], dirPath, label, atoi(argv[4]) , atoi(argv[5]), atoi(argv[6]), atoi(argv[7]) );
       
     } else {
-    
+      cout << "Generating testing data using test file: " << argv[1] << endl;
+      
       generateActivityLogsFromGenomes( argv[1], dirPath, label );
 
     }
@@ -1069,11 +1116,7 @@ int main (int argc, const char* argv[]) {
     cout << "generateActivityLogsFromGenomes completed..."<<endl;
       
     return -1;
-    //} else {
-    //  // Tell the user how to run the program
-    //  std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
-    // / return 1;
-    //}
+    
   }
   
   // Print the user's name:
@@ -1158,7 +1201,8 @@ int main (int argc, const char* argv[]) {
     char cp_config_command[100];
     strcpy( cp_config_command, ("cp ") );
     strcat( cp_config_command, argv[1] );
-    strcat( cp_config_command, " DATA/" );
+    //strcat( cp_config_command, " DATA/" );
+    strcat( cp_config_command, " " );
     strcat( cp_config_command, expName );
 
     const int cp_err = system( cp_config_command );
