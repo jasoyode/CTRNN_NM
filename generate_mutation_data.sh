@@ -3,7 +3,7 @@
 INI="$1"
 TITLE="$2"
 
-DIR="mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/"
+DIR="DATA/mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/"
 
 if [ "$TITLE" == "" ]; then
   echo "Usage: $0 ***.ini title"
