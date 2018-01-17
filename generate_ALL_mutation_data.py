@@ -8,8 +8,7 @@ def sh( command):
   output = subprocess.check_output( command , shell=True).decode("utf-8")
   return output.strip().split("\n")
     
-    
-    
+  
 #DONT FORGET THE / AT END OF DIRECTORY!
 selected_seeds= []
 selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/",  59) )
@@ -18,17 +17,15 @@ selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-50
 selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 29) )
 selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/",  87) )
 selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 75) )
-                 
 
+               
+#CPG-3-mod, 59
+#CPG-3-std, 49
+#MPG-3-mod, 64
+#MPG-3-std, 29
+#RPG-3-mod  87
+#RPG-3-std  75
 
-#CPG-3mod,   59 ]#,
-#CPG-3std, 49
-#MPG-3-mod,  64
-#MPG-3=std,  29
-#RPG-3-mod 87
-#RPG-3-std 75
-#                  (), 
-#                  () ]
 
 for pair in selected_seeds:
  directory = pair[0]

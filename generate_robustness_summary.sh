@@ -1,9 +1,50 @@
 #!/bin/bash
 
-declare -a JOBS
-#DIR="PLAY_DATA/SMALL_SAMPLE_STANDARD/TESTS/"
+# Use this to make sure the latest testing data is used for generating robustness plots
+#
 
-JOBS[1]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"
+if [ "" == "$1" ]; then
+  echo "Usage:   $0  [EXPERIMENT_DIRECTORY] "
+  echo "Example  $0  DATA/CPG_RPG_MPG_345/ " 
+  exit
+fi
+
+declare -a JOBS
+
+EXP_DIR="$1"
+
+dir_count=0
+for DIR in $( ls $EXP_DIR ); do
+  let "dir_count++"
+  JOBS[$dir_count]="$EXP_DIR/$DIR"
+
+done
+
+#echo "${JOBS[@]}"
+#exit
+
+for JOB in ${JOBS[@]}; do
+  echo "$JOB"
+  DIR="$JOB/TESTS/"
+  FILTERS=( AMP_ CONSTANT_ )    #CONST_POS_  CONST_NEG_-
+  for FILTER in ${FILTERS[@]}; do
+    echo $FILTER
+    OUTPUT="$JOB/RESULTS_${FILTER}.csv"
+    echo "seed,fitness,noise," > $OUTPUT
+    #sort numerically
+    for file in $( ls $DIR | grep "$FILTER" |sed "s/$FILTER//" | sort -k1.1n  ); do
+      echo $file
+      NOISE=$( echo "${FILTER}${file}" | sed "s/.*$FILTER//" )
+      for line in $( cat $DIR/${FILTER}${file}/seeds_tested_fitness.csv | grep -v "seed" ); do
+        echo "${line}${NOISE}" >> $OUTPUT
+      done
+    done
+  done
+done
+
+
+#OLD
+#JOBS[1]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"
 #JOBS[2]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"
 #JOBS[3]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"
 
@@ -30,33 +71,3 @@ JOBS[1]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE
 #JOBS[17]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
 #JOBS[18]="DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
 
-
-for JOB in ${JOBS[@]}; do
-
-  echo "$JOB"
-  DIR="$JOB/TESTS/"
-
-  FILTERS=( AMP_ CONST_POS_ CONST_NEG_- )
-
-  for FILTER in ${FILTERS[@]}; do
-
-    echo $FILTER
-
-    #OUTPUT="PLAY_DATA/SMALL_SAMPLE_STANDARD/RESULTS_${FILTER}.csv"
-    OUTPUT="$JOB/RESULTS_${FILTER}.csv"
-
-    echo "seed,fitness,noise," > $OUTPUT
-
-
-    for file in $( ls $DIR | grep "$FILTER" ); do
-      echo $file
-      
-      NOISE=$( echo $file | sed "s/.*$FILTER//" )
-      
-      for line in $( cat $DIR/$file/seeds_tested_fitness.csv | grep -v "seed" ); do
-        echo "${line}${NOISE}" >> $OUTPUT
-      done
-
-    done
-  done
-done

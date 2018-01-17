@@ -13,7 +13,7 @@ import datetime
 
 
 if len(sys.argv) < 4:
-  print("You must provide 4 parameters: name, template, parameter_list")
+  print("You must provide 3 or 4 parameters to the script: name, template, parameter_list, [BATCHMODE=TRUE]")
   quit()
 
 exp_name=sys.argv[1]
@@ -22,7 +22,6 @@ parameter_list_file=sys.argv[3]
 
 
 reg_dir="/scratch/jasoyode/"
-
 exp_dir="{}github_jasoyode/CTRNN_NM/DATA/{}".format(reg_dir, exp_name )
 config_dir="{}/github_jasoyode/CTRNN_NM/CONFIG/{}".format(reg_dir, exp_name )
 run_dir="{}/github_jasoyode/CTRNN_NM/".format( reg_dir )
@@ -36,9 +35,8 @@ if bigred2:
 
 
 generate_batch_mode=False
-
 if len(sys.argv) > 4:
-  print("You specified a 5th parameter and it is: {}".format(sys.argv[4]) )
+  print("You specified a 4th parameter and it is: {}".format(sys.argv[4]) )
   generate_batch_mode=True
 
 
@@ -489,6 +487,7 @@ if generate_batch_mode or bigred2:
   os.system( "cat {} | tail -n 2".format(temporary_job_queue_file) )
   print( "temporary job file will only be appended to!" )
 else:
+  print("Running local job_q_server mode, will try to submit jobs to server defined in job_q_server")
   os.system( "python job_q_server/client_add_jobs.py {}".format( temporary_job_queue_file ) )
   os.system( "rm {}".format( temporary_job_queue_file ))
 

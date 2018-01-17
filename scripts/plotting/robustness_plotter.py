@@ -19,6 +19,7 @@ PI=3.141592653589
 levels=[ 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
 
 SAVE_PLOTS_MODE=True
+SCATTER=False
 
 #headless mode
 mpl.use('Agg')
@@ -28,12 +29,8 @@ import matplotlib.pyplot as plt
 DATA="../../DATA"
 PLOTS="../../PLOTS/TESTS/"
 
-
-
 if len( sys.argv) < 2:
   print("Usage:   python robustness_plotter.py [DATA.csv] ")
-  #comparison_name = comparison_name.replace(".csv","")
-  #COMPARE_MODE=3
   quit()
   
  
@@ -45,7 +42,7 @@ re.sub( csv_path, "" ,"" )
 experiment_title = re.sub(r'.*DATA/','', csv_path )
 experiment_title = re.sub(r'\/.*','', experiment_title )
 
-#print( experiment_title )
+print( experiment_title )
 
 
 job_title = re.sub(r'.*DATA/[^/]*/','', csv_path )
@@ -56,7 +53,9 @@ robust_label = re.sub(r'.*/','', robust_label )
 robust_label = re.sub(r'.csv','', robust_label )
 
 
-print( "{},{},".format( job_title,  robust_label), end="" )
+#print( "{},{},".format( job_title,  robust_label), end="" )
+#print(  "{}  /  {}  /  {}  /  {}_normalized.png".format( PLOTS, experiment_title, job_title, robust_label) )
+#quit()
 
 seed_data_dict={}
 
@@ -74,6 +73,9 @@ with open( sys.argv[-1]  ) as csvfile:
     seed =  row['seed']
     noise = row['noise']
     fitness = row['fitness']
+  
+    #if seed == "9":
+    #  print( noise  )
     
     if not seed in seed_data_dict:
       seed_data_dict[seed] = {}
@@ -97,14 +99,17 @@ with open( sys.argv[-1]  ) as csvfile:
     baseline = float( seed_data_dict[seed]['0.0'] )
 
     
-    for noise in sorted( seed_data_dict[seed].keys() ):
+    for noise in sorted( seed_data_dict[seed].keys(), key=float ):
       noise_data[seed].append( float(noise) )
       fitness_data[seed].append( float(seed_data_dict[seed][noise]) )
       normalized_fitness_data[seed].append( float(seed_data_dict[seed][noise])/baseline )
     
     if SAVE_PLOTS_MODE:  
       plt.ylim(-0, 1.0)
-      plt.plot( noise_data[seed], normalized_fitness_data[seed], label=seed)
+      if not SCATTER:
+        plt.plot( noise_data[seed], normalized_fitness_data[seed], label=seed)
+      else:
+        plt.scatter( noise_data[seed], normalized_fitness_data[seed], label=seed)
   
   if SAVE_PLOTS_MODE:  
     legend = plt.legend(loc='lower right') #, bbox_to_anchor=(1, 0.5) )
@@ -124,12 +129,18 @@ with open( sys.argv[-1]  ) as csvfile:
   
     for seed in seed_data_dict.keys():
       plt.ylim(0, .628)
-      plt.plot( noise_data[seed], fitness_data[seed], label=seed)
+      
+      if not SCATTER:
+        plt.plot( noise_data[seed], fitness_data[seed], label=seed)
+      else:
+        plt.scatter( noise_data[seed], fitness_data[seed], label=seed)
+        
+        
     legend = plt.legend(loc='lower right')
     plt.xlabel('Noise')   
     plt.ylabel('Fitness')
   
-  
+    
   
     plt.title( 'Measuring Absolute Fitness to Neuromodulatory Noise')                    
   
@@ -190,7 +201,7 @@ with open( sys.argv[-1]  ) as csvfile:
   noise_levels =[]
   
   #sort by noise level 0....0.5
-  for noise_key in sorted(aggregated_fitness_by_noise_level.keys() ):
+  for noise_key in sorted(aggregated_fitness_by_noise_level.keys(), key=float ):
     noise_levels.append( float(noise_key) )
     fitness_means.append( np.mean( aggregated_fitness_by_noise_level[noise_key]) )
     fitness_errors.append( np.std( aggregated_fitness_by_noise_level[noise_key] ))
@@ -212,7 +223,11 @@ with open( sys.argv[-1]  ) as csvfile:
   
   
   if SAVE_PLOTS_MODE:                                                                              
-    plt.plot(noise_levels, fitness_means  )
+    if not SCATTER:
+      plt.plot(noise_levels, fitness_means  )
+    else:
+      plt.scatter(noise_levels, fitness_means  )
+    
                                                                                         
     #shaded region indicates standard deviation
     plt.fill_between(noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
@@ -227,7 +242,10 @@ with open( sys.argv[-1]  ) as csvfile:
   if SAVE_PLOTS_MODE:
     plt.figure(3)
   
-    plt.plot(noise_levels, norm_fitness_means  )
+    if not SCATTER:
+      plt.plot(noise_levels, norm_fitness_means  )
+    else:
+      plt.scatter(noise_levels, norm_fitness_means  )
                                                                                         
     #shaded region indicates standard deviation
     plt.fill_between(noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)

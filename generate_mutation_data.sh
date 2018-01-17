@@ -1,9 +1,12 @@
 #!/bin/bash
 
 INI="$1"
-TITLE="$2"
+TITLE="$3"
+DIR="$2"
 
+#needs to be re-done in some way to allow to use the original file, but to have stuff replaced
 DIR="DATA/mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/"
+
 
 if [ "$TITLE" == "" ]; then
   echo "Usage: $0 ***.ini title"
@@ -15,6 +18,9 @@ fi
 for i in $( seq 1 6); do
   ./runExp $INI $DIR $TITLE $i $i 19 19  &
 done
+
+#the rest are not nearly as meaningful
+exit
 
 #for i in $( seq 11 6); do
 #  ./runExp $INI $DIR $TITLE $i $i 19 19  &
@@ -57,16 +63,4 @@ done
 
 #3->3 2->3
 ./runExp $INI $DIR $TITLE 18 18 15 15 &
-
-#./runExp $INI $DIR $TITLE 1 1 3 3 &
-#
-#./runExp $INI $DIR $TITLE 1 1 3 3 &
-#
-#./runExp $INI $DIR $TITLE 1 1 3 3 &
-#
-#./runExp $INI $DIR $TITLE 1 1 3 3 &
-#
-#./runExp $INI $DIR $TITLE 1 1 3 3 &
-
-
 

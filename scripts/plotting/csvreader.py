@@ -465,6 +465,9 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
       with open( record_file  ) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+          #TEMPORARY HACK TO GET MPG TO PLOT
+          if row['run'] == 1:
+           continue
           time.append( float( row['time'] ) )
           modulation.append( float( row['modulation'] ) )
           jointX.append( float( row['jointX'] )  )
@@ -478,6 +481,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
           
           
           for i in range(1, total_neurons +1 ):
+           #print(   row   )
            n_out[i].append( float( row['n{}_out'.format(i) ] ) );
 
           #total_neurons
@@ -975,6 +979,11 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
        with open( data_csv_path  ) as csvfile:
          reader = csv.DictReader(csvfile)
          for row in reader:
+           #TODO jasonayoder this is a hack to make MPG data plotting work
+           #
+           if row['run'] == 1:
+            continue
+           
            seed_data_dict[ seed_num ][ testing_dir ]["time"].append( float( row['time'] ) );
            seed_data_dict[ seed_num ][ testing_dir ]["modulation"].append( float( row['modulation'] ) );
            seed_data_dict[ seed_num ][ testing_dir ]["jointX"].append( float( row['jointX'] )  / 10 );
