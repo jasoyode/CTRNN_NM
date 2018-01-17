@@ -16,7 +16,8 @@ import matplotlib.mlab as mlab
 
 PI=3.141592653589
 
-levels=[ 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+#levels=[ 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+levels=[ 0.9 ]
 
 SAVE_PLOTS_MODE=True
 SCATTER=False
@@ -31,6 +32,7 @@ PLOTS="../../PLOTS/TESTS/"
 
 if len( sys.argv) < 2:
   print("Usage:   python robustness_plotter.py [DATA.csv] ")
+  print("Will save a robustness summary file." )
   quit()
   
  
@@ -42,7 +44,7 @@ re.sub( csv_path, "" ,"" )
 experiment_title = re.sub(r'.*DATA/','', csv_path )
 experiment_title = re.sub(r'\/.*','', experiment_title )
 
-print( experiment_title )
+#print( experiment_title )
 
 
 job_title = re.sub(r'.*DATA/[^/]*/','', csv_path )
@@ -53,9 +55,23 @@ robust_label = re.sub(r'.*/','', robust_label )
 robust_label = re.sub(r'.csv','', robust_label )
 
 
+#print( job_title )
+#print( robust_label )
+
+#quit()
+
 #print( "{},{},".format( job_title,  robust_label), end="" )
 #print(  "{}  /  {}  /  {}  /  {}_normalized.png".format( PLOTS, experiment_title, job_title, robust_label) )
 #quit()
+
+summary_filename = "{}/{}/{}/ROBUSTNESS_{}.csv".format(DATA, experiment_title, job_title, robust_label)
+
+#print(  summary_filename  )
+#quit()
+
+
+seed_summary ={}
+
 
 seed_data_dict={}
 
@@ -73,6 +89,15 @@ with open( sys.argv[-1]  ) as csvfile:
     seed =  row['seed']
     noise = row['noise']
     fitness = row['fitness']
+    
+    if not seed in seed_summary:
+      seed_summary[seed] = {}
+    
+    if noise == '0.0':
+      seed_summary[seed]['fitness'] = fitness
+  
+    if noise == '0.45':
+      seed_summary[seed]['fitness_at_90'] = fitness
   
     #if seed == "9":
     #  print( noise  )
@@ -286,6 +311,23 @@ with open( sys.argv[-1]  ) as csvfile:
       seed_robustness_dict[level][seed] = round( seed_robustness_dict[level][seed] / total, 3)
   
   
+  for s in seed_robustness_dict[0.9].keys():
+    seed_summary[s]['robustness'] = seed_robustness_dict[0.9][s]
+  
+  #this is all seeds and their robustness
+  #print("Sorted seeds by their robustness score:  " )
+  #print( seed_summary )
+  #print(  sorted( seed_summary.items(), key=operator.itemgetter(1)  ) )
+  #print(   sorted( seed_robustness_dict[0.9].items(), key=operator.itemgetter(1)  ) )
+  
+  summary_csv = open (summary_filename, "w+")
+  summary_csv.write(  "seed,fitness,fitness_at_90,robustness,\n" )
+  
+  for seed in seed_summary.keys():
+    summary_csv.write( "{},{},{},{},\n".format( seed,  seed_summary[seed]['fitness'],seed_summary[seed]['fitness_at_90'] , seed_summary[seed]['robustness'] ) ) 
+  
+  print("Wrote summary to: {}".format( summary_filename ) )
+  
   values = {}
   
   for level in levels:
@@ -313,12 +355,12 @@ with open( sys.argv[-1]  ) as csvfile:
   output = ""
   for level in levels:
     output+= "{},".format( robust_mean[level])
-  print(output)
+  #print(output)
   
   if SAVE_PLOTS_MODE:
     plt.xlabel('Robustness')   
     plt.ylabel('Frequency')
-    plt.title( "Robustness Frequency Distribution: {}".format(  str(robust_mean[0.5] )  ) )
+    plt.title( "Robustness Frequency Distribution: {}".format(  str(robust_mean[0.9] )  ) )
     plt.savefig( "{}/{}/{}/{}_robustness_histogram.png".format( PLOTS, experiment_title, job_title, robust_label) )
   
   

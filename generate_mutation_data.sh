@@ -1,11 +1,11 @@
 #!/bin/bash
 
 INI="$1"
-TITLE="$3"
 DIR="$2"
+TITLE="$3"
 
 #needs to be re-done in some way to allow to use the original file, but to have stuff replaced
-DIR="DATA/mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/"
+#DIR="DATA/mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/"
 
 
 if [ "$TITLE" == "" ]; then
@@ -18,6 +18,7 @@ fi
 for i in $( seq 1 6); do
   ./runExp $INI $DIR $TITLE $i $i 19 19  &
 done
+
 
 #the rest are not nearly as meaningful
 exit

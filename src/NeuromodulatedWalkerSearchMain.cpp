@@ -1132,7 +1132,7 @@ int main (int argc, const char* argv[]) {
     if ( argc >=8 ) {
       cout << "Generating Parameter Space data and will mutate the following: " <<endl;
       cout << "Parameters: " << argv[4] << " " << argv[5] << " " <<argv[6] << " " <<argv[7] << " " << endl;
-      exit(-1);
+      //exit(-1);
       generateActivityLogsFromGenomes( argv[1], dirPath, label, atoi(argv[4]) , atoi(argv[5]), atoi(argv[6]), atoi(argv[7]) );
       
     } else {
