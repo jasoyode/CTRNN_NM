@@ -5,7 +5,7 @@ import sys
 #DIR="../../DATA/JASON/JOB_size-3_sim-long10run_signal-SINE-1p_M-standard"
 #DIR="../../DATA/mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON"
 #DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard"
-DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
+DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard"
 
 
 
@@ -23,8 +23,10 @@ SEARCH="XXX"
 #CSVs = ["test_standard_plus_minus.csv", "test_standard_pos.csv", "test_standard_pos_neg.csv", "test_standard_neg.csv" ]
 
 #CSVs = [ "CPG_test_standard_EXTREMA.csv", "CPG_test_standard_PERIODS.csv", "CPG_test_standard_plus_minus.csv" ]
-CSVs = [ "CPG_MPG_RPG_STANDARD_CONST.csv", "CPG_MPG_RPG_STANDARD_SIN_AMPLITUDE.csv", "CPG_MPG_RPG_STANDARD_PERIODS.csv" ]
+#CSVs = [ "CPG_MPG_RPG_STANDARD_CONST.csv", "CPG_MPG_RPG_STANDARD_SIN_AMPLITUDE.csv", "CPG_MPG_RPG_STANDARD_PERIODS.csv" ]
 CSVs=[ "const_mod_extremes.csv"]
+
+
 
 os.system( "mkdir temp_files" )
 

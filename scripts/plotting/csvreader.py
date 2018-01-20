@@ -470,8 +470,9 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         reader = csv.DictReader(csvfile)
         for row in reader:
           #TEMPORARY HACK TO GET MPG TO PLOT
-          if row['run'] == MPG_EXCLUDE:
-           continue
+          if 'run' in row:
+           if row['run'] == MPG_EXCLUDE:
+            continue
           time.append( float( row['time'] ) )
           modulation.append( float( row['modulation'] ) )
           jointX.append( float( row['jointX'] )  )
@@ -985,8 +986,9 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
          for row in reader:
            #TODO jasonayoder this is a hack to make MPG data plotting work
            #
-           if row['run'] == MPG_EXCLUDE:
-            continue
+           if 'run' in row:
+            if row['run'] == MPG_EXCLUDE:
+             continue
            
            seed_data_dict[ seed_num ][ testing_dir ]["time"].append( float( row['time'] ) );
            seed_data_dict[ seed_num ][ testing_dir ]["modulation"].append( float( row['modulation'] ) );

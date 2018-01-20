@@ -79,6 +79,8 @@ if SAVE_PLOTS_MODE:
   plt.figure(0)
 
 
+
+
 with open( sys.argv[-1]  ) as csvfile:
   reader = csv.DictReader(csvfile)
   for row in reader:   
@@ -130,16 +132,21 @@ with open( sys.argv[-1]  ) as csvfile:
       normalized_fitness_data[seed].append( float(seed_data_dict[seed][noise])/baseline )
     
     if SAVE_PLOTS_MODE:  
-      plt.ylim(-0, 1.0)
+      #plt.ylim(0, 1.0)
+      plt.xlim(0, 1.0)
+      plt.ylim(-0.5, 0.5)
       if not SCATTER:
-        plt.plot( noise_data[seed], normalized_fitness_data[seed], label=seed)
+        #plt.plot( noise_data[seed], normalized_fitness_data[seed], label=seed)
+        plt.plot( normalized_fitness_data[seed], noise_data[seed], color="black", alpha=0.1, label=seed)
+      
       else:
         plt.scatter( noise_data[seed], normalized_fitness_data[seed], label=seed)
+        
   
   if SAVE_PLOTS_MODE:  
-    legend = plt.legend(loc='lower right') #, bbox_to_anchor=(1, 0.5) )
-    plt.xlabel('Noise')   
-    plt.ylabel('Fitness %')
+    #legend = plt.legend(loc='lower right') #, bbox_to_anchor=(1, 0.5) )
+    plt.ylabel('Noise')   
+    plt.xlabel('Fitness %')
   
     plt.title( 'Measuring Normalized Fitness to Neuromodulatory Noise')                    
     #plt.savefig(experiment_title + "_normalized.png" ) 
@@ -153,17 +160,20 @@ with open( sys.argv[-1]  ) as csvfile:
     plt.figure(1)
   
     for seed in seed_data_dict.keys():
-      plt.ylim(0, .628)
+      #plt.ylim(0, .628)
+      plt.xlim(0, .628)
+      plt.ylim(-0.5, 0.5)
       
       if not SCATTER:
-        plt.plot( noise_data[seed], fitness_data[seed], label=seed)
+        #plt.plot( noise_data[seed], fitness_data[seed], label=seed)
+        plt.plot( fitness_data[seed], noise_data[seed], color="black", alpha=0.1, label=seed)
       else:
         plt.scatter( noise_data[seed], fitness_data[seed], label=seed)
         
         
-    legend = plt.legend(loc='lower right')
-    plt.xlabel('Noise')   
-    plt.ylabel('Fitness')
+    #legend = plt.legend(loc='lower right')
+    plt.xlabel('Fitness')   
+    plt.ylabel('Noise')
   
     
   
@@ -249,37 +259,55 @@ with open( sys.argv[-1]  ) as csvfile:
   
   if SAVE_PLOTS_MODE:                                                                              
     if not SCATTER:
-      plt.plot(noise_levels, fitness_means  )
+      #plt.plot(noise_levels, fitness_means  )
+      plt.plot(fitness_means, noise_levels )
     else:
       plt.scatter(noise_levels, fitness_means  )
     
                                                                                         
     #shaded region indicates standard deviation
-    plt.fill_between(noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
-    plt.ylim(0, .628)
-    plt.axhline(y=0.314, xmin=0, xmax=1.0, color="red")
+    #plt.fill_between(noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
+    #plt.ylim(0, .628)
+    #plt.axhline(y=0.314, xmin=0, xmax=1.0, color="red")
+    
+    plt.fill_betweenx( noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
+    plt.ylim(-0.5, 0.5)
+    plt.xlim(0.0, 0.628)
+    
+    
     legend = plt.legend(loc='lower right')
-    plt.xlabel('Noise')   
-    plt.ylabel('Fitness')
+    plt.ylabel('Noise')   
+    plt.xlabel('Fitness')
     plt.title( 'Measuring Aggregate Absolute Fitness to Neuromodulatory Noise')                    
+    
+    #plt.gca().invert_yaxis()
+    
     plt.savefig( "{}/{}/{}/{}_aggregate_absolute.png".format( PLOTS, experiment_title, job_title, robust_label) )
    
   if SAVE_PLOTS_MODE:
     plt.figure(3)
   
     if not SCATTER:
-      plt.plot(noise_levels, norm_fitness_means  )
+      #plt.plot(noise_levels, norm_fitness_means  )
+      plt.plot(norm_fitness_means, noise_levels  )
     else:
       plt.scatter(noise_levels, norm_fitness_means  )
                                                                                         
     #shaded region indicates standard deviation
-    plt.fill_between(noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)
-    plt.ylim(0, 1.0)
-    plt.axhline(y=0.5, xmin=0, xmax=1.0, color="red")
+    #plt.fill_between(noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)
+    #plt.ylim(0, 1.0)
+    #plt.axhline(y=0.5, xmin=0, xmax=1.0, color="red")
+    
+    plt.fill_betweenx( noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)
+    plt.ylim(-0.5, 0.5)
+    plt.xlim(0.0, 1.0)
+    
     legend = plt.legend(loc='lower right')
-    plt.xlabel('Noise')   
-    plt.ylabel('Fitness %')
+    plt.ylabel('Noise')   
+    plt.xlabel('Fitness %')
     plt.title( 'Measuring Aggregate Normalized Fitness to Neuromodulatory Noise')                    
+    
+    #plt.gca().invert_yaxis()
     plt.savefig( "{}/{}/{}/{}_aggregate_normalized.png".format( PLOTS, experiment_title, job_title, robust_label) )
    
   

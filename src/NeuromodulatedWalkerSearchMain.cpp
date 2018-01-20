@@ -831,8 +831,24 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
   }
   
   
-  cout << "Generating activity data from directory: " << directory << endl;
-  cout << "Generating Standard and Altered Testing" << endl; 
+  //Copy genomes into the destination folder  
+  char cp_genomes_command[200];
+  strcpy( cp_genomes_command, ("cp ") );
+  strcat( cp_genomes_command, expName );
+  strcat( cp_genomes_command, "/genomes.txt " );
+  strcat( cp_genomes_command, expName );
+  strcat( cp_genomes_command, "/" );
+  strcat( cp_genomes_command, label );
+  strcat( cp_genomes_command, "/genomes.txt" );
+  
+  
+  const int cp_err2 = system( cp_genomes_command );
+  if (-1 == cp_err2) {
+      printf("Error copying files to new directory!n");
+      exit(1);
+  }
+  
+  cout << "Generating Standard and Altered Testing Data from dir: " << directory  << endl; 
 
   //use argument passed in to load from config file
   INIReader reader( ini   );
@@ -921,6 +937,9 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
           first_val = false;
           seed = stoi( subs );
           cout << "Seed set to be: " << seed << endl;
+          
+          
+          
         } else {
           //cout << genome.Size() << endl;
           //cout << "i:" << i << endl;
@@ -938,6 +957,11 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
           i++;
         }
         
+      }
+      
+      //to make this inclusive according to
+      if ( seed < startingSeed  || seed >=  (startingSeed + runs) ) {
+        continue;
       }
       
       TVector<double> phenotype(1, genomeSize);
@@ -1122,29 +1146,7 @@ int main (int argc, const char* argv[]) {
   //strcat(dirPath, expName );
   strcpy( dirPath, expName );
   
-  // Check the number of parameters
-  if (argc >= 4) {
-    cout << "Running in Special mode: will generate activity from genomes in directory: " << dirPath << endl;
-    
-    char* label;
-    asprintf(&label, "%s", argv[3]  );
-    
-    if ( argc >=8 ) {
-      cout << "Generating Parameter Space data and will mutate the following: " <<endl;
-      cout << "Parameters: " << argv[4] << " " << argv[5] << " " <<argv[6] << " " <<argv[7] << " " << endl;
-      //exit(-1);
-      generateActivityLogsFromGenomes( argv[1], dirPath, label, atoi(argv[4]) , atoi(argv[5]), atoi(argv[6]), atoi(argv[7]) );
-      
-    } else {
-      cout << "Generating testing data using test file: " << argv[1] << endl;
-      generateActivityLogsFromGenomes( argv[1], dirPath, label );
-    }
-    return -1;
-    
-  }
   
-  strcpy( dirPath, "DATA/");
-  strcat(dirPath, expName );
   
   // Print the user's name:
   cout << "Running experiment "<< argv[2]  <<" according to: " << argv[1] << endl;
@@ -1158,6 +1160,36 @@ int main (int argc, const char* argv[]) {
   
   //load global variable values from reader
   loadValuesFromConfig( reader );
+  
+  
+  // Check the number of parameters
+  if (argc >= 4) {
+    cout << "Running in Special mode: will generate activity from genomes in directory: " << dirPath << endl;
+    
+    char* label;
+    asprintf(&label, "%s", argv[3]  );
+    
+    if ( argc >=8 ) {
+      cout << "Generating Parameter Space data and will mutate the following: " <<endl;
+      cout << "Parameters: " << argv[4] << " " << argv[5] << " " <<argv[6] << " " <<argv[7] << " " << endl;
+      //exit(-1);
+      cout << "Seed should be: " << startingSeed << endl;
+      //exit(-1);
+      generateActivityLogsFromGenomes( argv[1], dirPath, label, atoi(argv[4]) , atoi(argv[5]), atoi(argv[6]), atoi(argv[7]) );
+      
+    } else {
+    
+    
+      cout << "Generating testing data using test file: " << argv[1] << endl;
+      generateActivityLogsFromGenomes( argv[1], dirPath, label );
+    }
+    return -1;
+    
+  }
+  
+  strcpy( dirPath, "DATA/");
+  strcat(dirPath, expName );
+  
   
   //get current date to put in filename
   //time_t secs=time(0);

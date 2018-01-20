@@ -13,12 +13,24 @@ def sh( command):
 selected_seeds= []
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/",  59) )
 
-selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/",  35) )
+
+
+#selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/",  35) )
+#selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/",  30) )
+#selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/",  52) )
+#selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/",  63) )
+
+#selected_seeds.append( ("DATA/MPG345_FAST/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/",  1) )
+
+
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 49) )
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/",  64) )
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 29) )
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/",  87) )
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 75) )
+
+selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 48) )
+selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 60) )
 
                
 #CPG-3-mod, 59
