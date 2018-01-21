@@ -48,6 +48,7 @@ double minSensorWeights;
 double maxSensorWeights;
 bool mixedPatternGen;
 
+bool recordAllActivity;
 
 
 int networkSize;
@@ -409,7 +410,8 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
       
       //RECORDING BEST PERF
       //setup header for logfile when passed
-      if ( fileOut && runsToDo == totalRuns-1 ) { // recordLog ) {
+      //do not even write this unless recordAllActivity is true!
+      if ( fileOut && (runsToDo == totalRuns-1)  && recordAllActivity ) { // recordLog ) {
         
         recordLog << "time,modulation,jointX,jointY,footX,footY,FootState,cx,angle,omega,run";
         for (int i=1; i <= networkSize; i++) {
@@ -433,7 +435,6 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
             }
         }
         
-        
         //use global modulatioEnabled to determine whether to use modulation step or not
         if (  NeuromodulationType != 0 ) {
             if ( sinusoidalOscillation ) {
@@ -456,7 +457,7 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
           }
           
           //RECORDING BEST PERF
-          if ( fileOut ) { // recordLog ) {
+          if ( fileOut &&  recordAllActivity ) { // || ( time + StepSize >= RunDuration  )  ) ) { // recordLog ) {
             recordLog << time << "," << modulationLevel << ",";
             recordLog << Insect.Leg.JointX << "," << Insect.Leg.JointY << ",";
             recordLog << Insect.Leg.FootX << "," << Insect.Leg.FootY << ",";
@@ -762,6 +763,8 @@ void loadValuesFromConfig( INIReader &reader) {
     StepSize     = reader.GetReal("exp", "StepSize", 0.1 );
     Stage1Threshold = reader.GetReal("exp", "Stage1Threshold", 0.126 );
     
+    recordAllActivity = reader.GetBoolean("exp", "recordAllActivity", true );
+    
     modulationStepSize =  2 * (maxModulation - minModulation ) *  ( externalModulationPeriods / (RunDuration / StepSize) )  ;
 //    cout << "modulationStepSize: " << modulationStepSize << endl;
 
@@ -801,10 +804,12 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
     cout << "Non-mutation mode running." << endl;
     string bestAgentFitnessAndReceptorLogFilename( dirPath   );
     bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/seeds_tested_fitness.csv";
-          
-    bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
-    bestAgentFitnessAndReceptorLogFile << "seed,fitness," << endl;
-    bestAgentFitnessAndReceptorLogFile.close();
+    
+    if ( !recordAllActivity ) {
+      bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
+      bestAgentFitnessAndReceptorLogFile << "seed,fitness," << endl;
+      bestAgentFitnessAndReceptorLogFile.close();
+    }
                             
   }
   
@@ -985,23 +990,32 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
 	  //create from base path each time
       string recordFilename2( dirPath  );
       recordFilename2 += "/seed_" + std::to_string( seed )  + "_recorded_activity.csv";
-      recordLog.open(  recordFilename2  );
+
+      //do not even open it unless specified!
+      if (recordAllActivity) {
+        recordLog.open(  recordFilename2  );
+      } 
       
       //store generated data (original or test) for comparison
       double origFit = Evaluate(genome,   recordLog );
       
       cout << "origFit: " << origFit << endl;
       
-      recordLog.close();
+      if (recordAllActivity) {
+        recordLog.close();
+      }
       
       
       
       string bestAgentFitnessAndReceptorLogFilename( dirPath   );
       bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/seeds_tested_fitness.csv";
 
-      bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename, std::fstream::app );
-      bestAgentFitnessAndReceptorLogFile << std::to_string( seed )  << "," << origFit <<  "," << endl;
-      bestAgentFitnessAndReceptorLogFile.close();
+      //if we are in recordAllActivity mode, then we don't want to overwrite this!
+      if ( !recordAllActivity ) {
+        bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename, std::fstream::app );
+        bestAgentFitnessAndReceptorLogFile << std::to_string( seed )  << "," << origFit <<  "," << endl;
+        bestAgentFitnessAndReceptorLogFile.close();
+      }
       
 
       //Parameter Mutation Landscape
@@ -1126,12 +1140,15 @@ int main (int argc, const char* argv[]) {
   // This program has three different use cases:
   // 1. generate new data using a particular configuration and storing in a particular directory (experiment name)
   // 2. generate testing data using a directory with genomes inside of it and giving it a label (to be stored inside experiment folder)
+  //     A. Would be nice to have a mode where data is written to file and mode where only final values are recorded
+  //     B. Would be nice to be able to specify one seed to do this to
+  //
   // 3. generate parameter space mutation plots, where different genetic parameters are varied (or all weights shifted)
   
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini  EXPERIMENT_NAME" << std::endl;
     std::cerr << "OR" << std::endl;
-    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY LABEL" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY LABEL [TRUE OR FALSE]" << std::endl;
     std::cerr << "OR" << std::endl;
     std::cerr << "Usage: " << argv[0] << " CONFIG_FILE.ini GENOME_DIRECTORY LABEL [#] [#] [#] [#]" << std::endl;
     

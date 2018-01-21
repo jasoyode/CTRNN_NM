@@ -25,7 +25,7 @@ PLOTS="../../PLOTS"
 
 #0   SENSORS OFF
 #1   SENSORS ON
-MPG_EXCLUDE="0"
+MPG_EXCLUDE="1"
 
 COMPARE_MODE=0
 
@@ -859,7 +859,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
       print( min_angle )
       print( max_angle )   
 
-def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):    
+def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False ):    
+    
     
     start=0
     stop=-1
@@ -896,6 +897,32 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
     sorted_seeds_and_fit =  sorted(seed_to_fitness_map.items(), key=operator.itemgetter(1,0) )
     sorted_seeds_and_fit.reverse()
     sorted_seeds_and_fit = sorted_seeds_and_fit[ 0:quantity ]
+    
+    #print(sorted_seeds_and_fit)
+    #print( seed_to_fitness_map )
+    
+    #quit()
+    
+    if plot_all_recorded_activity_mode:
+     #print( experiment_directory )
+     #print( testing_dict )
+     #quit()
+     recorded_activity_files =  glob.glob(  '{}/seed_*.csv'.format( list(testing_dict.keys())[0]  ) ) 
+
+     for r in range(0, len(recorded_activity_files)):
+      recorded_activity_files[r] = re.sub(".*seed_","",recorded_activity_files[r] ) 
+      recorded_activity_files[r] = re.sub("_recorded.*","",recorded_activity_files[r] ) 
+      
+     sorted_seeds_and_fit =[]
+     
+     for r in recorded_activity_files:
+      sorted_seeds_and_fit.append( (int(r), seed_to_fitness_map[ int(r) ]) )
+     #sorted_seeds_and_fit.append( (35, seed_to_fitness_map[35]) )
+     #sorted_seeds_and_fit.append( (49, seed_to_fitness_map[49]) )
+     
+    else:
+     print("XXXX")
+     quit()
 
 ###########################  setup genome map
     seed_to_genome_map = {}
@@ -928,9 +955,10 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
     top_seeds = [x[0] for x in sorted_seeds_and_fit]
     print( "top_seeds: " )
     print ( top_seeds )
+    #quit()
 
     record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
-
+    
     count=0
     
     #this will store ALL the data needed for all the various plots to be accessed at a later time
@@ -943,7 +971,10 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
       seed_num= int(  seed_num )
       #only generate plots for top X
       if seed_num not in top_seeds:
+       print("skipping seed {}".format(seed_num) )
        continue
+      else:
+       print( "plotting for seed {}".format(seed_num) )
       
       seed_data_dict[ seed_num ] = {}
       
@@ -969,7 +1000,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
        for stat in stats:
         seed_data_dict[ seed_num ][ testing_dir ][ stat ] = []
        
-       print( seed_data_dict[ seed_num ][ testing_dir ] )
+       #print( seed_data_dict[ seed_num ][ testing_dir ] )
        
        if not 'angle' in seed_data_dict[ seed_num ][ testing_dir ] :
         print("no angle found in {}".format(testing_dir) )
@@ -1037,7 +1068,13 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000 ):
            
             
          for i in range(1, total_neurons+1):
-          pre_val= seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i][0]
+          #print( "seed_num:{}    testing_dir: {}     i:{} ".format(seed_num, testing_dir, i ) )
+          #print("1"+ str( seed_data_dict[ seed_num ] ))
+          #print("2"+ str( seed_data_dict[ seed_num ][ testing_dir ] ))
+          #print("3"+ str( seed_data_dict[ seed_num ][ testing_dir ]["n_out"] ))
+          #print("4"+ str( seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i] ))
+          pre_val= seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i][0] 
+          
           for val in  seed_data_dict[ seed_num ][ testing_dir ]["n_out"][i]:
            seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][i].append( val - pre_val )
            pre_val=val
@@ -1462,7 +1499,7 @@ def main():
     elif COMPARE_MODE==3:
      print( "Special Plotting Testing Results Mode:\nWill plot different attributes for seeds in {}\n   according to the specifications in {}".format( directory, csv_path ))
      print( testing_dict )
-     plot_activity2( testing_dict, 1, 0, 500  )
+     plot_activity2( testing_dict, 1, 0, 500, True  )
      quit()
      
     elif COMPARE_MODE==4:
