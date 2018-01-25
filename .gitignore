@@ -1,5 +1,9 @@
 #other files
 
+mutation_job_queue.txt
+best_seeds/*
+*.png
+
 *~
 PLOTTING_SCRIPTS/TEST/*
 *.#*

@@ -47,6 +47,7 @@ double maxTimingConstant;
 double minSensorWeights;
 double maxSensorWeights;
 bool mixedPatternGen;
+bool mixedPatternGenSingleRun;
 
 bool recordAllActivity;
 
@@ -197,7 +198,7 @@ double Evaluate(TVector<double> &v, RandomState &rs)
     int totalRuns = 1;
     float fitness = 0;
     
-    if ( mixedPatternGen ) {
+    if ( mixedPatternGen && !mixedPatternGen ) {
       runsToDo++ ;  
       totalRuns++;
     }
@@ -276,12 +277,22 @@ double Evaluate(TVector<double> &v, RandomState &rs)
         // external input modulated by default
         //Provide input from sensors regardless of modulation
         for (int i=1; i<= networkSize; i++) {
-        
-          //if mixedPatternGen and first test turn off, otherwise send sensor angle data
-          if ( mixedPatternGen && runsToDo == 1 ) {
-            Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
+          
+          //if not single run mode, then run two full evaluations
+          if (!mixedPatternGenSingleRun ) {
+            //if mixedPatternGen and first test turn off, otherwise send sensor angle data
+            if ( mixedPatternGen && runsToDo == 1 ) {
+              Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
+            } else {
+              Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+            }
           } else {
-            Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+            //if single run mode, then half way through change
+            if ( mixedPatternGen && time < RunDuration/2 ) {
+              Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
+            } else {
+              Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+            }
           }
           
         }
@@ -330,7 +341,7 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
     int totalRuns = 1;
     float fitness = 0;
     
-    if ( mixedPatternGen ) {
+    if ( mixedPatternGen && !mixedPatternGenSingleRun ) {
       runsToDo++;  
       totalRuns++;
     }
@@ -425,14 +436,30 @@ double Evaluate(TVector<double> &v, ostream &recordLog = std::cout)
         // void SetNeuronExternalInput(int i, double value) {externalinputs[i] = value;};
         // for 1 to n ...   c.SetNeuronExternalInput( i,   weight_i* Insect.Leg.Angle );
         // external input modulated by default
-        //Provide input from sensors regardless of modulation
-        for (int i=1; i<= networkSize; i++) {
-          //if mixedPatternGen and first test turn off, otherwise send sensor angle data
-            if ( mixedPatternGen && runsToDo == 1 ) {
-              Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
-            } else {
-              Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
-            }
+        
+        
+        if ( !mixedPatternGenSingleRun) {
+          //Provide input from sensors regardless of modulation
+          for (int i=1; i<= networkSize; i++) {
+            //if mixedPatternGen and first test turn off, otherwise send sensor angle data
+              if ( mixedPatternGen && runsToDo == 1 ) {
+                Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
+              } else {
+                Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+              }
+          }
+        } else {
+        
+          //Provide input from sensors regardless of modulation
+          for (int i=1; i<= networkSize; i++) {
+            //if mixedPatternGenSingleRun and first half of time, otherwise send sensor angle data
+              if ( mixedPatternGen && time >= RunDuration/2 ) {
+                Insect.NervousSystem.SetNeuronExternalInput( i, 0 );
+              } else {
+                Insect.NervousSystem.SetNeuronExternalInput( i, sensorWeights(i) * Insect.Leg.Angle );
+              }
+          }
+        
         }
         
         //use global modulatioEnabled to determine whether to use modulation step or not
@@ -725,6 +752,7 @@ void loadValuesFromConfig( INIReader &reader) {
     minSensorWeights = reader.GetReal("ctrnn", "minSensorWeights", 0 );
     maxSensorWeights = reader.GetReal("ctrnn", "maxSensorWeights", 0 );
     mixedPatternGen =  reader.GetBoolean("ctrnn", "mixedPatternGen", false );
+    mixedPatternGenSingleRun = reader.GetBoolean("ctrnn", "mixedPatternGenSingleRun", false );
     
     //cout << "minNeuronBiasAndWeights=" << minNeuronBiasAndWeights << endl;
     //cout << "minSensorWeights" <<minSensorWeights << endl;

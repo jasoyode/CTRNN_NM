@@ -8,6 +8,8 @@ def sh( command):
   output = subprocess.check_output( command , shell=True).decode("utf-8")
   return output.strip().split("\n")
     
+
+OUTPUT_JOB_FILE="mutation_job_queue.txt"
   
 #DONT FORGET THE / AT END OF DIRECTORY!
 selected_seeds= []
@@ -29,8 +31,14 @@ selected_seeds= []
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/",  87) )
 #selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 75) )
 
-selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 48) )
-selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 60) )
+#selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 48) )
+#selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/", 60) )
+
+selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/", 59) )
+selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/", 67) )
+
+
+
 
                
 #CPG-3-mod, 59
@@ -43,6 +51,7 @@ selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-50
 #runs  = 100
 #startingSeed = 1
 
+job_queue = open ( OUTPUT_JOB_FILE, 'w')
 
 for pair in selected_seeds:
 
@@ -60,10 +69,13 @@ for pair in selected_seeds:
 
  #print( "./generate_mutation_data.sh {} {} {} {}".format( INI, "mutations", SEED, DIRECTORY ) )
  
- print( "./generate_mutation_data.sh {} {} {} ".format( mutation_INI, directory,  "mutations"  ) )
+ job_queue.write( "cd /scratch/jasoyode/github_jasoyode/CTRNN_NM/ && ./generate_mutation_data.sh {} {} {} \n".format( mutation_INI, directory,  "mutations"  ) )
  #os.system( "./generate_mutation_data.sh {} {} {} ".format( mutation_INI, directory,  "mutations"  ) )
 
+job_queue.close()
 
+os.system("cat {}".format(OUTPUT_JOB_FILE) )
+print( "cd /u/jasoyode/FARM/gasneat_experiment_farm/job_q_server && python client_add_jobs.py /scratch/jasoyode/github_jasoyode/CTRNN_NM/{}".format(OUTPUT_JOB_FILE) ) 
 
 
 #./generate_mutation_data.sh ***.ini title seed directory

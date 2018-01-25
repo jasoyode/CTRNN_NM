@@ -27,6 +27,9 @@ PLOTS="../../PLOTS"
 #1   SENSORS ON
 MPG_EXCLUDE="1"
 
+X_LIM=25
+XLIM_MODE=True
+
 COMPARE_MODE=0
 
 if len(sys.argv) < 2:
@@ -384,7 +387,9 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
       
 ###########################  setup genome map
     seed_to_genome_map = {}
-    genomes = "{}/genomes.txt".format( experiment_directory  )
+    #actualyl should be using phenotypes
+    #genomes = "{}/genomes.txt".format( experiment_directory  )
+    genomes = "{}/phenotypes.txt".format( experiment_directory  )
     total_neurons=-1
     with open( genomes  ) as genomes_file:
      genome_reader = csv.DictReader(genomes_file)
@@ -405,6 +410,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
        for j in range( 1, total_neurons+1 ):
         entry["w{}{}".format(i,j)  ] = float( row[ "w_{}->{}".format(i,j) ] )
        entry["recep{}".format(i)  ] = float( row[ "recep{}".format(i) ] )
+       entry["w_AS->{}".format(i)  ] = float( row[ "w_AS->{}".format(i) ] )
+      
       
       seed_to_genome_map[  int( row['seed'] ) ] =  entry ;
       
@@ -492,24 +499,34 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
           #total_neurons
           for i in range(1, total_neurons+1 ):
            summed_input =0
+           
+           
+           
            for j in range(1, total_neurons+1 ):
             if i != j:
              #get the latest   OUTPUT  X by
              #TODO CALCULATE BASED ON RECEPTOR STRENGTH
              receptor_str = seed_to_genome_map[seed_num]["recep{}".format(i)]
-             
              receptor_str = 1
-             
              if receptor_str != 1:
               print("Why receptor strength not 1?")
               quit()
-             
              #print( "j: {}  i: {}".format(j, i) )
              #print( n_out[j][-1] )
              #print( seed_to_genome_map[seed_num] )
              #print( "w{}{}".format(j,i) )
+             #
+             #
              
              summed_input +=  (1 + receptor_str*modulation[-1] ) * ( n_out[j][-1] * seed_to_genome_map[seed_num]["w{}{}".format(j,i)] ) 
+           
+           #sensor input 
+           sensor_input = (1 + receptor_str*modulation[-1] ) * ( angle[-1] * seed_to_genome_map[seed_num]["w_AS->{}".format(i)] ) 
+           
+           print( "#1: " + str(sensor_input ) )
+           
+           summed_input += sensor_input
+            
              
            #add calculated input to dataset for input to neuron i
            n_input[i].append( summed_input )
@@ -583,11 +600,16 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
         
         
+        
+        
         config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize)
         config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize)
         config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
         
-
+        #ax2A.set_ylabel( "BS (r:"+ bs_r+")" , fontsize=fontsize )
+        #ax3A.set_ylabel( "FT (r:"+ ft_r+")" , fontsize=fontsize )
+        #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
+        
         ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
         
         
@@ -640,6 +662,11 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize)
         config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize)
         config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        
+        
+        #ax2A.set_ylabel( "BS (r:"+ bs_r+")" , fontsize=fontsize )
+        #ax3A.set_ylabel( "FT (r:"+ ft_r+")" , fontsize=fontsize )
+        #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
         
         ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
         
@@ -786,7 +813,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         
         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
         
-        X_LIM = 2
+        #X_LIM = 5
         
         #old scatter plot
         #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
@@ -798,7 +825,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         dyn2.add_collection( lc )
         dyn2.set_xlabel("FT+FS")
         dyn2.set_ylabel("BS")
-        dyn2.set_xlim(-X_LIM, X_LIM )
+        if XLIM_MODE:
+         dyn2.set_xlim(-X_LIM, X_LIM )
         
         #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         X = [ n_input[2][start:stop], n_out[2][start:stop] ]
@@ -809,7 +837,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         dyn3.add_collection( lc )
         dyn3.set_xlabel("BS+FS")
         dyn3.set_ylabel("FT")
-        dyn3.set_xlim(-X_LIM,X_LIM)
+        if XLIM_MODE:
+         dyn3.set_xlim(-X_LIM,X_LIM)
         
         #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         X = [ n_input[3][start:stop], n_out[3][start:stop] ]
@@ -820,7 +849,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         dyn4.add_collection( lc )
         dyn4.set_xlabel("BS+FT")
         dyn4.set_ylabel("FS")
-        dyn4.set_xlim(-X_LIM,X_LIM)
+        if XLIM_MODE:
+         dyn4.set_xlim(-X_LIM,X_LIM)
         
         plt.tight_layout()
         
@@ -926,7 +956,9 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
 
 ###########################  setup genome map
     seed_to_genome_map = {}
-    genomes = "{}/genomes.txt".format( experiment_directory  )
+    #should actually be using the phenotype, not genotype
+    #genomes = "{}/genomes.txt".format( experiment_directory  )
+    genomes = "{}/phenotypes.txt".format( experiment_directory  )
     total_neurons=-1
     with open( genomes  ) as genomes_file:
      genome_reader = csv.DictReader(genomes_file)
@@ -944,6 +976,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        for j in range( 1, total_neurons+1 ):
         entry["w{}{}".format(i,j)  ] = float( row[ "w_{}->{}".format(i,j) ] )
        entry["recep{}".format(i)  ] = float( row[ "recep{}".format(i) ] )
+       entry["w_AS->{}".format(i)  ] = float( row[ "w_AS->{}".format(i) ] )
       seed_to_genome_map[  int( row['seed'] ) ] =  entry ;
 #######################    
 
@@ -1060,8 +1093,22 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
                print("Why receptor strength not 1?")
                quit()
               
-              
+              #other neuron input
               summed_input +=  (1 + receptor_str*seed_data_dict[ seed_num ][ testing_dir ]["modulation"][-1] ) * ( seed_data_dict[ seed_num ][ testing_dir ]["n_out"][j][-1] * seed_to_genome_map[seed_num]["w{}{}".format(j,i)] ) 
+             
+            #sensor input 
+            sensor_input =  (1 + receptor_str*seed_data_dict[ seed_num ][ testing_dir ]["modulation"][-1] ) * ( seed_data_dict[ seed_num ][ testing_dir ]["angle"][-1] * seed_to_genome_map[seed_num]["w_AS->{}".format(i)] )  
+            
+            #sanity check only valid when running with CPG
+            #if sensor_input != 0:
+            # print("non-zero answer!")
+            # print( "w_AS->{} weight is ".format(i) )
+            # print( "weight: "+ str( seed_to_genome_map[seed_num]["w_AS->{}".format(i) ] ) )
+            # print( "#2: "+ str(sensor_input) )
+            # 
+            # quit()
+             
+            summed_input += sensor_input
               
             #add calculated input to dataset for input to neuron i
             seed_data_dict[ seed_num ][ testing_dir ]["n_input"][i].append( summed_input )
@@ -1134,6 +1181,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
          
         else:
          plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][start:stop], seed_data_dict[ seed_num ][ testing_dir ][ st][start:stop] )      # Or whatever you want in the subplot
+         
          ax.set_ylabel( st )
         plt.title(  testing_dict[testing_dir][0]    )
         
@@ -1221,6 +1269,11 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, True, mod_color)
       
       ax1A.text(x, y, txt, fontsize=12, ha="left", va="top") 
+      
+      
+      ax2A.set_ylabel( "BS " , fontsize=fontsize )
+      ax3A.set_ylabel( "FT " , fontsize=fontsize )
+      ax4A.set_ylabel( "FS " , fontsize=fontsize )
       
       ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
       
@@ -1356,7 +1409,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
           co.append(  (0,0,0, transparency)  )
 #####################      
         
-        X_LIM=2
+        #X_LIM=5
         
         X = [ seed_data_dict[ seed_num ][ testing_dir ]["n_input"][num][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n_out"][num][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
@@ -1366,8 +1419,9 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
         ax.add_collection( lc )
         ax.set_xlabel( label+ " input"  )
         ax.set_ylabel( label+ " ouput"  )
-        
-        ax.set_xlim(-X_LIM, X_LIM )
+ 
+        if XLIM_MODE:
+         ax.set_xlim(-X_LIM, X_LIM )
         plt.title(  testing_dict[testing_dir][0]  )
         
        plt.tight_layout()
@@ -1461,10 +1515,23 @@ def plot_fitness_landscape( mutation_file_path) :
  title = re.sub(r'.*/','', mutation_file_path )
  plt.title( title )
  
- savefile = re.sub(r'mutations.csv','mutation_fitness_landscape.png', mutation_file_path )
  
- print( savefile )
- plt.savefig( savefile )
+ #print("exp dir: {}".format( experiment_directory ))
+ plot_path = re.sub( "/mutations/.*seed[^\\/]*.csv", "/", experiment_directory )
+ plot_path = re.sub( DATA, "{}/MUTATIONS/".format(PLOTS), plot_path )
+ 
+ #print( "plot_path: {}".format(plot_path) )
+ #quit()
+ 
+ os.system( "mkdir -p {}".format( plot_path ) )
+ 
+ savefile = re.sub(".*/seed",'seed', mutation_file_path )
+ savefile = re.sub(r'mutations.csv','mutation_fitness_landscape.png', savefile )
+ 
+ #print( "savefile: {}".format(savefile ))
+ #quit()
+ plt.savefig( "{}/{}".format(plot_path, savefile ) )
+ #plt.savefig( savefile )
  
  plt.close()
 
@@ -1499,7 +1566,13 @@ def main():
     elif COMPARE_MODE==3:
      print( "Special Plotting Testing Results Mode:\nWill plot different attributes for seeds in {}\n   according to the specifications in {}".format( directory, csv_path ))
      print( testing_dict )
+     
+     
+     #True makes this run in plot all activity mode
      plot_activity2( testing_dict, 1, 0, 500, True  )
+     #plot_activity2( testing_dict, 1, 0, 500, False  )
+     
+     
      quit()
      
     elif COMPARE_MODE==4:

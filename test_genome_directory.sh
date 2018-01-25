@@ -25,3 +25,4 @@ for dir in $( ls $ROOT_DIR); do
 done
 
 cat $TEST_JOB_QUEUE
+echo "cd /u/jasoyode/FARM/gasneat_experiment_farm/job_q_server && python client_add_jobs.py /scratch/jasoyode/github_jasoyode/CTRNN_NM/test_genomes_job_queue.txt"
