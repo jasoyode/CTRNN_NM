@@ -5,6 +5,9 @@ import subprocess
 #DONT FORGET TO SET PERIOD if running special mode
 MIXED_TESTING_MODE=False
 
+#To force generating inis to collect data for every seed in a directory
+FORCE_GEN_ALL=False
+
 
 
 def main():
@@ -13,7 +16,9 @@ def main():
     print("Usage:  python generate_TEST_INIs.py [directory containing *.ini file] [OPTIONAL SEED NUMBER ...]")
     quit()
 
-  PLOT_SEED_ACTIVITY_MODE=False
+  PLOT_SEED_ACTIVITY_MODE = FORCE_GEN_ALL
+  
+  
   SEEDS=[]
   if len(sys.argv) >= 3:
     PLOT_SEED_ACTIVITY_MODE=True
@@ -26,7 +31,7 @@ def main():
   original_ini_file= sh("ls {} | grep \".ini\" ".format( original_directory )  )[0]
 
 
-  if PLOT_SEED_ACTIVITY_MODE:
+  if PLOT_SEED_ACTIVITY_MODE and not FORCE_GEN_ALL:
     for SEED in SEEDS:
       print( "Creating special folder for seed {}".format(SEED) )
       create_inis( original_ini_file, original_directory, SEED )
@@ -37,6 +42,8 @@ def main():
 def create_inis( original_ini_file, original_directory, SEED=-1  ):
   
   PLOT_SEED_ACTIVITY_MODE=( SEED != -1)
+  if FORCE_GEN_ALL:
+    PLOT_SEED_ACTIVITY_MODE=True
 #  print( SEED )
 #  quit()
   
@@ -55,6 +62,7 @@ def create_inis( original_ini_file, original_directory, SEED=-1  ):
     steps=5
     step_size=0.1
   
+  
   if MIXED_TESTING_MODE:
     steps=5
     step_size=0.1
@@ -68,7 +76,7 @@ def create_inis( original_ini_file, original_directory, SEED=-1  ):
     value = round( i*step_size, 3)
     CONSTANT.append( (value, value) )
 
-  if PLOT_SEED_ACTIVITY_MODE:
+  if PLOT_SEED_ACTIVITY_MODE and not FORCE_GEN_ALL:
     #create folder for inis for testing this network
     os.system("mkdir -p {}/{}/SEED_{}/ ".format(TESTING_FOLDER, original_ini_file, SEED  )   )
     #copy ini to new folder as template to be modified
@@ -94,14 +102,16 @@ def create_inis( original_ini_file, original_directory, SEED=-1  ):
     search_replace_pairs.append( ("mixedPatternGen.*" , "mixedPatternGen = true\\nmixedPatternGenSingleRun = true" ))
 
   #do not make every log file 2MB long unless in PLOT SEED ACTIVTY MODE!
-  if PLOT_SEED_ACTIVITY_MODE:
+  if PLOT_SEED_ACTIVITY_MODE and not FORCE_GEN_ALL:
     search_replace_pairs.append( ("runs.*" , "runs  = 1" ))
     search_replace_pairs.append( ("startingSeed.*" , "startingSeed = {}".format(SEED) ))
+  elif FORCE_GEN_ALL:
+    print("leaving ini intact")
   else:
     search_replace_pairs.append( ("\\[exp\\].*" , "[exp]\\nrecordAllActivity = false" ))
     
   #make sure to put INIs in correct directory
-  if PLOT_SEED_ACTIVITY_MODE:
+  if PLOT_SEED_ACTIVITY_MODE and not FORCE_GEN_ALL:
     for pair in search_replace_pairs:
       os.system("cat {3}/{0}/SEED_{4}/template.ini | sed \"s/{1}/{2}/\" > tmp && cat tmp > {3}/{0}/SEED_{4}/template.ini".format( original_ini_file, pair[0], pair[1], TESTING_FOLDER, SEED ) )
     os.system("cat {1}/{0}/SEED_{2}/template.ini".format(original_ini_file,TESTING_FOLDER, SEED) )
