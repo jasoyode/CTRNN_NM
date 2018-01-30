@@ -2,28 +2,29 @@ import csv
 import sys
 
 
-DEFAULT_MODE=False
+DEFAULT_MODE=True
 
+CPG_3_EVO_STD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv"
+CPG_3_EVO_MOD_TEST_MOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
+CPG_3_EVO_MOD_TEST_NOMOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv"
 
-CPG_3_EVO-STD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv"
-CPG_3_EVO-MOD_TEST_NOMOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv"
+RPG_3_EVO_STD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv"
+RPG_3_EVO_MOD_TEST_MOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
+RPG_3_EVO_MOD_TEST_NOMOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv"
 
-RPG_3_EVO-STD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv"
-RPG_3_EVO-MOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
-
-DEFAULT_FILE_TEMPLATE=CPG_3_MOD
+DEFAULT_FILE_TEMPLATE=CPG_3_EVO_STD
 
 RUNS=100
 CYCLE_REQ=10
 ON_OFF_THRESHOLD=0.1
 
 WRITE_DICTIONARY={}
-#WRITE_DICTIONARY["CPG_3_STD.txt"] = CPG_3_STD
-WRITE_DICTIONARY["CPG_3_MOD.txt"] = CPG_3_EVO-MOD_TEST_NOMOD 
-#WRITE_DICTIONARY["RPG_3_STD.txt"] = RPG_3_STD
-#WRITE_DICTIONARY["RPG_3_MOD.txt"] = RPG_3_MOD
-
-
+WRITE_DICTIONARY["CPG_3_EVO_STD.txt"] = CPG_3_EVO_STD
+WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_MOD.txt"] = CPG_3_EVO_MOD_TEST_MOD
+WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_NOMOD.txt"] = CPG_3_EVO_MOD_TEST_NOMOD
+WRITE_DICTIONARY["RPG_3_EVO_STD.txt"] = RPG_3_EVO_STD
+WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_MOD.txt"] = RPG_3_EVO_MOD_TEST_MOD
+WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_NOMOD.txt"] = RPG_3_EVO_MOD_TEST_NOMOD
 
 
 if len(sys.argv) < 2:
