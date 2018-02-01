@@ -890,7 +890,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
       print( max_angle )   
 
 def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False ):    
-    
+    #print("die")
+    #quit()
     
     start=0
     stop=-1
@@ -918,7 +919,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        if "r"+str(r) in row:
         entry.append( float( row['r'+str(r)   ]  ) )
        else:
-        print("why??")
+        print("why???????????????????????????????????????????????????")
         quit()
       
       
@@ -990,12 +991,15 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
     print ( top_seeds )
     #quit()
 
+    print( experiment_directory )
     record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
     
     count=0
     
     #this will store ALL the data needed for all the various plots to be accessed at a later time
     seed_data_dict = {}
+    
+    print( "record files {}".format( record_files ))
     
     #loop through all seed activity files in folder
     for record_file in record_files:
@@ -1192,6 +1196,8 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        
        #plt.savefig("demo_simple_seed_{}.png".format( seed_num  ) )
        
+       print( "mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name)  )
+       quit()
        os.system("mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name) )
        plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
        
