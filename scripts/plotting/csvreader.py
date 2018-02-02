@@ -595,19 +595,19 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
         
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
         config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
         
         
         
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize)
-        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize)
         config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
         
-        #ax2A.set_ylabel( "BS (r:"+ bs_r+")" , fontsize=fontsize )
-        #ax3A.set_ylabel( "FT (r:"+ ft_r+")" , fontsize=fontsize )
+        #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
+        #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fontsize )
         #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
         
         ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
@@ -655,17 +655,17 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         y=ymax+height/10
         ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
         config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize)
-        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize)
         config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
         
         
-        #ax2A.set_ylabel( "BS (r:"+ bs_r+")" , fontsize=fontsize )
-        #ax3A.set_ylabel( "FT (r:"+ ft_r+")" , fontsize=fontsize )
+        #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
+        #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fontsize )
         #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
         
         ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
@@ -757,8 +757,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         #OLD WAY
         #dyn1.scatter( n_out[1][start:stop], n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         #dyn1.scatter( n_out[1][start:stop], n_out[2][start:stop], n_out[3][start:stop], c=co, label='neuron activation dynamics')
-        dyn1.set_xlabel("BS")
-        dyn1.set_ylabel("FT")
+        dyn1.set_xlabel("FT")
+        dyn1.set_ylabel("BS")
         dyn1.set_zlabel("FS")
         
         
@@ -780,8 +780,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn2.add_collection( lc )
-        dyn2.set_xlabel("BS")
-        dyn2.set_ylabel("FT")
+        dyn2.set_xlabel("FT")
+        dyn2.set_ylabel("BS")
         
         #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         X = [ n_out[1][start:stop], n_out[3][start:stop] ]
@@ -790,7 +790,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn3.add_collection( lc )
-        dyn3.set_xlabel("BS")
+        dyn3.set_xlabel("FT")
         dyn3.set_ylabel("FS")
         
         #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
@@ -800,7 +800,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn4.add_collection( lc )
-        dyn4.set_xlabel("FT")
+        dyn4.set_xlabel("BS")
         dyn4.set_ylabel("FS")
         
         plt.tight_layout()
@@ -823,8 +823,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn2.add_collection( lc )
-        dyn2.set_xlabel("FT+FS")
-        dyn2.set_ylabel("BS")
+        dyn2.set_xlabel("BS+FS")
+        dyn2.set_ylabel("FT")
         if XLIM_MODE:
          dyn2.set_xlim(-X_LIM, X_LIM )
         
@@ -835,8 +835,8 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn3.add_collection( lc )
-        dyn3.set_xlabel("BS+FS")
-        dyn3.set_ylabel("FT")
+        dyn3.set_xlabel("FT+FS")
+        dyn3.set_ylabel("BS")
         if XLIM_MODE:
          dyn3.set_xlim(-X_LIM,X_LIM)
         
@@ -847,7 +847,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn4.add_collection( lc )
-        dyn4.set_xlabel("BS+FT")
+        dyn4.set_xlabel("FT+BS")
         dyn4.set_ylabel("FS")
         if XLIM_MODE:
          dyn4.set_xlim(-X_LIM,X_LIM)
@@ -992,6 +992,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
     #quit()
 
     print( experiment_directory )
+    #quit()
     record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
     
     count=0
@@ -1177,8 +1178,8 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
         
         if st == "derivs":
          
-         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][1][short_start:short_stop], label=r"$\Delta$ BS" )
-         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][2][short_start:short_stop], label=r"$\Delta$ FT" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][1][short_start:short_stop], label=r"$\Delta$ FT" )
+         plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][2][short_start:short_stop], label=r"$\Delta$ BS" )
          plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][3][short_start:short_stop], label=r"$\Delta$ FS" )
          ax.set_ylabel( r'$\Delta$ neuron outputs' )   #, fontsize=fontsize )
          legend = ax.legend(loc='center right' )
@@ -1196,8 +1197,8 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        
        #plt.savefig("demo_simple_seed_{}.png".format( seed_num  ) )
        
-       print( "mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name)  )
-       quit()
+       #print( "mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name)  )
+       #quit()
        os.system("mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name) )
        plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
        
@@ -1260,25 +1261,25 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        
        
        #CLEANUP
-       #config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-       #config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
+       #config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
+       #config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
        #config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
        
-       config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "BS (r: 1)", "BackSwing neuron output over time", fontsize, True, mod_color)
-       config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "FT (r: 1)", "FootLift neuron output over time",  fontsize, True, mod_color)
+       config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r: 1)", "BackSwing neuron output over time", fontsize, True, mod_color)
+       config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r: 1)", "FootLift neuron output over time",  fontsize, True, mod_color)
        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r: 1)", "ForwardSwing neuron output over time", fontsize, True, mod_color)
        
        
        
-       config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize, True, mod_color)
-       config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize, True, mod_color)
+       config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize, True, mod_color)
+       config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize, True, mod_color)
        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, True, mod_color)
       
       ax1A.text(x, y, txt, fontsize=12, ha="left", va="top") 
       
       
-      ax2A.set_ylabel( "BS " , fontsize=fontsize )
-      ax3A.set_ylabel( "FT " , fontsize=fontsize )
+      ax2A.set_ylabel( "FT " , fontsize=fontsize )
+      ax3A.set_ylabel( "BS " , fontsize=fontsize )
       ax4A.set_ylabel( "FS " , fontsize=fontsize )
       
       ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
@@ -1347,8 +1348,8 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        ax.add_collection( lc )
        
        #OLD WAY
-       ax.set_xlabel("BS")
-       ax.set_ylabel("FT")
+       ax.set_xlabel("FT")
+       ax.set_ylabel("BS")
        ax.set_zlabel("FS")
        
        #plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"], seed_data_dict[ seed_num ][ testing_dir ]["modulation"] )      # Or whatever you want in the subplot
@@ -1369,7 +1370,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       
       
       ##############FIX THESE
-      data2d= [  [1,"BS"], [2,"FT"] , [3,"FS"] ]
+      data2d= [  [1,"FT"], [2,"BS"] , [3,"FS"] ]
       
       for pair in data2d:
        plt.close('all')
@@ -1575,7 +1576,7 @@ def main():
      
      
      #True makes this run in plot all activity mode
-     plot_activity2( testing_dict, 1, 0, 500, True  )
+     plot_activity2( testing_dict, 1, 0, 800, True  )
      #plot_activity2( testing_dict, 1, 0, 500, False  )
      
      

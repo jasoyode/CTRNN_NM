@@ -10,8 +10,8 @@ DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SI
 #DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard"
 #DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
 
-#DIR="../../DATA/CITED_DATA"
-DIR="../../DATA/TEMP_DATA/DUD"
+DIR="../../DATA/CITED_DATA"
+#DIR="../../DATA/TEMP_DATA/DUD"
 
 
 if len(sys.argv) < 2:

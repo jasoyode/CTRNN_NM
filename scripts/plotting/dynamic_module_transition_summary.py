@@ -160,21 +160,21 @@ def std( pattern_string ):
 
 #make score to numerically order any given state  
 def rank_score( line ):
-  BS1=6
-  BS2=BS1+3
-  FT1=17
+  FT1=6
   FT2=FT1+3
+  BS1=17
+  BS2=BS1+3
   FS1=28
   FS2=FS1+3
-  #print("BS[]: {}".format(line[BS1:BS2] ) )
-  #print("FS[]: {}".format(line[FS1:FS2] ) )
   #print("FT[]: {}".format(line[FT1:FT2] ) )
-  if line[BS1:BS2]=="ON ":
-    BS=2
-  elif line[BS1:BS2]=="OFF":
-    BS=0
+  #print("FS[]: {}".format(line[FS1:FS2] ) )
+  #print("BS[]: {}".format(line[BS1:BS2] ) )
+  if line[FT1:FT2]=="ON ":
+    FT=2
+  elif line[FT1:FT2]=="OFF":
+    FT=0
   else:
-    BS=1
+    FT=1
   
   if line[FS1:FS2]=="ON ":
     FS=2
@@ -183,25 +183,25 @@ def rank_score( line ):
   else:
     FS=1
   
-  if line[FT1:FT2]=="ON ":
-    FT=2
-  elif line[FT1:FT2]=="OFF":
-    FT=0
+  if line[BS1:BS2]=="ON ":
+    BS=2
+  elif line[BS1:BS2]=="OFF":
+    BS=0
   else:
-    FT=1
+    BS=1
   #print("line: {}".format( line ))
-  #print( "BS: {}".format(BS) )
-  #print( "FS: {}".format(FS) )
   #print( "FT: {}".format(FT) )
-  return 100*BS + 10*FS + FT
+  #print( "FS: {}".format(FS) )
+  #print( "BS: {}".format(BS) )
+  return 100*FT + 10*FS + BS
   
 
 def lookup( n ):
   if n < 4:
     if n ==1:
-      return "BS"
-    elif n ==2:
       return "FT"
+    elif n ==2:
+      return "BS"
     else:
       return "FS"
   else:

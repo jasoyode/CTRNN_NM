@@ -175,15 +175,15 @@ def main():
     print("key: {}   from_genome.txt: {}  from phenotype.txt: {}".format( key, vd[key], value_dict[key] ) )
   
   
-  quit()
+  #quit()
   
   
   for i in range(1, size+1):
   #do all the stuff and generate plots
     if i ==1:
-      name="BS"
-    elif i ==2:
       name="FT"
+    elif i ==2:
+      name="BS"
     elif i ==3:
       name="FS"
     else:
