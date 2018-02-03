@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Read phenotype from file and create visual
-representation of the network.
+Read phenotype from csv file and create visual representation of the network.
 
 """
 #    Copyright (C) 2006 by 
@@ -18,7 +17,7 @@ from __future__ import print_function
 from __future__ import division
 
 __author__ = """Jason Yoder (jasoyode@indiana.edu)"""
-
+import re
 import sys
 import pygraphviz as pgv
 import math
@@ -26,80 +25,71 @@ import os
 import csv
 import math
 import numpy as np
+import configparser
 
 PI=3.141592653
-
 ROUND=3
 
-#K=0.3,strict=False,size=8
-#pgv.AGraph(  directed=True ,splines='curved')
+
+CONFIG_FILE="config.ini"
 
 
-MINLEN=3
+def main( config_file ):
 
-include_angle_sensors=True
-all_details=True
-imitate_beer=True
+  config = configparser.ConfigParser()
 
-SEED=48
-CRM="CPG"
-SIZE="3"
-TYPE="standard"
-SUBFOLDER=""
+  config.read(config_file )
+
+  ROUND                = int( config["PlottingOptions"]["rounding_digits"] )
+  MINLEN               = int( config["PlottingOptions"]["edge_length"] )
+  include_angle_sensors= config["PlottingOptions"]["include_angle_sensors"]
+  all_details          = config["PlottingOptions"]["all_details"]
+  plotting_mode        = config["PlottingOptions"]["plotting_mode"]
+  #######
+  STARTING_SEED        = int( config["Jobs"]["seed_start"] )
+  STOPPING_SEED        = int( config["Jobs"]["seed_stop"] )
+  
+  #SUBFOLDER = config["InputOutput"][""]
+  csv_path           = config["InputOutput"]["input_csv"]
+  SAVE_PATH          = config["InputOutput"]["output_dir"]
+  CUSTOM_NAME        = config["InputOutput"]["custom_output_name"]
+  DYNAMIC_MODULE_CSV = config["InputOutput"]["dynamic_modules_csv"]
+  PLOT_DYNAMIC_MODULES= config["PlottingOptions"]["plot_dynamic_modules"]
 
 
-if len(sys.argv) > 1:
-  if len(sys.argv) > 1:
-    SEED=int(sys.argv[1])
-  if len(sys.argv) > 2:
-    CRM=sys.argv[2]
-  if len(sys.argv) > 3:
-    SIZE=int(sys.argv[3])
-  if len(sys.argv) > 4:
-    TYPE=sys.argv[4]
-  if len(sys.argv) > 5:
-    SUBFOLDER=sys.argv[5]
+  if plotting_mode=="simple":
+    imitate_beer=True
+    all_details=False
+  elif plotting_mode=="both":
+    imitate_beer=True
+    all_details=True
+  elif plotting_mode=="detail":
+    imitate_beer=False
+    all_details=True
+  else:
+    print("Invalid plotting mode specified, must be simple, detail, or both")
+    quit()
+  
   
 
-print("Using SEED:{} CRM:{}  SIZE:{}  TYPE:{} SUBFOLDER:{}".format(SEED,CRM,SIZE,TYPE,SUBFOLDER) )
+  for SEED in range(STARTING_SEED,STOPPING_SEED+1):
 
+    CUSTOM_SEED_NAME = re.sub( r'XSEEDX', str(SEED), CUSTOM_NAME)
 
+    if PLOT_DYNAMIC_MODULES:
+      os.system("mkdir -p {}/DM/".format(SAVE_PATH) )
+      OUTPUT_FILENAME="{}/DM/{}".format(SAVE_PATH, CUSTOM_SEED_NAME)
+      generate_dynamic_module_graphs( csv_path, include_angle_sensors, SEED, CUSTOM_SEED_NAME, OUTPUT_FILENAME, MINLEN, PLOT_DYNAMIC_MODULES, DYNAMIC_MODULE_CSV )    
 
-#CUSTOM_NAME="BEST_CPG3_"
-CUSTOM_NAME=""
-
-SAVE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/PLOTS/NETWORK_GRAPHS/{}".format(SUBFOLDER)
-
-csv_path="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CPG_RPG_MPG_345/"
-csv_path+="JOB_ctrnn-{}_size-{}_sim-100run-500gen_signal-SINE-1p_M-{}/phenotypes.txt".format(CRM,SIZE,TYPE)
-
-
-#SEED=2
-#csv_path="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/phenotypes.txt"
-
-PRE_FIX=""
-if imitate_beer:
-  PRE_FIX="simple_"
-
-
-
-if CUSTOM_NAME != "":
-  OUTPUT_FILENAME='{}/{}{}.png'.format(SAVE_PATH,PRE_FIX,CUSTOM_NAME)
-else:
-  OUTPUT_FILENAME='{}/{}{}_{}_{}_{}.png'.format(SAVE_PATH,PRE_FIX,CRM,SIZE,TYPE,SEED) 
-
-
-
-  
-
-if CUSTOM_NAME != "":
-  A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="simple_{}.png".format(CUSTOM_NAME) )
-else:
-  A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}_{}_{}_{}.png".format(CRM,SIZE,TYPE,SEED)  )
-
-value_dict = {}
-
-
+    #quit()
+       
+    if imitate_beer:
+      OUTPUT_FILENAME="{}/simple_{}".format(SAVE_PATH, CUSTOM_SEED_NAME)
+      generate_graph( csv_path, include_angle_sensors, False, True, SEED, CUSTOM_SEED_NAME, OUTPUT_FILENAME, MINLEN)
+    if all_details:
+      OUTPUT_FILENAME="{}/{}".format(SAVE_PATH, CUSTOM_SEED_NAME)
+      generate_graph( csv_path, include_angle_sensors, True, False, SEED, CUSTOM_SEED_NAME, OUTPUT_FILENAME, MINLEN )      
+    
 
 def is_bistable( left, right):
   return left < 0 and right > 0
@@ -123,7 +113,59 @@ def calculate_edges(  w, b ):
   return I_L, I_R
 
 
-def main( csv_path, include_angle_sensors, all_details, imitate_beer ):
+def generate_dynamic_module_graphs( csv_path, include_angle_sensors, SEED, CUSTOM_SEED_NAME, OUTPUT_FILENAME, MINLEN, PLOT_DYNAMIC_MODULES, DYNAMIC_MODULE_CSV ):
+  if PLOT_DYNAMIC_MODULES:
+    print( "Attempting to represent DM for seed {} in {}".format(SEED, DYNAMIC_MODULE_CSV) )
+    
+    with open( DYNAMIC_MODULE_CSV  ) as csvfile:
+      reader = csv.DictReader(csvfile)
+      for row in reader:
+        size=0
+        if int(row["seed"]) == SEED:
+          dm = row["dm"]
+          dm = re.sub("{","", dm)
+          dm = re.sub("}","", dm)
+          dm_list=dm.split("=>")
+          #print( dm_list )
+          break
+
+    index=1
+    for dm in dm_list:
+      if not dm == "":
+        #print(dm)
+        DM_VALS={}
+        for neuron in dm.split(" "):
+          #print( neuron )
+          DM_VALS[ neuron[:2] ]= neuron[2]
+        OUTPUT_F = re.sub(".png","{}.png".format(index), OUTPUT_FILENAME)
+        generate_graph( csv_path, include_angle_sensors, False, True, SEED, CUSTOM_SEED_NAME, OUTPUT_F, MINLEN, DM_VALS, "{} {}".format(index, dm) )
+        index+=1
+    
+
+
+def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, SEED, CUSTOM_NAME, OUTPUT_FILENAME, MINLEN, DYNAMIC_MODULE_VALUES=[], DM_LABEL="" ):
+  
+  if len(DYNAMIC_MODULE_VALUES) == 0:
+    PLOT_DYNAMIC_MODULES=False
+  else:
+    PLOT_DYNAMIC_MODULES=True
+  #print( PLOT_DYNAMIC_MODULES )
+  print( DYNAMIC_MODULE_VALUES )
+  #return
+  #quit()
+  #######################################
+  # INDENT ALL BELOW
+  #######################################
+  
+  #CUSTOM_NAME = re.sub("XSEEDX", SEED, CUSTOM_NAME)
+  if PLOT_DYNAMIC_MODULES:
+    A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}".format(  DM_LABEL )  )
+  else:
+    A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}".format(CUSTOM_NAME )  )
+
+  value_dict = {}
+
+
   if imitate_beer:
     all_details=False
     include_angle_sensors=False      
@@ -162,6 +204,7 @@ def main( csv_path, include_angle_sensors, all_details, imitate_beer ):
       name="INT2"
     else:
       name="unknown"
+    n=name
     
     if all_details:
       name="N{} ({})".format(i,name)
@@ -198,19 +241,32 @@ def main( csv_path, include_angle_sensors, all_details, imitate_beer ):
     else:
       lbl="{}\n{}".format(name,stability)
     
-    if imitate_beer:
+    if PLOT_DYNAMIC_MODULES:
       radius=1
-      #A.add_node(i,fontname="times bold", label=lbl,fontsize=14, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
-      A.add_node(i,fontname="times bold", label=lbl,fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+      if DYNAMIC_MODULE_VALUES[n]=="+":
+        A.add_node(i,fontname="times bold", label=lbl,fontsize=12,style="bold", fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+      elif DYNAMIC_MODULE_VALUES[n]=="↑":
+        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="filled",fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+      elif DYNAMIC_MODULE_VALUES[n]=="↓":
+        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="bold,filled",fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+      elif DYNAMIC_MODULE_VALUES[n]=="-":
+        A.add_node(i,fontname="times bold", label=lbl,fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+      else:
+        print("No state detected exiting")
+        quit()
+        
     else:
-      radius=1.5
-      #A.add_node(i, label=lbl, shape='circle', color='black',pos='{},{}'.format(x,y) )
-      A.add_node(i, label=lbl, fixedsize=True, width=radius, height=radius,shape='circle', color='black',pos='{},{}'.format(x,y) )
+      if imitate_beer:
+        radius=1
+        A.add_node(i,fontname="times bold", label=lbl,fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+      else:
+        radius=1.5
+        A.add_node(i, label=lbl, fixedsize=True, width=radius, height=radius,shape='circle', color='black',pos='{},{}'.format(x,y) )
+
+      if include_angle_sensors:
+        if i ==1:
+          A.add_node(99, label="Angle\nSensor", color='black',pos='{},{}'.format( 0,0 ) )
     
-    if include_angle_sensors:
-      if i ==1:
-        A.add_node(99, label="Angle\nSensor", color='black',pos='{},{}'.format( 0,0 ) )
-  
   
   
   for i in range(1,size+1):
@@ -219,9 +275,24 @@ def main( csv_path, include_angle_sensors, all_details, imitate_beer ):
       weight= value_dict[ "w_{}->{}".format(i,j) ]
       
       
-      if imitate_beer:
-        h=100
-        if i != j:
+      if PLOT_DYNAMIC_MODULES:
+        if i==1:
+          n="FT"
+        elif i==2:
+          n="BS"
+        elif i==3:
+          n="FS"
+        elif i==4:
+          n="INT1"
+        elif i==5:
+          n="INT2"
+        else:
+          n="unknown"
+        
+        if DYNAMIC_MODULE_VALUES[n] in "-↑":
+          #must include to keep shape
+          A.add_edge(i,j,len=MINLEN/2, arrowhead="tee", style="invis"  )
+        elif i!=j:
           if weight > 0:
             A.add_edge(i,j,len=MINLEN/2, arrowhead="tee",  )
           elif weight <0:
@@ -230,32 +301,40 @@ def main( csv_path, include_angle_sensors, all_details, imitate_beer ):
             print("weight is zero no showing!")
       
       else:
-      
-        if weight > 0:
-          lbl_weight="<<font color=\"red\">{}</font>>".format(weight)
-          A.add_edge(i,j,len=MINLEN, arrowhead="tee", label=lbl_weight,color='red' )
-        elif weight <0:
-          lbl_weight="<<font color=\"blue\">{}</font>>".format(weight)
-          A.add_edge(i,j,len=MINLEN, arrowhead="dot", label=lbl_weight,color='blue' )
-        else:
-          print("weight is zero no showing!")
         
-        if include_angle_sensors:
-          if (i==j):
-            weight= value_dict[ "w_AS->{}".format(i) ]
+        if imitate_beer:
+          h=100
+          if i != j:
+            if weight > 0:
+              A.add_edge(i,j,len=MINLEN/2, arrowhead="tee",  )
+            elif weight <0:
+              A.add_edge(i,j,len=MINLEN/2, arrowhead="dot" )
+            else:
+              print("weight is zero no showing!")
+        
+        else:
+        
+          if weight > 0:
+            lbl_weight="<<font color=\"red\">{}</font>>".format(weight)
+            A.add_edge(i,j,len=MINLEN, arrowhead="tee", label=lbl_weight,color='red' )
+          elif weight <0:
+            lbl_weight="<<font color=\"blue\">{}</font>>".format(weight)
+            A.add_edge(i,j,len=MINLEN, arrowhead="dot", label=lbl_weight,color='blue' )
+          else:
+            print("weight is zero no showing!")
+          
+          if include_angle_sensors:
+            if (i==j):
+              weight= value_dict[ "w_AS->{}".format(i) ]
             A.add_edge(99,i, len=MINLEN,label=weight,color='black' )
         
   A.graph_attr['epsilon']='0.001'
-  #print(A.string()) # print to screen
-  #print("Wrote simple.dot")
   A.write('simple.dot') # write to simple.dot
   B=pgv.AGraph('simple.dot') # create a new graph from file
-  #B.layout(prog='circo')
   B.layout(prog='neato')
   if CUSTOM_NAME != "":
-    B.draw(OUTPUT_FILENAME)  #'{}/simple_{}_{}.png'.format(SAVE_PATH,CUSTOM_NAME,SUMMARY) ) # draw png
+    B.draw(OUTPUT_FILENAME)
   else:
-    B.draw(OUTPUT_FILENAME)  #'{}/simple_{}_{}_{}_{}_{}.png'.format(SAVE_PATH,CRM,SIZE,TYPE,SEED,SUMMARY) ) # draw png
-  #print("Wrote simple.png")
+    B.draw(OUTPUT_FILENAME)  
   
-main( csv_path, include_angle_sensors, all_details, imitate_beer )
+main( CONFIG_FILE )
