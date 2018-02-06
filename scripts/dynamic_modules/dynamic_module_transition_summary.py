@@ -1,9 +1,14 @@
 import csv
 import sys
 import re
+import operator
 
 DEFAULT_MODE=False
 DEBUG_MODE=False
+#Use the relative activity levels of each neuron to determine if it is in a transient state = TRUE
+#or try to use derivatives to determine if its in a transient state = FALSE
+ABS_MODE=True
+
 
 CPG_3_EVO_STD =            "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv"
 CPG_3_EVO_MOD_TEST_MOD =   "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
@@ -17,7 +22,15 @@ DEFAULT_FILE_TEMPLATE=CPG_3_EVO_STD
 
 RUNS=100
 CYCLE_REQ=10
-ON_OFF_THRESHOLD=0.2
+
+#this seems to be high, but the derivative threshold must be held high in order to make sure
+#we are not getting noise at the ends
+ON_OFF_THRESHOLD=0.25
+
+#this is a percentage of the maximum peak 
+#observed between timestep 1000 and 2000 
+#(after initial startin states are evened out)
+DERIVATIVE_THRESHOLD=0.005
 
 
 FT_POS=6
@@ -26,12 +39,12 @@ FS_POS=28
 
 WRITE_DICTIONARY={}
 WRITE_DICTIONARY["CPG_3_EVO_STD.txt"]            = CPG_3_EVO_STD
-#WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_MOD.txt"]   = CPG_3_EVO_MOD_TEST_MOD
-#WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_NOMOD.txt"] = CPG_3_EVO_MOD_TEST_NOMOD
+WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_MOD.txt"]   = CPG_3_EVO_MOD_TEST_MOD
+WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_NOMOD.txt"] = CPG_3_EVO_MOD_TEST_NOMOD
 
-#WRITE_DICTIONARY["RPG_3_EVO_STD.txt"]            = RPG_3_EVO_STD
-#WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_MOD.txt"]   = RPG_3_EVO_MOD_TEST_MOD
-#WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_NOMOD.txt"] = RPG_3_EVO_MOD_TEST_NOMOD
+WRITE_DICTIONARY["RPG_3_EVO_STD.txt"]            = RPG_3_EVO_STD
+WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_MOD.txt"]   = RPG_3_EVO_MOD_TEST_MOD
+WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_NOMOD.txt"] = RPG_3_EVO_MOD_TEST_NOMOD
 
 
 if len(sys.argv) < 2:
@@ -56,6 +69,7 @@ def main( file_template, output_file="" ):
     all_states_pattern_to_seed_map={}
     
     for i in range(1,RUNS+1):
+      print("seed: {}".format( i)  )
       #file = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv".format(i)
       #file = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv".format(i)
       #file = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv".format(i)
@@ -70,8 +84,12 @@ def main( file_template, output_file="" ):
         #print("skipping seed {} because it has multiple cycles".format(i) )
         multi_cycle_pattern=""
         for pair in pairs:
-          print( pair )
-          multi_cycle_pattern += pair[0][0]+" <=T=>"
+          #print( pair )
+          multi_cycle_pattern += pair[0][0]+" --- "
+        
+        #for ps in pairs_all_states:
+          #for p in ps:       
+          #  print(p)
         
         multi_cycle_pattern = multi_cycle_pattern.strip()
         if not multi_cycle_pattern in pattern_to_seed_map:
@@ -92,8 +110,8 @@ def main( file_template, output_file="" ):
         #print("skipping seed {} because it has multiple cycles".format(i) )
         multi_cycle_pattern=""
         for pair in pairs_all_states:
-          print( pair )
-          multi_cycle_pattern += pair[0][0]+" <=T=>"
+          #print( pair )
+          multi_cycle_pattern += pair[0][0]+" --- "
         
         multi_cycle_pattern = multi_cycle_pattern.strip()
         if not multi_cycle_pattern in all_states_pattern_to_seed_map:
@@ -141,12 +159,16 @@ def main( file_template, output_file="" ):
       
   else:
     pairs = process_file( SEED_ACTIVITY_FILE, True )
-    
-    for pair in pairs:
-      print( "The follow pattern appeared {} times:".format( pair[1] ) )
-      #print( pairs)
-      print( pair[0] )
-      #print(  reduce_to_dm_transition( pair[0] ) )
+    pairs_all_states = process_file( SEED_ACTIVITY_FILE, False )
+    #print( pairs )
+    #print( pairs_all_states )
+    #for pair in pairs:
+    print( "The follow pattern appeared {} times:".format( pairs[0][1] ) )
+    #print( pairs)
+    print( pairs[0][0] )
+    print("Compressed format:")
+    print( pairs_all_states[0][0] )
+    #print(  reduce_to_dm_transition( pair[0] ) )
       
   if WRITE_TO_FILE_MODE  :
     seeds_fh.close()
@@ -160,8 +182,39 @@ def process_file( seed_activity_file, show_all=False ):
   last_data=[]
   summary_data=[]
   
-  for i in range(0, len(activity_data) ):
-    current = transform( activity_data[i], size, ON_OFF_THRESHOLD )
+  
+  lowest_der=  list(map( operator.sub, activity_data[0], activity_data[0] ))
+  highest_der= list(map( operator.sub, activity_data[0], activity_data[0] ))
+  
+  highest = activity_data[0]
+  lowest = activity_data[0]
+  
+  for i in range(1000, 2000 ):
+    #used to calculate if in transition or not
+    #we want to use the relative peaks of the individual neuron derivatives to give a test of 
+    #relative % progress towards peak, say 10% towards peak to be considered in a transition
+    
+    lowest_der  = list(map(min, lowest_der, list(map( operator.sub, activity_data[i], activity_data[i-1] )) ))
+    highest_der = list(map(max, highest_der, list(map( operator.sub, activity_data[i],activity_data[i-1] )) ))
+    
+    lowest  = list(map(min, lowest,  activity_data[i] ))
+    highest = list(map(max, highest, activity_data[i] ))
+  
+  
+  #TEMP FOR TESTING DATA RANGE OBSERVED  
+  #for i in range(1100, 1350 ):
+  
+  #start after noisy states
+  for i in range(2000, len(activity_data) ):
+    if DEBUG_MODE:
+      print("TIMESTEP:   {}    ".format(i))
+    
+    if ABS_MODE:
+      current = transform_abs( activity_data[i-1],  activity_data[i], size, ON_OFF_THRESHOLD, DERIVATIVE_THRESHOLD, lowest_der, highest_der, lowest, highest )
+    else:
+      current = transform( activity_data[i-1],  activity_data[i], size, ON_OFF_THRESHOLD, DERIVATIVE_THRESHOLD, lowest_der, highest_der, lowest, highest )
+    
+    
     if last_data != current:
       #summary_data.append( "{} - {} timesteps ".format( last_data, count ) )
       summary_data.append( "{}".format( last_data ) )
@@ -172,6 +225,9 @@ def process_file( seed_activity_file, show_all=False ):
     count+=1
   #summary_data.append( "{} - {} timesteps ".format( last_data, count ) )
   summary_data.append( "{}".format( last_data ) )
+  
+  
+  
   
   current_string=""
   pattern_dict={}
@@ -259,41 +315,110 @@ def lookup( n ):
   elif n ==3:
     return "FS"
   else:
-    return "INT{}".format( n - 3 )
+    return "I{}".format( n - 3 )
 
-def transform( activity_entry, size, threshold ):
+def transform(prior_activity_entry, activity_entry, size, threshold, derivative_threshold, lowest_der, highest_der, lowest, highest ):
   entry=[]
   
   #if activity_entry[3] > 0.6: #(1 - threshold):
   #  print( activity_entry[3]    )
   #  print( "ddd" )
   #  quit()
-  
+  #print("\n------------------")
   for i in range(0, size):
-    if activity_entry[i] < threshold:
+    deriv= activity_entry[i] - prior_activity_entry[i]
+    abs_diff = abs( activity_entry[i] - prior_activity_entry[i] )
+    
+    if DEBUG_MODE and i == 0:
+      print( "lowest {}".format(lowest[i]) )
+      print( "highest {}".format( highest[i]) )
+      print( "{} because deriv: {}  <= {}".format( (deriv <=lowest_der[i] + derivative_threshold), deriv, (lowest_der[i] + derivative_threshold) ) )
+      print( "{} because deriv: {}  >= {}".format( (deriv >= (highest_der[i] - derivative_threshold)), deriv, (highest_der[i] - derivative_threshold) ) )
+      print( "{} because  activity: {}  < {}".format( (activity_entry[i] < (lowest[i] +  threshold)  ), activity_entry[i], ( lowest[i] +  threshold) ) )
+      print( "{} because  activity: {}  > {}".format( (activity_entry[i] > ( highest[i]  - threshold)  ), activity_entry[i], ( highest[i]  - threshold) ) )
+      
+        
+    #if rate of change is high, we are in a transition
+    #if abs_diff > derivative_threshold:
+    if deriv <= (lowest_der[i] + derivative_threshold) or deriv >= (highest_der[i] - derivative_threshold):
+    #if deriv <= -derivative_threshold or deriv >= derivative_threshold:
+      entry.append("{}->T  ".format(lookup(i+1) ) )
+      #if DEBUG_MODE:
+      #  print( "deriv: {}  >= {}".format( deriv, (lowest_der[i] + derivative_threshold) ) )
+      #  print( "deriv: {}  <= {}".format( deriv, (highest_der[i] - derivative_threshold) ) )
+      #  print("T   " )
+    #if not transitioning then if below certain threshold we can expect to be OFF
+    elif activity_entry[i] < (lowest[i] +  threshold) :
       entry.append("{}->OFF".format(lookup(i+1) ) )
-    elif activity_entry[i] > (1 - threshold):
+      #if DEBUG_MODE and i==0:
+      #  print( "activity: {}  <= {}".format( activity_entry[i], ( lowest[i] +  threshold) ) )
+      #  print( "activity: {}  >= {}".format( activity_entry[i], ( highest[i]  - threshold) ) )
+      #  print("OFF " )
+    #if not transitioning then if within certain threshold of 1 we can expect to be ON
+    elif activity_entry[i] > ( highest[i]  - threshold):
+      entry.append("{}->ON ".format(lookup(i+1) ) )
+      #if DEBUG_MODE and i==0:
+        #print( "lowest {}".format(lowest[i]) )
+        #print( "highest {}".format( highest[i]) )
+        #print( "activity: {}  <= {}".format( activity_entry[i], ( lowest[i] +  threshold) ) )
+        #print( "activity: {}  >= {}".format( activity_entry[i], ( highest[i]  - threshold) ) )
+        #print("ON   " )
+        
+
+    #if not in transition AND not ON or OFF, then something is weird, like a type of
+    # stable equilibrium that is not at 0 or 1, which is quite bizarre
+    #in which case I want to throw and error and see what is going on    
+    else:
+      entry.append("{}->T  ".format(lookup(i+1) ) )
+      
+      #print("Found an state with non-transitioing state which is NOT ON or OFF")
+      #print("(highest - threshold): {}".format(  (highest[i+1] - threshold) ) )
+      #print("(lowest + threshold): {}".format(   lowest[i+1] + threshold ) )
+      #print("neuron({}) with prior activation: {}  current activation {}".format(i, prior_activity_entry[i], activity_entry[i]) )
+      #print("neuron({}) with abs(derivative diff): {} < derive threshold {}".format(i, abs_diff, derivative_threshold) )
+      #print("ON OFF threshold: {}".format( threshold ))
+      #print( lowest[:3] )
+      ##print( highest[:3] )
+      #
+      #sys.exit(0)
+      #quit()
+      #entry.append("{}->T  ".format(lookup(i+1) ) )
+  return  entry
+
+
+
+
+def transform_abs(prior_activity_entry, activity_entry, size, threshold, derivative_threshold, lowest_der, highest_der, lowest, highest ):
+  
+  entry=[]
+  for i in range(0, size):
+    if activity_entry[i] < (lowest[i] +  threshold) :
+      entry.append("{}->OFF".format(lookup(i+1) ) )
+    elif activity_entry[i] > ( highest[i]  - threshold):
       entry.append("{}->ON ".format(lookup(i+1) ) )
     else:
-      #if i == 3:
-      #  print( activity_entry[i]   )
       entry.append("{}->T  ".format(lookup(i+1) ) )
   return  entry
+  
+  
+  
+
 
 #should be normalized before passed to this method
 def reduce_to_dm_transition( string, show_all=False ):
   list=string.split("\n")
   result=""
   if "T  " in list[0]:
-    #print("this should never happen!")
-    print( list )
-    return "{TTT}"
+    print("This should RARELY happen! Every state includes at least one transient condition, NO quasi-stable states present!")
+    #print( list )
+    return "{TTT}=>"
+    #sys.exit(-1)
     #quit()
   
   current_quasi_state=list[0]
   list.append( current_quasi_state )
   first=True
-  # must add trsnsiyions, not sctual states 
+  # must add transitions, not actual states 
   # result.append( current_quasi_state )
   for state in list:
     if first:

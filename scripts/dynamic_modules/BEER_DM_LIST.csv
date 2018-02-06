@@ -1,0 +1,27 @@
+number,adjacency,transition,
+
+
+
+{BS↓}=>{FT↓ FS↑}=>{BS↑}=>{FT↑ FS↓}=>,
+{FT↓ BS↓}=>{FS↓}=>{FT↑ BS↑}=>{FS↑}=>,
+{FT↓}=>{BS↑ FS↓}=>{FT↑}=>{BS↓ FS↑}=>,
+{FT↓}=>{BS↑}=>{FS↓}=>{FT↑}=>{BS↓}=>{FS↑}=>,
+{BS↓}=>{FT↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{FS↑}=>,
+{FS↓}=>{FT↓ BS↓}=>{FS↑}=>{FT↑ BS↑}=>,
+{FT↓}=>{BS↑}=>{FT↑ FS↓}=>{BS↓}=>{FS↑}=>,
+{FT↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{BS↓ FS↑}=>,
+{FT↓}=>{BS↑ FS↓}=>{FT↑}=>{BS↓}=>{FS↑}=>,
+{FT↓}=>{BS↓}=>{FS↓}=>{FT↑}=>{BS↑}=>{FS↑}=>,
+{BS↓}=>{FT↓}=>{FS↓}=>{FT↑ BS↑}=>{FS↑}=>,
+{FT↓ BS↓}=>{FS↓}=>{FT↑}=>{BS↑}=>{FS↑}=>,
+{FT↓}=>{BS↑}=>{FS↓}=>{FT↑}=>{BS↓ FS↑}=>,
+{FT↓ FS↑}=>{BS↓}=>{FT↑ FS↓}=>{BS↑}=>,
+{BS↓}=>{FT↓ FS↑}=>{FT↑ BS↑ FS↓}=>,
+{FS↓}=>{FT↓ BS↓}=>{FS↑}=>{BS↑}=>{FT↑}=>,
+{FT↓ BS↓ FS↑}=>{FS↓}=>{FT↑ BS↑}=>,
+{FT↓}=>{BS↓ FS↑}=>{FT↑ BS↑ FS↓}=>,
+{FT↓ BS↓}=>{FS↑}=>{FT↑ BS↑ FS↓}=>,
+{BS↓}=>{FS↓}=>{BS↑ FS↑}=>,
+{FT↓ BS↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{FS↑}=>,
+{FT↓ BS↓}=>{FT↑ FS↓}=>{BS↑}=>{FS↑}=>,
+

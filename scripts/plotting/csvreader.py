@@ -348,8 +348,12 @@ def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
 
     
 
-def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
-
+def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
+    
+    
+    if seed != -1:
+     quantity=100
+    
     #VIEWING WINDOW
     start=0
     stop=-1
@@ -441,9 +445,14 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
       seed_num = re.sub('_.*', '', seed_num )
       seed_num= int(  seed_num )
       
+      if seed != -1:
+       if seed_num != seed:
+        continue
+        
+      else:
       #only generate plots for top X
-      if seed_num not in top_seeds:
-       continue
+       if seed_num not in top_seeds:
+        continue
       
       print( record_file )
       
@@ -595,16 +604,16 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
         
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
-        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "blue")
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
+        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
         
         
         
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize)
-        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize)
-        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "blue")
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange" )
+        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
         
         #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
         #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fontsize )
@@ -655,13 +664,13 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000 ):
         y=ymax+height/10
         ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize)
-        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
-        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "blue")
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
+        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize)
-        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize)
-        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize)
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "blue")
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange")
+        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
         
         
         #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
@@ -1544,10 +1553,13 @@ def plot_fitness_landscape( mutation_file_path) :
 
 
 
-def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_color=() ):
+def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_color=(), linecolor="" ):
 
      if len(mod_color) <= 0:
-      ax.plot( time, data, label=ylabel )
+      if linecolor != "":
+       ax.plot( time, data, label=ylabel, color=linecolor )
+      else:
+       ax.plot( time, data, label=ylabel )
      else:
       #print( "using color"+ mod_color )
       #quit()
@@ -1593,7 +1605,8 @@ def main():
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
      print("plot_actvity ") 
      #plot_fitness2()
-     plot_activity( 10, 0, 2000 )
+     #plot_activity( 100, 1110, 1350, 68 )
+     plot_activity( 10, 100, 800 )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation

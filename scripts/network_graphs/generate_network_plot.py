@@ -199,9 +199,9 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
     elif i==3:
       name="FS"
     elif i==4:
-      name="INT1"
+      name="I1"
     elif i==5:
-      name="INT2"
+      name="I2"
     else:
       name="unknown"
     n=name
@@ -283,9 +283,9 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
         elif i==3:
           n="FS"
         elif i==4:
-          n="INT1"
+          n="I1"
         elif i==5:
-          n="INT2"
+          n="I2"
         else:
           n="unknown"
         

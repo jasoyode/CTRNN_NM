@@ -24,13 +24,13 @@ STEPSIZE=0.1
 self_loop_cutoff=4
 
 STEPS=500
-VECTOR_STEPS=2
+VECTOR_STEPS=1
 
 DEBUG=0
 
-SHOW_VECTOR=False
+SHOW_VECTOR=True
 
-SEED=1
+SEED=2
 
 #PHENOTYPE_CSV_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/phenotypes.txt"
 #GENOME_TYPE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/genomes.txt"
@@ -46,10 +46,10 @@ CONSTANT_INPUT_LEVELS_PER_UNIT=10
 LEVELS_CURRENT_ACTIVATION=10
 
 #fewer columns
-VECTOR_FIELD_DIVIDER=2
+VECTOR_FIELD_DIVIDER=4
 
 #fewer rows
-VECTOR_FIELD_DIVIDER_2=5
+VECTOR_FIELD_DIVIDER_2=2
 
 #range of starting activation levels
 STARTING_ACTIVATION_EXTREMA=[-25,25]
@@ -247,10 +247,10 @@ def main():
     if SHOW_VECTOR:
       constant_input_levels=[]
       starting_states=[]
-      for i in range( int(CONSTANT_INPUT_EXTREMA[0]*CONSTANT_INPUT_LEVELS_PER_UNIT/VECTOR_FIELD_DIVIDER),int(( CONSTANT_INPUT_EXTREMA[1]*CONSTANT_INPUT_LEVELS_PER_UNIT+1)/VECTOR_FIELD_DIVIDER) ):
-        constant_input_levels.append( i/(CONSTANT_INPUT_LEVELS_PER_UNIT/VECTOR_FIELD_DIVIDER) )
-      for i in range( int(STARTING_ACTIVATION_EXTREMA[0]*LEVELS_CURRENT_ACTIVATION/VECTOR_FIELD_DIVIDER_2),int(( STARTING_ACTIVATION_EXTREMA[1]*LEVELS_CURRENT_ACTIVATION+1)/VECTOR_FIELD_DIVIDER_2) ):
-        starting_states.append( i/(LEVELS_CURRENT_ACTIVATION/VECTOR_FIELD_DIVIDER_2) )
+      for j in range( int(CONSTANT_INPUT_EXTREMA[0]*CONSTANT_INPUT_LEVELS_PER_UNIT/VECTOR_FIELD_DIVIDER),int(( CONSTANT_INPUT_EXTREMA[1]*CONSTANT_INPUT_LEVELS_PER_UNIT+1)/VECTOR_FIELD_DIVIDER) ):
+        constant_input_levels.append( j/(CONSTANT_INPUT_LEVELS_PER_UNIT/VECTOR_FIELD_DIVIDER) )
+      for j in range( int(STARTING_ACTIVATION_EXTREMA[0]*LEVELS_CURRENT_ACTIVATION/VECTOR_FIELD_DIVIDER_2),int(( STARTING_ACTIVATION_EXTREMA[1]*LEVELS_CURRENT_ACTIVATION+1)/VECTOR_FIELD_DIVIDER_2) ):
+        starting_states.append( j/(LEVELS_CURRENT_ACTIVATION/VECTOR_FIELD_DIVIDER_2) )
       for external_input_level in constant_input_levels:
         eq_seqs=find_equilibrium_sequences( external_input_level , starting_states, w_ii, bias_i, time_constant, stepsize )
         equilibrium_seq_plot_data[external_input_level] = eq_seqs
@@ -275,6 +275,7 @@ def main():
     
     #High res version
     #plt.figure(num=0, figsize=(18, 16), dpi=160)
+    print( i )
     plt.figure( i )
     plt.xlim(CONSTANT_INPUT_EXTREMA[0], CONSTANT_INPUT_EXTREMA[1])
     plt.ylim(-0.1, 1.1)
@@ -308,7 +309,7 @@ def main():
     #####################################
     plt.plot( x_data_1, y_data_1, color="black", linewidth=4.0)  #, alpha=1.0, s=10**2)  #, size=0.5) # label=seed)
     
-    plt.ylabel('Output of Neuron')
+    plt.ylabel('Output of {}'.format(name) )
     plt.xlabel('Current Input')
 
     plt.title( 'Steady State Input Output Flow')
