@@ -15,10 +15,16 @@ fi
 
 
 #1=bias1, bias2
-for i in $( seq 1 6); do
-  ./runExp $INI $DIR $TITLE $i $i 19 19  &
-done
+#for i in $( seq 1 6); do
+#  ./runExp $INI $DIR $TITLE $i $i 19 19  &
+#done
 
+#1->2
+#./runExp $INI $DIR $TITLE 11 11 19 19  &
+
+#1->1   vs  1->2
+
+./runExp $INI $DIR $TITLE 10 10 11 11  &
 
 #the rest are not nearly as meaningful
 exit

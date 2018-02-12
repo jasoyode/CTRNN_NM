@@ -8,9 +8,9 @@ import sys
 
 #DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard"
 #DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard"
-#DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
+DIR="../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
 
-DIR="../../DATA/CITED_DATA"
+#DIR="../../DATA/CITED_DATA"
 #DIR="../../DATA/TEMP_DATA/DUD"
 
 
@@ -31,10 +31,12 @@ SEARCH="XXX"
 #CSVs = [ "CPG_MPG_RPG_STANDARD_CONST.csv", "CPG_MPG_RPG_STANDARD_SIN_AMPLITUDE.csv", "CPG_MPG_RPG_STANDARD_PERIODS.csv" ]
 
 
-CSVs=[ "const_mod_extremes_NOAMP.csv","const_mod_extremes2_NOAMP.csv", "amp_mod_5_levels.csv", "const_mods_NOAMP.csv"]
+#CSVs=[ "const_mod_extremes_NOAMP.csv","const_mod_extremes2_NOAMP.csv", "amp_mod_5_levels.csv", "const_mods_NOAMP.csv"]
 #CSVs=[ "amp_mod_5_levels.csv"]
 
-
+#CSVs=["const_mod_lows_NOAMP.csv", "const_mod_-0.05.csv", "const_mod_0.05.csv", "const_mod_lows2.csv", "amp_mod_5_LOW_levels.csv", "const_mod_0.1.csv", "const_mod_-0.1.csv"]
+#CSVs=["const_mod_0.1.csv"]
+CSVs=["amp_mod_5_levels.csv"]
 
 os.system( "mkdir temp_files" )
 

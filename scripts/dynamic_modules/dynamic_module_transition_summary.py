@@ -56,8 +56,40 @@ else:
   DEFAULT_FILE_TEMPLATE=SEED_ACTIVITY_FILE
 
 
-def main( file_template, output_file="" ):
+DM_DICT={}
+
+
+def load_beer_list():
+  dm_file="BEER_DM_LIST.csv"
   
+  activity_data=[]
+
+  with open( dm_file  ) as file:
+    dm_reader = csv.DictReader( file )
+    
+    if not "transition" in dm_reader.fieldnames:
+      print("The file you passed in does not have a transition header, exiting...")
+      quit()
+    
+    for row in dm_reader:
+      entry = []
+      entry.append( int( row["number"] ) )
+      
+      entry.append(  row["adjacency"] )
+      entry.append(  row["consistency"] )
+      entry.append(  row["ordered"] )
+
+      DM_DICT[ row["transition"]    ] = entry
+  
+
+
+
+def main( file_template, output_file="" ):
+  load_beer_list()
+  #print( DM_DICT )
+  #quit()
+  
+   
   WRITE_TO_FILE_MODE=False
   if output_file != "":
     WRITE_TO_FILE_MODE=True
@@ -136,7 +168,10 @@ def main( file_template, output_file="" ):
     for item in sorted(pattern_to_seed_map.items(), key=lambda x: -len(x[1]) ):
       if WRITE_TO_FILE_MODE:
         #fh.write( "The following pattern appears {} times in the seeds {}:\n".format( len( pattern_to_seed_map[ item[0] ]), pattern_to_seed_map[ item[0] ] ))
-        fh.write( "{}  appeared {} times in the seeds {}".format( item[0], len( pattern_to_seed_map[ item[0] ]), pattern_to_seed_map[ item[0] ] ))
+        if item[0] in DM_DICT:
+          fh.write( "{} was DM #{} in Beers list, has consistency: {} adjacency: {} and  appeared {} times in the seeds {}".format( item[0], DM_DICT[item[0]][0], DM_DICT[item[0]][1], DM_DICT[item[0]][2],  len( pattern_to_seed_map[ item[0] ]), pattern_to_seed_map[ item[0] ] ))
+        else:
+          fh.write( "{}  appeared {} times in the seeds {}".format( item[0], len( pattern_to_seed_map[ item[0] ]), pattern_to_seed_map[ item[0] ] ))
         fh.write( "\n" )
       else:
         print( "The following pattern appears {} times in the seeds {}:".format( len( pattern_to_seed_map[ item[0] ]), pattern_to_seed_map[ item[0] ] ))

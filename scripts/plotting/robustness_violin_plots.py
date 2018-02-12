@@ -10,7 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-VIOLIN_MODE=False
+VIOLIN_MODE=True
 
 SUFFIX="ROBUSTNESS_RESULTS_AMP_.csv"
 #SUFFIX="ROBUSTNESS_RESULTS_CONST_NEG_-.csv"
@@ -213,7 +213,7 @@ def customize(ax2, data):
 if VIOLIN_MODE:
     customize(axes[0, 0], data0 )
 else:
-    axes[0, 0].boxplot(data0, color="blue")
+    axes[0, 0].boxplot(data0)  #, color="blue")
 
 axes[0, 0].set_title('Comparing Network Robustness', fontsize=fs)
 

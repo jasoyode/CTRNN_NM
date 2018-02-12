@@ -14,48 +14,69 @@ import matplotlib.pyplot as plt
 
 MinSearchValue = -1.0
 MaxSearchValue = 1.0
-
 ROUND=0
 E=2.71828
-EQ_THRESHOLD=0.001
-#EQ_THRESHOLD=0
-
+EQ_THRESHOLD=0.0001
+OUTPUT_THRESHOLD=0.001
 STEPSIZE=0.1
 self_loop_cutoff=4
-
-STEPS=500
+STEPS=5
 VECTOR_STEPS=1
 
+MODULATION=-0.25
+
+ALPHA=0.5
 DEBUG=0
-
-SHOW_VECTOR=True
-
-SEED=2
+SHOW_VECTOR=False
+#True
+SEED=29
 
 #PHENOTYPE_CSV_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/phenotypes.txt"
 #GENOME_TYPE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/genomes.txt"
 
-PHENOTYPE_CSV_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/phenotypes.txt"
-GENOME_TYPE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CITED_DATA/genomes.txt"
+PHENOTYPE_CSV_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/phenotypes.txt"
+GENOME_TYPE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/genomes.txt"
+
+PHENOTYPE_CSV_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
+GENOME_TYPE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/genomes.txt"
 
 
 #x coordinates
-CONSTANT_INPUT_LEVELS_PER_UNIT=10
+CONSTANT_INPUT_LEVELS_PER_UNIT=25
 
 #y coordinates
 LEVELS_CURRENT_ACTIVATION=10
 
 #fewer columns
-VECTOR_FIELD_DIVIDER=4
+VECTOR_FIELD_DIVIDER=CONSTANT_INPUT_LEVELS_PER_UNIT*8/10
 
 #fewer rows
-VECTOR_FIELD_DIVIDER_2=2
+VECTOR_FIELD_DIVIDER_2=LEVELS_CURRENT_ACTIVATION*2/10
 
 #range of starting activation levels
 STARTING_ACTIVATION_EXTREMA=[-25,25]
 
 #range of external inputs to test
-CONSTANT_INPUT_EXTREMA=[-15,15]
+CONSTANT_INPUT_EXTREMA=[-20,20]
+
+if MODULATION != 0.0:
+  CSV_OUTPUT_PATH=re.sub("phenotypes.txt","seed_{}_ssio_mod_{}.csv".format( SEED, MODULATION ) , PHENOTYPE_CSV_PATH )
+  
+  SSIO_PLOT_OUTPUT=re.sub("/DATA/","/PLOTS/",PHENOTYPE_CSV_PATH )
+  PNG_OUTPUT_DIR=re.sub("phenotypes.txt","SSIO/" , SSIO_PLOT_OUTPUT)
+  SSIO_PLOT_OUTPUT=re.sub("phenotypes.txt","SSIO/seed_{}_ssio_mod_{}.png".format(SEED, MODULATION), SSIO_PLOT_OUTPUT)
+else:
+  CSV_OUTPUT_PATH=re.sub("phenotypes.txt","seed_{}_ssio.csv".format( SEED ) , PHENOTYPE_CSV_PATH )
+  
+  SSIO_PLOT_OUTPUT=re.sub("/DATA/","/PLOTS/",PHENOTYPE_CSV_PATH)
+  PNG_OUTPUT_DIR=re.sub("phenotypes.txt","SSIO/" , SSIO_PLOT_OUTPUT)
+  SSIO_PLOT_OUTPUT=re.sub("phenotypes.txt","SSIO/seed_{}_ssio.png".format( SEED ), SSIO_PLOT_OUTPUT)
+  
+
+#print( CSV_OUTPUT_PATH )
+#print( SSIO_PLOT_OUTPUT )
+#print( PNG_OUTPUT_DIR )
+#quit()
 
 
 #returns a dictionary of the parameters and values
@@ -71,7 +92,8 @@ def get_phenotype_dictionary( csv_path, SEED ):
       size=0  
       if int(row["seed"]) == SEED:
         for header in row.keys():
-          if not header == None:
+          if not header == None and header.strip() != "":
+            print( row[header] )
             value_dict[ header ] =  float( row[header] )
             if "bias" in header:
               if int(header[-1]) > size:
@@ -179,6 +201,7 @@ def main():
   
   
   for i in range(1, size+1):
+    neuron_ssio=i
   #do all the stuff and generate plots
     if i ==1:
       name="FT"
@@ -207,6 +230,10 @@ def main():
     #w_ii=15.546
     #w_ii=3.54
     
+    modulation_level=MODULATION
+    
+    w_ii = w_ii * (1 + modulation_level )
+    
     #bias_i=-9.573
     external_input=0
     stepsize=0.1
@@ -221,8 +248,9 @@ def main():
     x=calculate_equilibrium_state(state_i, w_ii, bias_i, external_input, stepsize, time_constant, steps  )
     #y=find_equilibrium_sequences( state_i, w_ii, bias_i, external_input, stepsize, time_constant, steps  )
     
-    pts = find_equilibrium_points(external_input, starting_states, w_ii, bias_i, time_constant, stepsize )
+    
     if DEBUG == 5:
+      pts = find_equilibrium_points(external_input, starting_states, w_ii, bias_i, time_constant, stepsize )
       print(x)
       quit()
       #print( x[-1] -x[-2] )
@@ -307,7 +335,7 @@ def main():
     #####################################
     # Plot the equilibrium points as a line
     #####################################
-    plt.plot( x_data_1, y_data_1, color="black", linewidth=4.0)  #, alpha=1.0, s=10**2)  #, size=0.5) # label=seed)
+    plt.plot( x_data_1, y_data_1, color="black", linewidth=2.0, alpha=ALPHA)  #, alpha=1.0, s=10**2)  #, size=0.5) # label=seed)
     
     plt.ylabel('Output of {}'.format(name) )
     plt.xlabel('Current Input')
@@ -316,44 +344,115 @@ def main():
     #plt.savefig(experiment_title + "_normalized.png" ) 
     #os.system( "mkdir -p {}/{}/{}".format( PLOTS, experiment_title, job_title ) )
     #plt.savefig( "{}/{}/{}/{}_normalized.png".format( PLOTS, experiment_title, job_title, robust_label) )
-    plt.savefig( "SEED-{}_{}_SSIO.png".format(SEED,name) )
-  
-  
-  
-  #print( equilibrium_plot_data_1 )
-  
+    
+    #make sure directory exists
+    os.system("mkdir -p {}".format(PNG_OUTPUT_DIR) )
+    
+    
+    save_file= re.sub( "_ssio","_ssio_n{}".format(neuron_ssio), SSIO_PLOT_OUTPUT )
+    
+    plt.savefig( save_file )
+    
+    ################
+    # write all SSIO data to csv file for later plotting overlay
+    ###############
+    
+    save_file= re.sub( "_ssio","_ssio_n{}".format(neuron_ssio), CSV_OUTPUT_PATH )
+    
+    fh = open( save_file, "w")
+    fh.write("x,y,\n")
+    for i in range(0, len( x_data_1) ):
+      fh.write("{},{},\n".format(x_data_1[i], y_data_1[i] ) )
+    fh.close()
+    
+    #if MODULATION != 0.0:
+    #  plt.savefig( "mod_{}_SEED-{}_{}_SSIO.png".format(MODULATION, SEED,name) )
+    #else:
+    #  plt.savefig( "SEED-{}_{}_SSIO.png".format(SEED,name) )
+    
 
 def logit(p):
-#  return p
   if p==1 :
     return 50
   if p==0:
     return -50
-    
   return np.log(p) - np.log(1 - p)
   
+
+
+def find_unstable_equilibrium_point(constant_input_level, low_activation_level, high_activation_level, fine_tuning_steps, self_weight, bias, time_constant, stepsize ):
   
+  prev_level=-1
+  prev_direction=0
+  
+  for i in range(0, fine_tuning_steps):
+    
+    activation_level = low_activation_level + i*( high_activation_level- low_activation_level)/fine_tuning_steps
+
+    #print( "low:{}   high:{}  i:{} actLvl: {}".format( low_activation_level, high_activation_level, i, activation_level))
+
+    
+    #get state and direction
+    new_eq, direction = calculate_equilibrium_state(activation_level, self_weight, bias, constant_input_level, stepsize, time_constant, STEPS, False )
+    ####################################
+    if new_eq:
+      return new_eq
+      
+    #if we did not find an equilibria but the direction of our trajectory changed, we found an unstable equilibrium point
+    if not new_eq and  (prev_direction * direction) < 0:
+      new_eq = (sigmoid( 1 * (activation_level + bias)     ) + prevOutput  )/2
+      return new_eq
+    
+    prev_direction=direction
+    prev_output=sigmoid( 1 * (activation_level + bias))
+  
+    
+    #####################################
+    prev_level=activation_level
+    
+  return prev_output
 
 def find_equilibrium_points(constant_input_level, starting_activation_levels, self_weight, bias, time_constant, stepsize ):
   #contain the set of all equilibrium points found
   equilibrium_states=[]
   
+  prev_direction=0
+  prevEq=0
   #we need to go through all the potential starting states to see where the equilibrium points are found
   for activation_level in starting_activation_levels:
     
-    #print( activation_level )
-    new_eq=calculate_equilibrium_state(activation_level, self_weight, bias, constant_input_level, stepsize, time_constant, STEPS, False )
+    new_eq, direction = calculate_equilibrium_state(activation_level, self_weight, bias, constant_input_level, stepsize, time_constant, STEPS, False )
+    #print("input:{}   act: {}     direction: {}".format(constant_input_level, activation_level, direction ))
     add=True
+    
+    #if we did not find an equilibria but the direction of our trajectory changed, we found an unstable equilibrium point
+    if not new_eq and (prev_direction * direction) < 0:
+      #print( "new_eq:{}   prev_dir:{}   dir:{}".format( new_eq, prev_direction, direction))
+      new_eq = find_unstable_equilibrium_point(constant_input_level, prev_activation, activation_level, 100, self_weight, bias, time_constant, stepsize )
+      #print( new_eq )
+      #quit()
+    
     for eq in equilibrium_states:
-      
-      if not eq or not new_eq:
+      if not eq:
+        #print( "eq empty")
+        x=5
+      elif not new_eq:
         add=False
+        
       #if we find an equlibrium point already included, set add to false
       elif abs( eq - new_eq ) <= EQ_THRESHOLD*10:
         add=False
+    
+    GAIN=1
+    
     #if there is not already the eq point, then add it
     if add:
       equilibrium_states.append( new_eq )
+  
+    prev_direction=direction
+    prev_activation=activation_level
+  
+  #quit()
   
   return equilibrium_states
   
@@ -366,7 +465,7 @@ def find_equilibrium_sequences(constant_input_level, starting_activation_levels,
   for activation_level in starting_activation_levels:
     
     #print( activation_level )
-    new_eq_seq=calculate_equilibrium_state(activation_level, self_weight, bias, constant_input_level, stepsize, time_constant, VECTOR_STEPS, True )
+    new_eq_seq, direction=calculate_equilibrium_state(activation_level, self_weight, bias, constant_input_level, stepsize, time_constant, VECTOR_STEPS, True )
     add=True
     
     for eq_seq in equilibrium_sequences:
@@ -418,11 +517,16 @@ def eulerStep(stepsize, external_input, weight, bias, time_constant, state, outp
   
 
 def calculate_equilibrium_state(state_i, w_ii, bias_i, external_input, stepsize, time_constant, steps, SEQ_MODE=True  ):
+  
+  
   prev_state=state_i
   
   GAIN=1
   
   output = sigmoid( GAIN * (state_i + bias_i)     )
+  
+  #record first  output for comparison
+  startingState=output
   
   #store all data points leading up to is
   if SEQ_MODE:
@@ -445,7 +549,7 @@ def calculate_equilibrium_state(state_i, w_ii, bias_i, external_input, stepsize,
 
     state_i, output = eulerStep(stepsize, external_input, w_ii, bias_i, time_constant, state_i, output )
 
-
+    direction = startingState-output
     
     if SEQ_MODE:
       if ROUND > 0:
@@ -454,19 +558,26 @@ def calculate_equilibrium_state(state_i, w_ii, bias_i, external_input, stepsize,
       else:
         seq.append( output )
     
-    if abs( state_i - prev_state ) <= EQ_THRESHOLD:
+    stuck_low=  sigmoid( state_i + bias_i ) < OUTPUT_THRESHOLD and (state_i - prev_state) < 0
+    
+    stuck_high= sigmoid( state_i + bias_i ) > ( 1 - OUTPUT_THRESHOLD) and (state_i - prev_state) > 0
+    
+    stuck_stable=abs( state_i - prev_state ) <= EQ_THRESHOLD
+    
+    if stuck_low or stuck_high or stuck_stable:
+    
       if DEBUG > 1:
         print("Found equilibrium point after {} steps, state: {}    output:{}".format(t, state_i,  sigmoid(state_i) ) )
         
       if SEQ_MODE:
-        return seq
+        return seq, direction
       else:
         if ROUND > 0:
           #return round( sigmoid( state_i ), ROUND)
-          return round(output, ROUND)
+          return round(output, ROUND), direction
         else:
           #return sigmoid( state_i )
-          return output
+          return output, direction
     
     #print( "state: {}      output:{}".format( state_i, (sigmoid(state_i + bias_i ) ) ))
     
@@ -476,13 +587,14 @@ def calculate_equilibrium_state(state_i, w_ii, bias_i, external_input, stepsize,
 
   
   if SEQ_MODE:
-    return seq
+    return seq, direction
   else:
-    return None
+    return None, direction
   ######################
   
 def sigmoid( x ):
   #      1 / (1 + E^(-x) )
   return 1 / (1 + E ** (-x) )
+
 
 main()

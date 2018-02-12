@@ -23,6 +23,11 @@ import matplotlib.pyplot as plt
 DATA="../../DATA"
 PLOTS="../../PLOTS"
 
+
+
+SSIO_MODE=True
+SSIO_MODULATION_MODE=True
+
 #0   SENSORS OFF
 #1   SENSORS ON
 MPG_EXCLUDE="1"
@@ -109,6 +114,8 @@ if len( sys.argv) > 2 and ".csv" in sys.argv[-1]:
 
 
 def plot_fitness2( ):
+
+    print( "plot_fitness2" )
 
     #each element is a collection of all the generations in 1 run
     gen_all = []
@@ -346,10 +353,53 @@ def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
     
     plt.savefig("{0}/COMPARE/comparing_{1}.png".format(PLOTS, comparisonName ) )
 
-    
 
-def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
+def get_ssio_data_for_plotting( DATA, exp_base, seed_num): 
+ SSIO_MODE=True
+ ssio_files={}
+ ssio_data={}
+ for i in range(1,4):
+  ssio_files[i] = {}
+  
+  if SSIO_MODULATION_MODE:
+   #1. glob get all files matching the mod
+   mod_files= glob.glob(  '{}/{}/seed_{}_ssio_n{}_mod_*.csv'.format( DATA,exp_base,seed_num, i   ) )
+   #2. strip out the mod value
+   for mod_ssio in mod_files:
+    ssio_mod_level=re.sub('{}/{}/seed_{}_ssio_n{}_mod_'.format(DATA,exp_base,seed_num, i),"",mod_ssio)
+    ssio_mod_level=re.sub( ".csv","", ssio_mod_level)
+    ssio_mod_level=float( ssio_mod_level )
+    ssio_files[i][ssio_mod_level]=mod_ssio
+  
+  #normal file is just modulation level 0
+  ssio_files[i][0]="{}/{}/seed_{}_ssio_n{}.csv".format(DATA,exp_base,seed_num, i)
+  #if we are missing any SSIOs, then cancel ssio plotting mode
+  if not os.path.isfile( ssio_files[i][0]  ):
+   SSIO_MODE=False
+   break
+  
+  ssio_data[i]={}
+  for mod in ssio_files[i].keys():
+   #print( mod)
+   ssio_data[i][mod]={}
+   ssio_data[i][mod]["x"]=[]
+   ssio_data[i][mod]["y"]=[]
+  
+  for mod, ssio_file in ssio_files[i].items():
+   #for each neuron
+   with open( ssio_file, 'r') as f:
+    ssio_reader = csv.DictReader(f)
+    for ssio_row in ssio_reader:
+     ssio_data[i][mod]["x"].append( float(ssio_row["x"]) )
+     ssio_data[i][mod]["y"].append( float(ssio_row["y"]) )
+
+
+
+ return ssio_data, SSIO_MODE
+
+def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False ):
     
+    print("plot_activity")
     
     if seed != -1:
      quantity=100
@@ -440,7 +490,10 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
     
     count=0
     for record_file in record_files:
-    
+      
+      if "ssio" in record_file:
+       continue
+      
       seed_num = re.sub('.*seed_', '', record_file )
       seed_num = re.sub('_.*', '', seed_num )
       seed_num= int(  seed_num )
@@ -453,8 +506,6 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
       #only generate plots for top X
        if seed_num not in top_seeds:
         continue
-      
-      print( record_file )
       
       time = []
       modulation = []
@@ -489,6 +540,9 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
           if 'run' in row:
            if row['run'] == MPG_EXCLUDE:
             continue
+          
+          #print( record_file )
+          
           time.append( float( row['time'] ) )
           modulation.append( float( row['modulation'] ) )
           jointX.append( float( row['jointX'] )  )
@@ -532,7 +586,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
            #sensor input 
            sensor_input = (1 + receptor_str*modulation[-1] ) * ( angle[-1] * seed_to_genome_map[seed_num]["w_AS->{}".format(i)] ) 
            
-           print( "#1: " + str(sensor_input ) )
+           #print( "#1: " + str(sensor_input ) )
            
            summed_input += sensor_input
             
@@ -779,83 +833,145 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
         #######################################################
         # 2d plots
         
-        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
         
-        #old scatter plot
-        #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n_out[1][start:stop], n_out[2][start:stop] ]
-        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
-        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
-        plt.setp(lc, linewidth=thickness )
-        dyn2.add_collection( lc )
-        dyn2.set_xlabel("FT")
-        dyn2.set_ylabel("BS")
+        if SSIO_MODE:
+         ssio_data, SSIO_MODE = get_ssio_data_for_plotting( DATA, exp_base, seed_num )
         
-        #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n_out[1][start:stop], n_out[3][start:stop] ]
-        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
-        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
-        plt.setp(lc, linewidth=thickness )
-        dyn3.add_collection( lc )
-        dyn3.set_xlabel("FT")
-        dyn3.set_ylabel("FS")
         
-        #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
-        X = [ n_out[2][start:stop], n_out[3][start:stop] ]
-        points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
-        segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
-        plt.setp(lc, linewidth=thickness )
-        dyn4.add_collection( lc )
-        dyn4.set_xlabel("BS")
-        dyn4.set_ylabel("FS")
-        
-        plt.tight_layout()
-        
-        plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
-        
+        SHOW_2D_NON_SS=False
+###########################################################################################################################        
+        if SHOW_2D_NON_SS:
+         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
+         
+         #old scatter plot
+         #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+         X = [ n_out[1][start:stop], n_out[2][start:stop] ]
+         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+         plt.setp(lc, linewidth=thickness )
+         dyn2.add_collection( lc )
+         if SSIO_MODE:
+          ss_i=1
+          for mod in ssio_data[i].keys():
+           R=min( 1, max(mod*2,0))
+           G=0
+           B=min(1, max(-mod*2,0))
+           ssio_color=(R,G,B)
+           dyn2.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+         
+         dyn2.set_xlabel("FT")
+         dyn2.set_ylabel("BS")
+         
+         #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+         X = [ n_out[1][start:stop], n_out[3][start:stop] ]
+         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+         plt.setp(lc, linewidth=thickness )
+         dyn3.add_collection( lc )
+         if SSIO_MODE:
+          ss_i=2
+          for mod in ssio_data[i].keys():
+           R=min( 1, max(mod*2,0))
+           G=0
+           B=min(1, max(-mod*2,0))
+           ssio_color=(R,G,B)
+           dyn3.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+         dyn3.set_xlabel("FT")
+         dyn3.set_ylabel("FS")
+         
+         #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
+         X = [ n_out[2][start:stop], n_out[3][start:stop] ]
+         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
+         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+         plt.setp(lc, linewidth=thickness )
+         dyn4.add_collection( lc )
+         if SSIO_MODE:
+          ss_i=3
+          for mod in ssio_data[i].keys():
+           R=min( 1, max(mod*2,0))
+           G=0
+           B=min(1, max(-mod*2,0))
+           ssio_color=(R,G,B)
+           dyn4.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+         dyn4.set_xlabel("BS")
+         dyn4.set_ylabel("FS")
+         
+         plt.tight_layout()
+         
+         plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+###################################################################################################################         
         
         #######################################################
         # 2d plots fixed
         
+        ##############################
+        # SSIO include if files exist
+        ##############################
+
+        if SSIO_MODE:
+         ssio_data, SSIO_MODE = get_ssio_data_for_plotting( DATA, exp_base, seed_num )
+        
+        
         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
         
-        #X_LIM = 5
         
-        #old scatter plot
-        #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         X = [ n_input[1][start:stop], n_out[1][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn2.add_collection( lc )
+        if SSIO_MODE:
+         ss_i=1
+         for mod in ssio_data[i].keys():
+          R=min( 1, max(mod*2,0))
+          G=0
+          B=min(1, max(-mod*2,0))
+          ssio_color=(R,G,B)
+          dyn2.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
         dyn2.set_xlabel("BS+FS")
         dyn2.set_ylabel("FT")
         if XLIM_MODE:
          dyn2.set_xlim(-X_LIM, X_LIM )
         
-        #dyn3.scatter( n_out[1][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         X = [ n_input[2][start:stop], n_out[2][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn3.add_collection( lc )
+        if SSIO_MODE:
+         ss_i=2
+         for mod in ssio_data[i].keys():
+          R=min( 1, max(mod*2,0))
+          G=0
+          B=min(1, max(-mod*2,0))
+          ssio_color=(R,G,B)
+          dyn3.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )         
+         
         dyn3.set_xlabel("FT+FS")
         dyn3.set_ylabel("BS")
         if XLIM_MODE:
          dyn3.set_xlim(-X_LIM,X_LIM)
         
-        #dyn4.scatter( n_out[2][start:stop], n_out[3][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
         X = [ n_input[3][start:stop], n_out[3][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn4.add_collection( lc )
+        if SSIO_MODE:
+         ss_i=3
+         for mod in ssio_data[i].keys():
+          R=min( 1, max(mod*2,0))
+          G=0
+          B=min(1, max(-mod*2,0))
+          ssio_color=(R,G,B)
+          dyn4.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+          
         dyn4.set_xlabel("FT+BS")
         dyn4.set_ylabel("FS")
         if XLIM_MODE:
@@ -898,9 +1014,11 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1 ):
       print( min_angle )
       print( max_angle )   
 
-def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False ):    
-    #print("die")
-    #quit()
+def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False, SSIO_MODE=False, PNG_W=8, PNG_Y=11, seed=-1  ):    
+    
+    SINGLE_SEED_MODE=True
+    if seed == -1:
+     SINGLE_SEED_MODE=False
     
     start=0
     stop=-1
@@ -908,6 +1026,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
     txt = "no txt"
     
     print( "Plotting activity2")
+    #quit()
     
     seed_to_fitness_map={}
     fitness_and_receptors = "{}/fitness_and_receptors.txt".format( experiment_directory  )
@@ -950,8 +1069,9 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
      recorded_activity_files =  glob.glob(  '{}/seed_*.csv'.format( list(testing_dict.keys())[0]  ) ) 
 
      for r in range(0, len(recorded_activity_files)):
-      recorded_activity_files[r] = re.sub(".*seed_","",recorded_activity_files[r] ) 
-      recorded_activity_files[r] = re.sub("_recorded.*","",recorded_activity_files[r] ) 
+      if "recorded" in recorded_activity_files[r]:
+       recorded_activity_files[r] = re.sub(".*seed_","",recorded_activity_files[r] ) 
+       recorded_activity_files[r] = re.sub("_recorded.*","",recorded_activity_files[r] ) 
       
      sorted_seeds_and_fit =[]
      
@@ -998,11 +1118,10 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
     top_seeds = [x[0] for x in sorted_seeds_and_fit]
     print( "top_seeds: " )
     print ( top_seeds )
-    #quit()
 
     print( experiment_directory )
     #quit()
-    record_files =  glob.glob(  '{}/seed_*.csv'.format( experiment_directory  ) ) 
+    record_files =  glob.glob(  '{}/seed_*_recorded_activity.csv'.format( experiment_directory  ) ) 
     
     count=0
     
@@ -1010,20 +1129,31 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
     seed_data_dict = {}
     
     print( "record files {}".format( record_files ))
+    #quit()
     
     #loop through all seed activity files in folder
     for record_file in record_files:
       seed_num = re.sub('.*seed_', '', record_file )
       seed_num = re.sub('_.*', '', seed_num )
       seed_num= int(  seed_num )
-      #only generate plots for top X
-      if seed_num not in top_seeds:
-       print("skipping seed {}".format(seed_num) )
-       continue
+      
+      if SINGLE_SEED_MODE:
+      
+       if seed != seed_num:
+        continue
+      
       else:
-       print( "plotting for seed {}".format(seed_num) )
+       #only generate plots for top X
+       if seed_num not in top_seeds:
+        #print("skipping seed {}".format(seed_num) )
+        continue
+       else:
+        print( "plotting for seed {}".format(seed_num) )
+        #continue
       
       seed_data_dict[ seed_num ] = {}
+      
+      #print( testing_dict.keys() )
       
       for testing_dir in testing_dict.keys():
        print( "Get all data from {} for seed {}".format(  testing_dir, seed_num ) )
@@ -1169,7 +1299,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
 
        #FIRST AGG PLOT
        fig = plt.figure(1)
-       fig.set_size_inches(8, 11)
+       fig.set_size_inches(PNG_W, PNG_Y)
 
 
       
@@ -1223,7 +1353,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       plt.close('all')
       
       
-      fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A) ) = plt.subplots(nrows=5, ncols=1, figsize=(8, 11) )        
+      fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A) ) = plt.subplots(nrows=5, ncols=1, figsize=(PNG_W, PNG_Y) )        
       plt.xlabel('Time')
       
       
@@ -1305,7 +1435,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
 
       #FIRST AGG PLOT
       fig = plt.figure(2)
-      fig.set_size_inches(8, 11)
+      fig.set_size_inches(PNG_W, PNG_Y)
       
       for testing_dir in testing_dict.keys():
        rr=int(testing_dict[testing_dir][1])
@@ -1375,7 +1505,11 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       
       plt.close('all')
       fig = plt.figure(3)
-      fig.set_size_inches(8, 11)
+      fig.set_size_inches(PNG_W, PNG_Y)
+      
+      
+      if SSIO_MODE:
+       ssio_data, SSIO_MODE = get_ssio_data_for_plotting( DATA, exp_base, seed_num )
       
       
       ##############FIX THESE
@@ -1384,7 +1518,7 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       for pair in data2d:
        plt.close('all')
        fig = plt.figure(3)
-       fig.set_size_inches(8, 11)
+       fig.set_size_inches(PNG_W, PNG_Y)
        num=pair[0]
        label=pair[1]
        
@@ -1435,6 +1569,17 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
         ax.add_collection( lc )
         ax.set_xlabel( label+ " input"  )
         ax.set_ylabel( label+ " ouput"  )
+        
+        if SSIO_MODE:
+          ss_i=pair[0]
+          for mod in ssio_data[i].keys():
+           R=min( 1, max(mod*2,0))
+           G=0
+           B=min(1, max(-mod*2,0))
+           ssio_color=(R,G,B)
+           ax.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+
+        
  
         if XLIM_MODE:
          ax.set_xlim(-X_LIM, X_LIM )
@@ -1584,11 +1729,11 @@ def main():
      
     elif COMPARE_MODE==3:
      print( "Special Plotting Testing Results Mode:\nWill plot different attributes for seeds in {}\n   according to the specifications in {}".format( directory, csv_path ))
-     print( testing_dict )
-     
+     #print( testing_dict )
      
      #True makes this run in plot all activity mode
-     plot_activity2( testing_dict, 1, 0, 800, True  )
+     #testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False, SSIO_MODE
+     plot_activity2( testing_dict, quantity=1, short_start=0, short_stop=800, plot_all_recorded_activity_mode=True, SSIO_MODE=True, PNG_W=4, PNG_Y=12, seed=29 )
      #plot_activity2( testing_dict, 1, 0, 500, False  )
      
      
@@ -1606,7 +1751,7 @@ def main():
      print("plot_actvity ") 
      #plot_fitness2()
      #plot_activity( 100, 1110, 1350, 68 )
-     plot_activity( 10, 100, 800 )
+     plot_activity( quantity=1, short_start=350, short_stop=1100, seed=35, SSIO_MODE=True )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation

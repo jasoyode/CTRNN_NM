@@ -7,8 +7,7 @@ MIXED_TESTING_MODE=False
 
 #To force generating inis to collect data for every seed in a directory
 FORCE_GEN_ALL=False
-
-
+FORCE_SEED_ALL_LEVELS=True
 
 def main():
   # This script copies a given ini and uses it as a template to generate testing configs
@@ -58,7 +57,9 @@ def create_inis( original_ini_file, original_directory, SEED=-1  ):
   
   steps=50
   step_size=0.01
-  if PLOT_SEED_ACTIVITY_MODE:
+  
+  
+  if PLOT_SEED_ACTIVITY_MODE and not FORCE_SEED_ALL_LEVELS:
     steps=5
     step_size=0.1
   

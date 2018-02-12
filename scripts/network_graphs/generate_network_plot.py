@@ -42,9 +42,12 @@ def main( config_file ):
 
   ROUND                = int( config["PlottingOptions"]["rounding_digits"] )
   MINLEN               = int( config["PlottingOptions"]["edge_length"] )
-  include_angle_sensors= config["PlottingOptions"]["include_angle_sensors"]
-  all_details          = config["PlottingOptions"]["all_details"]
-  plotting_mode        = config["PlottingOptions"]["plotting_mode"]
+  include_angle_sensors= "True" ==  config["PlottingOptions"]["include_angle_sensors"] 
+  
+  
+  
+  all_details          = "True" ==  config["PlottingOptions"]["all_details"]
+  plotting_mode        =  config["PlottingOptions"]["plotting_mode"] 
   #######
   STARTING_SEED        = int( config["Jobs"]["seed_start"] )
   STOPPING_SEED        = int( config["Jobs"]["seed_stop"] )
@@ -322,6 +325,7 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
             A.add_edge(i,j,len=MINLEN, arrowhead="dot", label=lbl_weight,color='blue' )
           else:
             print("weight is zero no showing!")
+          
           
           if include_angle_sensors:
             if (i==j):

@@ -1,0 +1,39 @@
+#### LEGAL CPGs Evolved
+{BS↓}=>{FT↓ FS↑}=>{BS↑}=>{FT↑ FS↓}=>  appeared 25 times in the seeds [2, 5, 9, 15, 21, 25, 28, 30, 35, 37, 41, 45, 51, 54, 63, 65, 67, 75, 85, 86, 87, 91, 92, 96, 97]
+{FT↓ BS↓}=>{FS↓}=>{FT↑ BS↑}=>{FS↑}=>  appeared 18 times in the seeds [4, 8, 11, 19, 29, 33, 34, 38, 40, 42, 48, 59, 60, 77, 79, 80, 81, 98]
+{FT↓}=>{BS↑ FS↓}=>{FT↑}=>{BS↓ FS↑}=>  appeared 10 times in the seeds [18, 26, 36, 43, 57, 58, 74, 78, 93, 95]
+{FT↓}=>{BS↑}=>{FS↓}=>{FT↑}=>{BS↓}=>{FS↑}=>  appeared 7 times in the seeds [3, 6, 27, 46, 66, 70, 76]
+{BS↓}=>{FT↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{FS↑}=>  appeared 5 times in the seeds [12, 20, 32, 56, 83]
+{FT↓}=>{BS↑}=>{FT↑ FS↓}=>{BS↓}=>{FS↑}=>  appeared 3 times in the seeds [24, 52, 84]
+{FT↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{BS↓ FS↑}=>  appeared 3 times in the seeds [47, 82, 99]
+{FT↓}=>{BS↑ FS↓}=>{FT↑}=>{BS↓}=>{FS↑}=>  appeared 3 times in the seeds [16, 73, 90]
+{BS↓}=>{FT↓}=>{FS↓}=>{FT↑ BS↑}=>{FS↑}=>  appeared 2 times in the seeds [64, 89]
+{FT↓}=>{BS↑}=>{FS↓}=>{FT↑}=>{BS↓ FS↑}=>  appeared 2 times in the seeds [55, 61]
+{FT↓ BS↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{FS↑}=>  appeared 1 times in the seeds [31]
+
+
+###############Adjacency Violated
+{BS↓}=>{FT↓ FS↑}=>{FT↑ BS↑ FS↓}=>  appeared 1 times in the seeds [13]
+{FT↓ BS↓ FS↑}=>{FS↓}=>{FT↑ BS↑}=>  appeared 1 times in the seeds [100]
+
+
+
+
+##### TODO, figure this out
+{ --- { ---  appeared 4 times in the seeds [10, 14, 49, 71]
+
+
+
+
+########################not found in beer's list
+{FS↓}=>{FT↓ BS↓}=>{FS↑}=>{FT↑ BS↑}=>  appeared 4 times in the seeds [17, 53, 68, 72]
+{FT↓}=>{BS↓}=>{FS↓}=>{FT↑}=>{BS↑}=>{FS↑}=>  appeared 2 times in the seeds [1, 44]
+{FT↓ BS↓}=>{FS↓}=>{FT↑}=>{BS↑}=>{FS↑}=>  appeared 2 times in the seeds [22, 94]
+{FT↓ FS↑}=>{BS↓}=>{FT↑ FS↓}=>{BS↑}=>  appeared 2 times in the seeds [7, 62]
+{FS↓}=>{FT↓ BS↓}=>{FS↑}=>{BS↑}=>{FT↑}=>  appeared 1 times in the seeds [50]
+{FT↓}=>{BS↓ FS↑}=>{FT↑ BS↑ FS↓}=>  appeared 1 times in the seeds [39]
+{FT↓ BS↓}=>{FS↑}=>{FT↑ BS↑ FS↓}=>  appeared 1 times in the seeds [23]
+{FT↓ BS↓}=>{FT↑ FS↓}=>{BS↑}=>{FS↑}=>  appeared 1 times in the seeds [88]
+
+####module not found at all
+{BS↓}=>{FS↓}=>{BS↑ FS↑}=>  appeared 1 times in the seeds [69]
