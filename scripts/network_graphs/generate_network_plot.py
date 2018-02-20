@@ -31,8 +31,11 @@ PI=3.141592653
 ROUND=3
 
 
-CONFIG_FILE="config.ini"
-
+if len(sys.argv) <= 1:
+  CONFIG_FILE="config.ini"
+else:
+  CONFIG_FILE=sys.argv[1]
+    
 
 def main( config_file ):
 
@@ -40,24 +43,24 @@ def main( config_file ):
 
   config.read(config_file )
 
-  ROUND                = int( config["PlottingOptions"]["rounding_digits"] )
-  MINLEN               = int( config["PlottingOptions"]["edge_length"] )
-  include_angle_sensors= "True" ==  config["PlottingOptions"]["include_angle_sensors"] 
+  ROUND                = int( config["ALL"]["rounding_digits"] )
+  MINLEN               = int( config["ALL"]["edge_length"] )
+  include_angle_sensors= "True" ==  config["ALL"]["include_angle_sensors"] 
   
   
   
-  all_details          = "True" ==  config["PlottingOptions"]["all_details"]
-  plotting_mode        =  config["PlottingOptions"]["plotting_mode"] 
+  all_details          = "True" ==  config["ALL"]["all_details"]
+  plotting_mode        =  config["ALL"]["plotting_mode"] 
   #######
-  STARTING_SEED        = int( config["Jobs"]["seed_start"] )
-  STOPPING_SEED        = int( config["Jobs"]["seed_stop"] )
+  STARTING_SEED        = int( config["ALL"]["seed_start"] )
+  STOPPING_SEED        = int( config["ALL"]["seed_stop"] )
   
-  #SUBFOLDER = config["InputOutput"][""]
-  csv_path           = config["InputOutput"]["input_csv"]
-  SAVE_PATH          = config["InputOutput"]["output_dir"]
-  CUSTOM_NAME        = config["InputOutput"]["custom_output_name"]
-  DYNAMIC_MODULE_CSV = config["InputOutput"]["dynamic_modules_csv"]
-  PLOT_DYNAMIC_MODULES= config["PlottingOptions"]["plot_dynamic_modules"]
+  #SUBFOLDER = config["ALL"]["InputOutput"][""]
+  csv_path           = config["ALL"]["seed_phenotype_txt"]
+  SAVE_PATH          = config["ALL"]["output_dir"]
+  CUSTOM_NAME        = config["ALL"]["custom_output_name"]
+  DYNAMIC_MODULE_CSV = config["ALL"]["dynamic_modules_csv"]
+  PLOT_DYNAMIC_MODULES= config["ALL"]["plot_dynamic_modules"]
 
 
   if plotting_mode=="simple":

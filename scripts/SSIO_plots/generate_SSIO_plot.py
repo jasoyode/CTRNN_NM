@@ -1,3 +1,4 @@
+import configparser
 import re
 import os
 import sys
@@ -59,24 +60,25 @@ STARTING_ACTIVATION_EXTREMA=[-25,25]
 #range of external inputs to test
 CONSTANT_INPUT_EXTREMA=[-20,20]
 
-if MODULATION != 0.0:
-  CSV_OUTPUT_PATH=re.sub("phenotypes.txt","seed_{}_ssio_mod_{}.csv".format( SEED, MODULATION ) , PHENOTYPE_CSV_PATH )
-  
-  SSIO_PLOT_OUTPUT=re.sub("/DATA/","/PLOTS/",PHENOTYPE_CSV_PATH )
-  PNG_OUTPUT_DIR=re.sub("phenotypes.txt","SSIO/" , SSIO_PLOT_OUTPUT)
-  SSIO_PLOT_OUTPUT=re.sub("phenotypes.txt","SSIO/seed_{}_ssio_mod_{}.png".format(SEED, MODULATION), SSIO_PLOT_OUTPUT)
-else:
-  CSV_OUTPUT_PATH=re.sub("phenotypes.txt","seed_{}_ssio.csv".format( SEED ) , PHENOTYPE_CSV_PATH )
-  
-  SSIO_PLOT_OUTPUT=re.sub("/DATA/","/PLOTS/",PHENOTYPE_CSV_PATH)
-  PNG_OUTPUT_DIR=re.sub("phenotypes.txt","SSIO/" , SSIO_PLOT_OUTPUT)
-  SSIO_PLOT_OUTPUT=re.sub("phenotypes.txt","SSIO/seed_{}_ssio.png".format( SEED ), SSIO_PLOT_OUTPUT)
-  
 
-#print( CSV_OUTPUT_PATH )
-#print( SSIO_PLOT_OUTPUT )
-#print( PNG_OUTPUT_DIR )
-#quit()
+
+
+#if config file passed in use that to set variables instead of hard coding
+if len(sys.argv) == 2:
+  config = configparser.ConfigParser()
+  config.read( sys.argv[1]   )
+  
+  #set all the values from the config to override the locally set values here
+  MODULATION_LEVELS=config["ALL"]["MODULATION_VALUES"]
+  SHOW_VECTOR=config["ALL"]["SHOW_VECTOR"]
+  SEED=int(config["ALL"]["seed_num"])
+  PHENOTYPE_CSV_PATH=config["ALL"]["input_csv"]
+  GENOME_TYPE_PATH=config["ALL"]["seed_genomes_txt"]
+  OUTPUT_PATH=config["ALL"]["output_dir"]
+  print( "Generating SSIOs for modulation levels: {}".format(  MODULATION_LEVELS.split() ))
+
+
+
 
 
 #returns a dictionary of the parameters and values
@@ -166,7 +168,28 @@ def inverseMapSearchParameter( x, min, max):
 
 
 
-def main():
+def main( MODULATION ):
+  
+  if MODULATION != 0.0:
+    CSV_OUTPUT_PATH=re.sub("phenotypes.txt","seed_{}_ssio_mod_{}.csv".format( SEED, MODULATION ) , PHENOTYPE_CSV_PATH )
+    SSIO_PLOT_OUTPUT=re.sub("/DATA/","/PLOTS/", PHENOTYPE_CSV_PATH )
+    
+    PNG_OUTPUT_DIR=re.sub("phenotypes.txt","SSIO/" , SSIO_PLOT_OUTPUT)
+    SSIO_PLOT_OUTPUT=re.sub("phenotypes.txt","SSIO/seed_{}_ssio_mod_{}.png".format(SEED, MODULATION), SSIO_PLOT_OUTPUT)
+  else:
+    CSV_OUTPUT_PATH=re.sub("phenotypes.txt","seed_{}_ssio.csv".format( SEED ) , PHENOTYPE_CSV_PATH )
+    SSIO_PLOT_OUTPUT=re.sub("/DATA/","/PLOTS/",PHENOTYPE_CSV_PATH)
+    PNG_OUTPUT_DIR=re.sub("phenotypes.txt","SSIO/" , SSIO_PLOT_OUTPUT)
+    SSIO_PLOT_OUTPUT=re.sub("phenotypes.txt","SSIO/seed_{}_ssio.png".format( SEED ), SSIO_PLOT_OUTPUT)
+  
+  if OUTPUT_PATH != "":
+    os.system("mkdir -p {}/SSIO/".format(OUTPUT_PATH) )
+    if MODULATION == 0.0:
+      SSIO_PLOT_OUTPUT="{}/SSIO/seed_{}_ssio.png".format(OUTPUT_PATH, SEED )
+    else:
+      SSIO_PLOT_OUTPUT="{}/SSIO/seed_{}_ssio_mod_{}.png".format(OUTPUT_PATH, SEED, MODULATION )
+  
+  print("running with modulation: {}".format(MODULATION) )
   
   #PHENOTYPE_CSV_PATH
   #GENOME_TYPE_PATH
@@ -596,5 +619,9 @@ def sigmoid( x ):
   #      1 / (1 + E^(-x) )
   return 1 / (1 + E ** (-x) )
 
+if MODULATION_LEVELS:
+  for m in MODULATION_LEVELS.split():
+    main( float(m) )
+else:
+  main( MODULATION )
 
-main()

@@ -51,8 +51,13 @@ if len(sys.argv) < 2:
   print("Must provide a seed_activity.csv file!")
   print("Running default values")
   DEFAULT_MODE=True
+elif len(sys.argv) == 2:
+  SEED_ACTIVITY_FILE=sys.argv[1]
+  OUTPUT_DM_SEED_FILE=""
+  DEFAULT_FILE_TEMPLATE=SEED_ACTIVITY_FILE
 else:
   SEED_ACTIVITY_FILE=sys.argv[1]
+  OUTPUT_DM_SEED_FILE=sys.argv[2]
   DEFAULT_FILE_TEMPLATE=SEED_ACTIVITY_FILE
 
 
@@ -204,6 +209,17 @@ def main( file_template, output_file="" ):
     print("Compressed format:")
     print( pairs_all_states[0][0] )
     #print(  reduce_to_dm_transition( pair[0] ) )
+
+    
+    if OUTPUT_DM_SEED_FILE != "":
+      fh_dm = open(OUTPUT_DM_SEED_FILE,"w")
+      fh_dm.write("seed,dm,\n")
+      seed = re.sub(".*seed_","",SEED_ACTIVITY_FILE)
+      seed = re.sub("_recorded_activity.csv","", seed)
+      print("Writing seed {} to file: {}".format( seed, OUTPUT_DM_SEED_FILE))
+      fh_dm.write("{},{}".format( seed, pairs[0][0] ) )
+      fh_dm.close()
+    
       
   if WRITE_TO_FILE_MODE  :
     seeds_fh.close()
