@@ -205,7 +205,7 @@ def main( file_template, output_file="" ):
   else:
     pairs = process_file( SEED_ACTIVITY_FILE, True )
     pairs_all_states = process_file( SEED_ACTIVITY_FILE, False )
-    #print( pairs )
+    print( pairs )
     #print( pairs_all_states )
     #for pair in pairs:
     print( "The follow pattern appeared {} times:".format( pairs[0][1] ) )
