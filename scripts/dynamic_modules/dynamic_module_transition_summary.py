@@ -1,6 +1,7 @@
 import csv
 import sys
 import re
+import os
 import operator
 
 DEFAULT_MODE=False
@@ -93,6 +94,10 @@ def main( file_template, output_file="" ):
   load_beer_list()
   #print( DM_DICT )
   #quit()
+  #print( OUTPUT_DM_SEED_FILE   )
+  DIR=re.sub("[^\/]*.csv","", OUTPUT_DM_SEED_FILE )
+  #print( DIR)
+  os.system("mkdir -p {}".format( DIR ) )
   
    
   WRITE_TO_FILE_MODE=False
@@ -212,6 +217,7 @@ def main( file_template, output_file="" ):
 
     
     if OUTPUT_DM_SEED_FILE != "":
+      
       fh_dm = open(OUTPUT_DM_SEED_FILE,"w")
       fh_dm.write("seed,dm,\n")
       seed = re.sub(".*seed_","",SEED_ACTIVITY_FILE)

@@ -1,3 +1,4 @@
+import configparser
 import re
 import os
 import sys
@@ -109,6 +110,11 @@ if len( sys.argv) > 2 and ".csv" in sys.argv[-1]:
    c=row['column']
    testing_dict[dir]= ( label, r, c )
    
+INI_MODE=False
+if ".ini" in sys.argv[-1]:
+ INI_MODE=True
+
+
 
 
 
@@ -366,7 +372,7 @@ def get_ssio_data_for_plotting( DATA, exp_base, seed_num):
    mod_files= glob.glob(  '{}/{}/seed_{}_ssio_n{}_mod_*.csv'.format( DATA,exp_base,seed_num, i   ) )
    #2. strip out the mod value
    for mod_ssio in mod_files:
-    ssio_mod_level=re.sub('{}/{}/seed_{}_ssio_n{}_mod_'.format(DATA,exp_base,seed_num, i),"",mod_ssio)
+    ssio_mod_level=re.sub('.*seed_.*_ssio_n.*_mod_',"",mod_ssio)
     ssio_mod_level=re.sub( ".csv","", ssio_mod_level)
     ssio_mod_level=float( ssio_mod_level )
     ssio_files[i][ssio_mod_level]=mod_ssio
@@ -397,7 +403,10 @@ def get_ssio_data_for_plotting( DATA, exp_base, seed_num):
 
  return ssio_data, SSIO_MODE
 
-def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False ):
+def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False, alternate_output="", ):
+    
+    
+     
     
     print("plot_activity")
     
@@ -413,6 +422,9 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
 
     print( "Plotting activity")
     seed_to_fitness_map={}
+    
+    #print( experiment_directory )
+    
     fitness_and_receptors = "{}/fitness_and_receptors.txt".format( experiment_directory  )
     total_receptors=-1
     
@@ -691,8 +703,11 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
         
         exp_title = re.sub(r'.*/','', experiment_directory )       
         exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
-        
-        plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        if alternate_output== "":
+         plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        else:
+         os.system("mkdir -p {}/NormalTrajectories".format(alternate_output) )
+         plt.savefig("{0}/NormalTrajectories/seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
 ##################################################
 # just plot the activity of output neurons
 ##################################################
@@ -736,9 +751,10 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
         plt.tight_layout()
         legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
         #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
-        
-        plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
-        
+        if alternate_output== "":
+         plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        else:
+         plt.savefig("{0}/NormalTrajectories/single_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
         
 ################################################
         #angle plots
@@ -762,7 +778,10 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
         plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
         exp_title = re.sub(r'.*/','', experiment_directory )       
         exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
-        plt.savefig("{0}/{1}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        if alternate_output== "":
+         plt.savefig("{0}/{1}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        else:
+         plt.savefig("{0}/NormalTrajectories/angles_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
 #############################################################
         
         
@@ -827,8 +846,10 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
         
         
         dyn1.legend()
-        
-        plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        if alternate_output== "":
+         plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        else:
+         plt.savefig("{0}/NormalTrajectories/dynamics3d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
         
         #######################################################
         # 2d plots
@@ -901,7 +922,10 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
          
          plt.tight_layout()
          
-         plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         if alternate_output== "":
+          plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         else:
+          plt.savefig("{0}/NormalTrajectories/dynamics2d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
 ###################################################################################################################         
         
         #######################################################
@@ -978,8 +1002,10 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
          dyn4.set_xlim(-X_LIM,X_LIM)
         
         plt.tight_layout()
-        
-        plt.savefig("{0}/{1}/summed_dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        if alternate_output== "":
+         plt.savefig("{0}/{1}/summed_dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+        else:
+         plt.savefig("{0}/NormalTrajectories/summed_dynamics2d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
         
         
         #not working
@@ -1014,7 +1040,7 @@ def plot_activity( quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MOD
       print( min_angle )
       print( max_angle )   
 
-def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False, SSIO_MODE=False, PNG_W=8, PNG_Y=11, seed=-1  ):    
+def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False, SSIO_MODE=False, PNG_W=8, PNG_Y=11, seed=-1,alternate_output="" ):    
     
     SINGLE_SEED_MODE=True
     if seed == -1:
@@ -1338,9 +1364,15 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
        
        #print( "mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name)  )
        #quit()
-       os.system("mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name) )
-       plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
        
+       if alternate_output=="":
+        os.system("mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name) )
+        plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+       else:
+        #print( "mkdir -p {0}/TESTING_TRAJECTORIES/{1}".format(alternate_output, comparison_name) )
+        os.system("mkdir -p {0}/TESTING_TRAJECTORIES/{1}".format(alternate_output, comparison_name) )
+        plt.savefig("{0}/TESTING_TRAJECTORIES/{4}/{3}_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, st, comparison_name  ) )
+
        plt.close('all')
        ######################################
        
@@ -1428,7 +1460,10 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
       
       #plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
-      plt.savefig("{0}/TESTS/{1}/{5}/neurons_act_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+      if alternate_output=="":
+       plt.savefig("{0}/TESTS/{1}/{5}/neurons_act_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+      else:
+       plt.savefig("{0}/TESTING_TRAJECTORIES/{4}/neurons_act_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, st, comparison_name  ) )
       
       
 ###########################################################
@@ -1501,7 +1536,10 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       #plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
       plt.tight_layout()
       #plt.savefig("demo_seed_{}.png".format( seed_num  ) )
-      plt.savefig("{0}/TESTS/{1}/{4}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name  ) )
+      if alternate_output=="":
+       plt.savefig("{0}/TESTS/{1}/{4}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name  ) )
+      else:
+       plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/dynamics3d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, comparison_name  ) )
       
       plt.close('all')
       fig = plt.figure(3)
@@ -1586,7 +1624,10 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
         plt.title(  testing_dict[testing_dir][0]  )
         
        plt.tight_layout()
-       plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, "n"+label  ) )
+       if alternate_output=="":
+        plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, "n"+label  ) )
+       else:
+        plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/dynamics2d_{4}_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, comparison_name, "n"+label  ) )
       
       
       plt.close('all')
@@ -1618,11 +1659,17 @@ def plot_activity2( testing_dict, quantity=10, short_start=0, short_stop=1000, p
       plt.tight_layout()
       legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
       plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
-      plt.savefig("{0}/TESTS/{1}/{4}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title,  comparison_name  ) )
+      if alternate_output=="":
+       plt.savefig("{0}/TESTS/{1}/{4}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title,  comparison_name  ) )
+      else:
+       plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/angles_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title,  comparison_name  ) )
 
-def plot_fitness_landscape( mutation_file_path) :
-
+def plot_fitness_landscape( mutation_file_path, alternate_output="",SEED="" ) :
+ 
+ 
  BEST_PERF=0.628
+
+
 
  with open( mutation_file_path  ) as mutation_fitnesss_file:
      mutation_fitness_reader = csv.DictReader( mutation_fitnesss_file )
@@ -1681,9 +1728,9 @@ def plot_fitness_landscape( mutation_file_path) :
  plot_path = re.sub( "/mutations/.*seed[^\\/]*.csv", "/", experiment_directory )
  plot_path = re.sub( DATA, "{}/MUTATIONS/".format(PLOTS), plot_path )
  
- #print( "plot_path: {}".format(plot_path) )
- #quit()
- 
+ if alternate_output!="":
+  plot_path="{}/PARAMETER_SPACE/".format(alternate_output)
+  
  os.system( "mkdir -p {}".format( plot_path ) )
  
  savefile = re.sub(".*/seed",'seed', mutation_file_path )
@@ -1718,30 +1765,95 @@ def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_c
 
 def main():
 
+
+    #plotting activity:
+    #
+    quantity=1
+    short_start=350
+    short_stop=1100
+    seed=35
+    SSIO_MODE=True
+    OUTPUT_DIR=""
+    PNG_W=8
+    PNG_Y=12
+
+    if INI_MODE:
+     print("Using config file to set the parameters for plotting")
+     #quit()
+     config = config = configparser.ConfigParser()
+     config.read( sys.argv[-1]  )
+     
+     
+     COMPARE_MODE= int(sys.argv[-2])
+     if  COMPARE_MODE==4:
+      MUTATION_FILE=sys.argv[1]
+     
+     
+     #print( config["ALL"]["output_dir"] )
+     short_start= int( config["ALL"]["short_start"])
+     short_stop=  int( config["ALL"]["short_stop"] )
+     seed= int( config["ALL"]["seed_num"])
+     SSIO_MODE=   config["ALL"]["SSIO_MODE"] == "True"
+     OUTPUT_DIR=config["ALL"]["output_dir"]
+     experiment_directory=config["ALL"]["CTRNN_PATH"]
+     experiment_directory+="/"
+     experiment_directory+=config["ALL"]["experiment_folder"]
+     experiment_title = re.sub(r'.*/','', experiment_directory )
+     
+     PNG_W=float(config["ALL"]["PNG_W"])
+     PNG_Y=float(config["ALL"]["PNG_Y"])
+     
+     if COMPARE_MODE==3:
+      directory = experiment_directory
+      comparison_name = re.sub(".*/","", sys.argv[2] ) 
+      comparison_name = comparison_name.replace(".csv","")
+      
+      #print("comparison name {}".format(comparison_name))
+      
+      #directory=config["ALL"]["CSV_COMPARE_DIR"]
+      csv_path=sys.argv[2]
+      
+      testing_dict={}
+      with open( csv_path  ) as csvfile:
+       reader = csv.DictReader(csvfile)
+       for row in reader:
+        if not 'column' in row:
+         print("Are you sure you specified the correct csv file? It must have a 'column' in the header to work in this mode")
+         quit()
+        
+        dir =  row['directory'] 
+        label = row['label']
+        r=row['row']
+        c=row['column']
+        testing_dict[dir]= ( label, r, c )
+      
+    
     
     #make sure folder exists
     if COMPARE_MODE==1:
      os.system( "mkdir -p {}/{}".format( PLOTS, "COMPARE" ) )
      plot_fitness(comparison_name, experiment_directories )
      
-    elif COMPARE_MODE==2: 
+    elif COMPARE_MODE==2:
      plot_fitness(comparison_name, experiment_directories, experiment_styles, True)
      
     elif COMPARE_MODE==3:
      print( "Special Plotting Testing Results Mode:\nWill plot different attributes for seeds in {}\n   according to the specifications in {}".format( directory, csv_path ))
      #print( testing_dict )
-     
      #True makes this run in plot all activity mode
-     #testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False, SSIO_MODE
-     plot_activity2( testing_dict, quantity=1, short_start=0, short_stop=800, plot_all_recorded_activity_mode=True, SSIO_MODE=True, PNG_W=4, PNG_Y=12, seed=29 )
-     #plot_activity2( testing_dict, 1, 0, 500, False  )
      
+     #testing_dict, quantity=10, short_start=0, short_stop=1000, plot_all_recorded_activity_mode=False, SSIO_MODE
+     plot_all_recorded_activity_mode=True
+     
+     plot_activity2(experiment_directory, testing_dict,comparison_name, quantity=quantity, short_start=short_start, short_stop=short_stop, plot_all_recorded_activity_mode=plot_all_recorded_activity_mode, SSIO_MODE=SSIO_MODE, PNG_W=PNG_W, PNG_Y=PNG_Y, seed=seed, alternate_output=OUTPUT_DIR  )
+     #plot_activity2( testing_dict, 1, 0, 500, False  )
      
      quit()
      
     elif COMPARE_MODE==4:
+     
      print( "Generating plot of the fitness landscape..."  )
-     plot_fitness_landscape( MUTATION_FILE )
+     plot_fitness_landscape( MUTATION_FILE, alternate_output=OUTPUT_DIR )
      
     
     else:
@@ -1749,13 +1861,16 @@ def main():
      exp_base = re.sub(r'.*/DATA/','', experiment_directory )
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
      print("plot_actvity ") 
-     #plot_fitness2()
      #plot_activity( 100, 1110, 1350, 68 )
-     plot_activity( quantity=1, short_start=350, short_stop=1100, seed=35, SSIO_MODE=True )
+     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation
      #os.system( "./email_plots.sh {}".format( experiment_directory )  )
+     
+    
+     
+   
 
 
 main()

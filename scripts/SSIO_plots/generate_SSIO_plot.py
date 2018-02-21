@@ -72,7 +72,7 @@ if len(sys.argv) == 2:
   MODULATION_LEVELS=config["ALL"]["MODULATION_VALUES"]
   SHOW_VECTOR=config["ALL"]["SHOW_VECTOR"]
   SEED=int(config["ALL"]["seed_num"])
-  PHENOTYPE_CSV_PATH=config["ALL"]["input_csv"]
+  PHENOTYPE_CSV_PATH=config["ALL"]["seed_phenotype_txt"]
   GENOME_TYPE_PATH=config["ALL"]["seed_genomes_txt"]
   OUTPUT_PATH=config["ALL"]["output_dir"]
   print( "Generating SSIOs for modulation levels: {}".format(  MODULATION_LEVELS.split() ))
@@ -375,6 +375,7 @@ def main( MODULATION ):
     save_file= re.sub( "_ssio","_ssio_n{}".format(neuron_ssio), SSIO_PLOT_OUTPUT )
     
     plt.savefig( save_file )
+    plt.gcf().clear()
     
     ################
     # write all SSIO data to csv file for later plotting overlay
@@ -407,6 +408,7 @@ def find_unstable_equilibrium_point(constant_input_level, low_activation_level, 
   
   prev_level=-1
   prev_direction=0
+  prevOutput=None
   
   for i in range(0, fine_tuning_steps):
     
@@ -423,6 +425,8 @@ def find_unstable_equilibrium_point(constant_input_level, low_activation_level, 
       
     #if we did not find an equilibria but the direction of our trajectory changed, we found an unstable equilibrium point
     if not new_eq and  (prev_direction * direction) < 0:
+      if not prevOutput:
+        prevOutput = sigmoid( 1 * (activation_level + bias))
       new_eq = (sigmoid( 1 * (activation_level + bias)     ) + prevOutput  )/2
       return new_eq
     

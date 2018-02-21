@@ -1,3 +1,4 @@
+import configparser
 import os
 import sys
 import subprocess
@@ -45,8 +46,16 @@ selected_seeds.append( ("DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-50
 
 selected_seeds.append( ("DATA/CITED_DATA/", 2) )
 
+config_file=""
 
-
+if ".ini" in sys.argv[-1]:
+ config_file = sys.argv[-1]
+ config = configparser.ConfigParser()
+ config.read( config_file )
+ 
+ selected_seeds= []
+ selected_seeds.append( ( config["ALL"]["experiment_folder"], int(config["ALL"]["seed_num"]) ) )
+ 
 
                
 #CPG-3-mod, 59
@@ -82,8 +91,9 @@ for pair in selected_seeds:
 
 job_queue.close()
 
-os.system("cat {}".format(OUTPUT_JOB_FILE) )
-print( "cd /u/jasoyode/FARM/gasneat_experiment_farm/job_q_server && python client_add_jobs.py /scratch/jasoyode/github_jasoyode/CTRNN_NM/{}".format(OUTPUT_JOB_FILE) ) 
+if config_file == "":
+ os.system("cat {}".format(OUTPUT_JOB_FILE) )
+ print( "cd /u/jasoyode/FARM/gasneat_experiment_farm/job_q_server && python client_add_jobs.py /scratch/jasoyode/github_jasoyode/CTRNN_NM/{}".format(OUTPUT_JOB_FILE) ) 
 
 
 #./generate_mutation_data.sh ***.ini title seed directory

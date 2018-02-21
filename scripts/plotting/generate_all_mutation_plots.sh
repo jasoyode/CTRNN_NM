@@ -6,9 +6,24 @@ if [ "$1" == "" ] ; then
 fi
 
 DIR="$1"
+SEED="$2"
+INI="$3"
 
-for file in $( ls $DIR | grep mutations ); 
+#echo "dir: $DIR"
+#echo "seed: $SEED"
+#echo "ini: $INI"
+
+for file in $( ls $DIR | grep "mutations.csv" | grep "seed_${SEED}_" )
 do   
-	echo "python csvreader.py $DIR/$file "
-	python csvreader.py $DIR/$file
+#	echo $file
+	
+	if [ "$INI" == "" ] ; then
+		echo "python csvreader.py $DIR/$file"
+		python csvreader.py $DIR/$file
+	else
+		echo "python csvreader.py $DIR/$file 4 $INI"
+		python csvreader.py $DIR/$file 4 $INI
+	fi
+
 done;
+

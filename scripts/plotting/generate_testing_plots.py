@@ -1,3 +1,4 @@
+import configparser
 import os
 import sys
 
@@ -19,7 +20,7 @@ if len(sys.argv) < 2:
 else:
   DIR=sys.argv[1]
 
-DIR= DIR.replace("/", "\/" )
+
 
 SEARCH="XXX"
 
@@ -38,6 +39,24 @@ SEARCH="XXX"
 #CSVs=["const_mod_0.1.csv"]
 CSVs=["amp_mod_5_levels.csv"]
 
+
+config_file=""
+if ".ini" in sys.argv[-1] :
+  config_file=sys.argv[-1]
+  config = configparser.ConfigParser()
+  
+  config.read( config_file )
+  DIR="{}/{}".format( config["ALL"]["CTRNN_PATH"], config["ALL"]["experiment_folder"] )
+  
+  CSVs = config["ALL"]["CSV_COMPARE"].split()
+  print( DIR )
+  print( CSVs )
+  #quit()
+  
+#quit()
+
+DIR= DIR.replace("/", "\/" )
+
 os.system( "mkdir temp_files" )
 
 for CSV in CSVs:
@@ -45,5 +64,14 @@ for CSV in CSVs:
   print(  "cat CSV/{0} | sed \"s/{1}/{2}/\" > temp_files/{0} ".format(CSV, SEARCH, DIR) )
   
 for CSV in CSVs:
-  os.system( "python csvreader.py {} temp_files/{} &".format(DIR, CSV) )
-  print( "python csvreader.py {} CSV/{} &".format(DIR, CSV) )
+  #os.system( "python csvreader.py {} temp_files/{} {} &".format(DIR, CSV, config_file) )
+  if config_file != "":
+    print(      "python csvreader.py {} temp_files/{} 3 {} &".format(DIR, CSV, config_file) )
+    os.system(  "python csvreader.py {} temp_files/{} 3 {} &".format(DIR, CSV, config_file) )
+  else:
+    print(      "python csvreader.py {} temp_files/{} &".format(DIR, CSV) )
+    os.system( "python csvreader.py {} temp_files/{} &".format(DIR, CSV) )
+  
+
+
+

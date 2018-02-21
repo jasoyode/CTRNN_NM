@@ -24,6 +24,7 @@ echo "[generation mutation data]"
 echo "ctrnn"
 echo "joe generate_ALL_mutation_data.py"
 echo "add in directory and seed"
+
 echo "python generate_ALL_mutation_data.py"
 echo "run command suggested:"
 echo "cd /u/jasoyode/FARM/gasneat_experiment_farm/job_q_server && python client_add_jobs.py /scratch/jasoyode/github_jasoyode/CTRNN_NM/mutation_job_queue.txt"

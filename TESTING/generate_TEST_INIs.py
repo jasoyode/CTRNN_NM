@@ -7,6 +7,8 @@ MIXED_TESTING_MODE=False
 
 #To force generating inis to collect data for every seed in a directory
 FORCE_GEN_ALL=False
+
+#Force a seed to generate all levels of modulation
 FORCE_SEED_ALL_LEVELS=True
 
 def main():
