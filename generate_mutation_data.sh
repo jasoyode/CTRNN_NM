@@ -8,16 +8,35 @@ TITLE="$3"
 #DIR="DATA/mod1_345_100jobs/JOB_size-3_sim-long10run-2000gen_signal-SINE-1p_M-mod1-ON/"
 
 
+
 if [ "$TITLE" == "" ]; then
-  echo "Usage: $0 ***.ini title"
+  echo "Usage: $0 ***.ini directory title"
   exit
 fi
 
 
-#1=bias1, bias2
-#for i in $( seq 1 6); do
-#  ./runExp $INI $DIR $TITLE $i $i 19 19  &
-#done
+#1=bias1, bias2   timingConstant1
+for i in $( seq 1 6); do
+  ./runExp $INI $DIR $TITLE $i $i 19 19  &
+  ./runExp $INI $DIR $TITLE $i $i 20 20  &
+  ./runExp $INI $DIR $TITLE $i $i 21 21  &  
+  ./runExp $INI $DIR $TITLE $i $i 22 22  &
+  
+done
+
+
+for i in $( seq 19 21); do
+  ./runExp $INI $DIR $TITLE $i $i 22 22  &
+done
+
+
+./runExp $INI $DIR $TITLE 19 19 20 20  &
+
+./runExp $INI $DIR $TITLE 19 19 21 21  &
+
+./runExp $INI $DIR $TITLE 20 20 21 21  &
+
+
 
 #1->2
 #./runExp $INI $DIR $TITLE 11 11 19 19  &
@@ -25,6 +44,8 @@ fi
 #1->1   vs  1->2
 
 ./runExp $INI $DIR $TITLE 10 10 11 11  &
+./runExp $INI $DIR $TITLE 10 10 12 12  &
+./runExp $INI $DIR $TITLE 11 11 12 12  &
 
 #the rest are not nearly as meaningful
 exit

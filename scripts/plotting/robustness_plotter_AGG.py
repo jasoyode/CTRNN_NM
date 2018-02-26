@@ -41,6 +41,8 @@ if len( sys.argv) < 2:
  
 
 EVO_COND="standard"
+#EVO_COND="mod1-ON"
+
 
 for PLOT_MODE in PLOT_MODES:
   fig, axes = plt.subplots(nrows=1, ncols=9, figsize=(9, 6), squeeze=False)

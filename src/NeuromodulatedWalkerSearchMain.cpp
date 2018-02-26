@@ -543,9 +543,9 @@ string EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, 
     //cout << "parameterNum1" <<parameterNum1 << endl;
     //exit(-1);
     
-    if (parameterNum1 == 19 ) {
+    if (parameterNum1 == 22 ) {
       //cout << "ADJUST ALL WEIGHTS IN NETWORK BY %" <<endl;
-      for (int i=10; i<19; i++) {
+      for (int i=10; i<22; i++) {
         mutatedVector(i) = mutatedVector(i) * (1 + mutation1*MAX );
       }
       
@@ -553,9 +553,9 @@ string EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, 
       mutatedVector(parameterNum1) = mutation1;
     }
     
-    if (parameterNum2 == 19 ) {
+    if (parameterNum2 == 22 ) {
       //cout << "ADJUST ALL WEIGHTS IN NETWORK BY %" <<endl;
-      for (int i=10; i<19; i++) {
+      for (int i=10; i<22; i++) {
         mutatedVector(i) = mutatedVector(i) * (1 + mutation2*MAX );
       }
       
@@ -575,13 +575,13 @@ string EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, 
     double paramVal1=-1;
     double paramVal2=-1;
     
-    if (parameterNum1 == 19 ) {
+    if (parameterNum1 == 22 ) {
       paramVal1 = 1 + mutation1*MAX;
     } else {
       paramVal1 = phenotype(parameterNum1);
     }
     
-    if (parameterNum2 == 19 ) {
+    if (parameterNum2 == 22 ) {
       paramVal2 = 1 + mutation2*MAX;
     } else {
       paramVal2 = phenotype(parameterNum2);
@@ -1053,8 +1053,8 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       //bias1	bias2	bias3	timConst1	timConst2	timConst3	recep1	recep2	recep3	
       //1		2		3		4			5			6			7		8		9		
       
-      //w_1->1	w_1->2	w_1->3	w_2->1	w_2->2	w_2->3	w_3->1	w_3->2	w_3->3  ALL_weights
-      //10		11		12		13		14		15		16		17		18      19
+      //w_1->1	w_1->2	w_1->3	w_2->1	w_2->2	w_2->3	w_3->1	w_3->2	w_3->3  w_AS->1   w_AS->2  w_AS->3 ALL_weights
+      //10		11		12		13		14		15		16		17		18      19        20       21      22
       
       std::map <int, string> param_map;
       
@@ -1077,13 +1077,21 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       param_map[17] = "w3-to-2";
       param_map[18] = "w3-to-3";
       
-      param_map[19] = "wALL";
-      param_map[20] = "w*-to-1";
-      param_map[21] = "w*-to-2";
-      param_map[22] = "w*-to-3";
-      param_map[23] = "w*-to-1or2";
-      param_map[24] = "w*-to-1or3";
-      param_map[25] = "w*-to-2or3";
+      param_map[19] = "w_AS-to-1";
+      param_map[20] = "w_AS-to-2";
+      param_map[21] = "w_AS-to-3";
+      
+      param_map[22] = "wALL";
+      
+      param_map[23] = "w*-to-1";
+      param_map[24] = "w*-to-2";
+      param_map[25] = "w*-to-3";
+      param_map[26] = "w*-to-1or2";
+      param_map[27] = "w*-to-1or3";
+      param_map[28] = "w*-to-2or3";
+      
+      
+      
       
       
       int sliceAMax = stop1;
@@ -1136,7 +1144,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
             TVector<double> phenotype(1, genomeSize);
             translate_to_phenotype( genome, phenotype );
             
-            if (sliceB == 19 ) {
+            if (sliceB == 22 ) {
               //ADD ORIGINAL AT END!
               recordLog << phenotype(sliceA) << "," << 1 << "," << origFit << ",";
             } else {

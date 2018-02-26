@@ -2,8 +2,8 @@
 
 
 
-XXX_SEED_XXX="67"
-XXX_NAME_XXX="CPG3_MOD_67"
+XXX_SEED_XXX="4"
+XXX_NAME_XXX="RPG3_STD_$XXX_SEED_XXX"
 XXX_CTRNN_PATH_XXX="/scratch/jasoyode/github_jasoyode/CTRNN_NM/"
 INNER_FOLDER="JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
 

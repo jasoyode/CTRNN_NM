@@ -11,7 +11,7 @@ ROUND=3
 BASE_DIR="/scratch/jasoyode/github_jasoyode/CTRNN_NM"
 
 DEBUG_MODE=True
-PRINT_MODE=True
+PRINT_MODE=False
 
 if len(sys.argv) <= 1:
   config_file="{}/{}/config.ini".format(BASE_DIR, "scripts/single_seed_analysis" )
@@ -47,9 +47,9 @@ def main( config_file ):
   #6. generate testing data plots
   generate_testing_plots()
   #7. generate mutation data
-  generate_mutation_data()
+  #generate_mutation_data()
   #8. generate mutation parameter space plots  may want to specify the specific genome positions to mutate?
-  generate_mutation_plots()
+  #generate_mutation_plots()
 
 
 
