@@ -895,6 +895,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
   //load global variable values from reader
   cout <<"trying to load values from config " << endl;
   loadValuesFromConfig( reader );  
+  cout << "values loaded" << endl;
   //cout << StepSize << " ..";
   
   int genomeSize = (networkSize*neuronParameterCount + networkSize*networkSize);
@@ -919,10 +920,12 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
     } 
   }
   
+  cout << "A" << endl;
+  
   for (int i=1; i <= networkSize; i++ ) { 
     bestAgentGenomeLogFile << "w_AS->" << i << ",";   
   }
-  
+  cout << "B" << endl;
   
   bestAgentPhenotypeLogFile << endl;
   bestAgentPhenotypeLogFile.close();  
@@ -939,8 +942,15 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
   std::string line;
   bool first=true;
   
+  cout << "C" << endl;
+  
+  cout << "inflie:" << genomesFile << endl;
+  
   for( std::string line; getline( infile, line ); )  {
-      //cout << "line: " << line << endl;
+  
+  
+      
+      cout << "line: " << line << endl;
       //...for each line in input...
       // each line is a separate genome previously recorded
       //the first line is a header
@@ -974,10 +984,10 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
           
           
         } else {
-          //cout << genome.Size() << endl;
-          //cout << "i:" << i << endl;
-          //cout << "lower: "<<genome.LowerBound() << endl;
-          //cout << "upper: "<<genome.UpperBound() << endl;
+          cout << genome.Size() << endl;
+          cout << "i:" << i << endl;
+          cout << "lower: "<<genome.LowerBound() << endl;
+          cout << "upper: "<<genome.UpperBound() << endl;
           
           try {
             genome(i) = stof( subs );
@@ -986,7 +996,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
               cout << "Did you select an appropriately sized config file?" << "\n";
               std::exit(-1);
           }
-          //cout << " genome[" << i << "]:" << genome(i) << endl ;
+          cout << " genome[" << i << "]:" << genome(i) << endl ;
           i++;
         }
         
@@ -1167,6 +1177,9 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       cout << "Wrote activity for best agent in seed " << seed  << " to file..." << endl;
       //DONE WRITING GENOME ACTIVITY TO FILE	
   }
+  
+  cout << "end of func";
+  
 
 }
 

@@ -15,6 +15,13 @@ if [ "$TITLE" == "" ]; then
 fi
 
 
+./runExp $INI $DIR $TITLE 19 19 20 20  &
+./runExp $INI $DIR $TITLE 19 19 21 21  &
+./runExp $INI $DIR $TITLE 20 20 21 21  &
+
+#exit
+
+
 #1=bias1, bias2   timingConstant1
 for i in $( seq 1 6); do
   ./runExp $INI $DIR $TITLE $i $i 19 19  &
@@ -30,22 +37,19 @@ for i in $( seq 19 21); do
 done
 
 
-./runExp $INI $DIR $TITLE 19 19 20 20  &
-
-./runExp $INI $DIR $TITLE 19 19 21 21  &
-
-./runExp $INI $DIR $TITLE 20 20 21 21  &
-
-
 
 #1->2
 #./runExp $INI $DIR $TITLE 11 11 19 19  &
 
 #1->1   vs  1->2
 
-./runExp $INI $DIR $TITLE 10 10 11 11  &
-./runExp $INI $DIR $TITLE 10 10 12 12  &
-./runExp $INI $DIR $TITLE 11 11 12 12  &
+#./runExp $INI $DIR $TITLE 10 10 11 11  &
+#./runExp $INI $DIR $TITLE 10 10 12 12  &
+
+#usefuk for the BS-switch neurons
+#   compare inhibitng connection from FT to BS and also the BS self loop
+#   these should need to change together
+./runExp $INI $DIR $TITLE 11 11 14 14  &
 
 #the rest are not nearly as meaningful
 exit

@@ -32,18 +32,18 @@ def main( config_file ):
   
   
   #0. create folder
-  #os.system( "mkdir -p {}".format(config["ALL"]["output_dir"]) )
+  os.system( "mkdir -p {}".format(config["ALL"]["output_dir"]) )
   
   #1. generate dynamic module analysis of normal network functionality
-  generate_dynamic_module_analysis()
+  #generate_dynamic_module_analysis()
   #2.generate network graphs of normal network
-  generate_network_graph()
+  #generate_network_graph()
   #3. generate SSIO curves and SSIO.csvs for later plots
-  generate_SSIO_curves()
+  #generate_SSIO_curves()
   #4. generate normal activity plots (add SSIO with curves)
   generate_normal_activity_plots()
   #5. generate testing data
-  generate_test_data()
+  #generate_test_data()
   #6. generate testing data plots
   generate_testing_plots()
   #7. generate mutation data

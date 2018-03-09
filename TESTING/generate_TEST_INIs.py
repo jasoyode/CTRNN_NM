@@ -2,6 +2,10 @@ import os
 import sys
 import subprocess
 
+
+SENSORS_OVERRIDE_BOTH=False
+
+
 #DONT FORGET TO SET PERIOD if running special mode
 MIXED_TESTING_MODE=False
 
@@ -35,12 +39,20 @@ def main():
   if PLOT_SEED_ACTIVITY_MODE and not FORCE_GEN_ALL:
     for SEED in SEEDS:
       print( "Creating special folder for seed {}".format(SEED) )
-      create_inis( original_ini_file, original_directory, SEED )
+      
+      if SENSORS_OVERRIDE_BOTH:
+        create_inis( original_ini_file, original_directory, SEED, SENSOR_MODE="ON" )
+        create_inis( original_ini_file, original_directory, SEED, SENSOR_MODE="OFF" )
+      else:
+        create_inis( original_ini_file, original_directory, SEED )
+      
+      
+      
   else:
     create_inis( original_ini_file, original_directory )
 
 
-def create_inis( original_ini_file, original_directory, SEED=-1  ):
+def create_inis( original_ini_file, original_directory, SEED=-1, SENSOR_MODE=""  ):
   
   PLOT_SEED_ACTIVITY_MODE=( SEED != -1)
   if FORCE_GEN_ALL:
@@ -100,6 +112,19 @@ def create_inis( original_ini_file, original_directory, SEED=-1  ):
   search_replace_pairs.append( ("maxReceptor.*" , "maxReceptor = 1" ))
   search_replace_pairs.append( ("minReceptor.*" , "minReceptor = 1" ))
   
+  if SENSOR_MODE=="OFF":
+    search_replace_pairs.append( ("mixedPatternGen.*" , "mixedPatternGen = false" ))
+    search_replace_pairs.append( ("minSensorWeights.*" , "minSensorWeights = 0" ))
+    search_replace_pairs.append( ("maxSensorWeights.*" , "maxSensorWeights = 0" ))
+  
+  if SENSOR_MODE=="ON":
+    search_replace_pairs.append( ("mixedPatternGen.*" , "mixedPatternGen = false" ))
+    search_replace_pairs.append( ("minSensorWeights.*" , "minSensorWeights = -16" ))
+    search_replace_pairs.append( ("maxSensorWeights.*" , "maxSensorWeights = 16" ))
+
+
+  
+  
   if MIXED_TESTING_MODE:
     #run test with single run mode
     search_replace_pairs.append( ("mixedPatternGen.*" , "mixedPatternGen = true\\nmixedPatternGenSingleRun = true" ))
@@ -134,12 +159,16 @@ def create_inis( original_ini_file, original_directory, SEED=-1  ):
   for extrema in CONSTANT:
     if MIXED_TESTING_MODE:
       os.system( "cat {0} | sed \"s/MIN_MOD/{2}/\" | sed \"s/MAX_MOD/{3}/\" | sed \"s/PERIODS/{4}/\" | sed \"s/MOD_TYPE/{5}/\"   > {1}/temptest_MIXED_CONSTANT_{2}.ini ".format( tmpl, folder, extrema[0], extrema[1], period, mod_type  ) )  
+    elif SENSOR_MODE!= "":
+      os.system( "cat {0} | sed \"s/MIN_MOD/{2}/\" | sed \"s/MAX_MOD/{3}/\" | sed \"s/PERIODS/{4}/\" | sed \"s/MOD_TYPE/{5}/\"   > {1}/temptest_SA_{6}_CONSTANT_{2}.ini ".format( tmpl, folder, extrema[0], extrema[1], period, mod_type, SENSOR_MODE  ) )           
     else:
       os.system( "cat {0} | sed \"s/MIN_MOD/{2}/\" | sed \"s/MAX_MOD/{3}/\" | sed \"s/PERIODS/{4}/\" | sed \"s/MOD_TYPE/{5}/\"   > {1}/temptest_CONSTANT_{2}.ini ".format( tmpl, folder, extrema[0], extrema[1], period, mod_type  ) )        
 
   for extrema in AMPLITUDE:
     if MIXED_TESTING_MODE:
       os.system( "cat {0} | sed \"s/MIN_MOD/{2}/\" | sed \"s/MAX_MOD/{3}/\" | sed \"s/PERIODS/{4}/\" | sed \"s/MOD_TYPE/{5}/\"   > {1}/temptest_MIXED_AMP_{3}.ini ".format( tmpl, folder, extrema[0], extrema[1], period, mod_type  ) )  
+    elif SENSOR_MODE!= "":
+      os.system( "cat {0} | sed \"s/MIN_MOD/{2}/\" | sed \"s/MAX_MOD/{3}/\" | sed \"s/PERIODS/{4}/\" | sed \"s/MOD_TYPE/{5}/\"   > {1}/temptest_SA_{6}_AMP_{3}.ini ".format( tmpl, folder, extrema[0], extrema[1], period, mod_type, SENSOR_MODE  ) )  
     else:
       os.system( "cat {0} | sed \"s/MIN_MOD/{2}/\" | sed \"s/MAX_MOD/{3}/\" | sed \"s/PERIODS/{4}/\" | sed \"s/MOD_TYPE/{5}/\"   > {1}/temptest_AMP_{3}.ini ".format( tmpl, folder, extrema[0], extrema[1], period, mod_type  ) )  
 

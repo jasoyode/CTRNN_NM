@@ -22,6 +22,7 @@ import sys
 import pygraphviz as pgv
 import math
 import os
+import os.path
 import csv
 import math
 import numpy as np
@@ -148,6 +149,63 @@ def generate_dynamic_module_graphs( csv_path, include_angle_sensors, SEED, CUSTO
         index+=1
     
 
+#returns a dictionary of the parameters and values
+def get_phenotype_from_genotype_dictionary( csv_path, SEED ):
+  if not "genome" in csv_path:
+    print("You must provide a genomes.txt file for this function! Exiting...")
+    print( csv_path )
+    quit()
+  value_dict={}  
+  with open( csv_path  ) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+      size=0  
+      if int(row["seed"]) == SEED:
+        for header in row.keys():
+          if not header == None:
+            
+            if "bias" in header:
+              if int(header[-1]) > size:
+                size = int(header[-1])
+
+            if "timConst" in header:  
+              x = float( row[header] )
+              value_dict[ header ] = mapSearchParameter(x, 0.5, 10 )
+            elif "recep" in header:   
+              x = float( row[header] )
+              value_dict[ header ] = mapSearchParameter(x, 1, 1 )
+            elif "bias" in header:
+              x = float( row[header] )
+              value_dict[ header ] = mapSearchParameter(x, -16, 16 )
+            elif "w_AS" in header:
+              x = float( row[header] )
+              value_dict[ header ] = mapSearchParameter(x, -16, 16 )
+            elif "w_" in header:
+              x = float( row[header] )
+              value_dict[ header ] = mapSearchParameter(x, -16, 16 )
+            else:
+              print("header not interpretted")
+
+            if header in value_dict:
+              print("{}:  {}".format(header, value_dict[header] ))
+
+        #print("printing and exitting")
+        #quit()
+        return value_dict, size
+
+#ported from Randy Beer's  TSearch.h class
+def clip(x, min, max):
+  temp = x if (x > min) else min
+  return temp if (temp < max) else max
+
+#map genome to phenotype
+def mapSearchParameter(x, min, max, clipmin = -10000, clipmax = 10000 ):
+  m = (max - min)/(MaxSearchValue - MinSearchValue)
+  b = min - m * MinSearchValue
+  return clip(m * x + b, clipmin, clipmax)
+
+
+
 
 def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, SEED, CUSTOM_NAME, OUTPUT_FILENAME, MINLEN, DYNAMIC_MODULE_VALUES=[], DM_LABEL="" ):
   
@@ -175,23 +233,31 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
   if imitate_beer:
     all_details=False
     include_angle_sensors=False      
+  
+  if not os.path.isfile( csv_path ):
+  #if phenotype does not exist, use genome and convert
+    genome_path = re.sub("phenotypes.txt", "genomes.txt", csv_path)
+    value_dict = get_phenotype_from_genotype_dictionary( genome_path, SEED )
 
-  with open( csv_path  ) as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-      size=0
-      if int(row["seed"]) == SEED:
-        for header in row.keys():
-          #print(header)
-          if not header == None and not header=="":
-            #print( header )
-            if not header == "seed":
-              value_dict[ header ] =  round(  float( row[header] ), ROUND )
-              
-            if "bias" in header:
-              if int(header[-1]) > size:
-                size = int(header[-1])
-        break
+  else:
+    with open( csv_path  ) as csvfile:
+      reader = csv.DictReader(csvfile)
+      for row in reader:
+        size=0
+        if int(row["seed"]) == SEED:
+          for header in row.keys():
+            #print(header)
+            if not header == None and not header=="":
+              #print( header )
+              if not header == "seed":
+                value_dict[ header ] =  round(  float( row[header] ), ROUND )
+                
+              if "bias" in header:
+                if int(header[-1]) > size:
+                  size = int(header[-1])
+          break
+  
+
 
   for i in range(1,size+1):
     STARTING_ANGLE=3*PI/2

@@ -403,7 +403,7 @@ def get_ssio_data_for_plotting( DATA, exp_base, seed_num):
 
  return ssio_data, SSIO_MODE
 
-def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False, alternate_output="", ):
+def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False, alternate_output="", LEG_ANGLE_SENSOR=False ):
     
     
      
@@ -670,14 +670,15 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         fs_r = "OFF" if (seed_to_fitness_map[seed_num][3] == 0.0) else  str( seed_to_fitness_map[seed_num][3]  )
         
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "blue")
+        
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "purple")
         config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
         config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
         
         
         
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "blue")
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "purple")
         config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange" )
         config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
         
@@ -688,7 +689,10 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
         
         
-        config_plot(ax1B, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        
+        #config_plot(ax1B, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        config_plot(ax1B, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle", " Leg Angle over time", fontsize)
+        
         ax1B.text(x, y, txt, fontsize=12, ha="left", va="top")
         
         
@@ -714,7 +718,8 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         
 
         plt.close('all')
-        fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A) ) = plt.subplots(nrows=5, ncols=1, figsize=(8, 11) )        
+        
+        fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=6, ncols=1, figsize=(8, 11) )        
         plt.xlabel('Time')
         
         config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
@@ -733,20 +738,31 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         y=ymax+height/10
         ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "blue")
-        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
-        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
+        config_plot(ax2A, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle ", "Leg Angle over time", fontsize, (), "black")
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "blue")
-        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange")
-        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
+        #config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "purple")
+        #config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
+        #config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
+        
+        config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT output", "BackSwing neuron output over time", fontsize, (), "purple")
+        config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS output", "FootLift neuron output over time",  fontsize, (), "orange")
+        config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS output", "ForwardSwing neuron output over time", fontsize, (), "green")
+        
+        config_plot(ax6A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "purple")
+        config_plot(ax6A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange")
+        config_plot(ax6A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
+        
+        #TODO ADD FLAG FOR TURNING THIS ON AND OFF
+        if LEG_ANGLE_SENSOR:
+         config_plot(ax6A, time[short_start:short_stop], angle_omega[short_start:short_stop], r"$\Delta$ Angular Velocity", " Leg Angular Velocity", fontsize, (), "black")
+         
         
         
         #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
         #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fontsize )
         #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
         
-        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+        ax6A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
         
         plt.tight_layout()
         legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
@@ -945,7 +961,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         X = [ n_input[1][start:stop], n_out[1][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        lc = LineCollection(segs, color="purple") # colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn2.add_collection( lc )
         if SSIO_MODE:
@@ -964,7 +980,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         X = [ n_input[2][start:stop], n_out[2][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        lc = LineCollection(segs, color="orange")  #colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn3.add_collection( lc )
         if SSIO_MODE:
@@ -984,7 +1000,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         X = [ n_input[3][start:stop], n_out[3][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
-        lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        lc = LineCollection(segs, color="green")  #colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn4.add_collection( lc )
         if SSIO_MODE:
@@ -1385,7 +1401,7 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
       plt.close('all')
       
       
-      fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A) ) = plt.subplots(nrows=5, ncols=1, figsize=(PNG_W, PNG_Y) )        
+      fig, ( (ax1A), (axFOOTSTATE), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=7, ncols=1, figsize=(PNG_W, PNG_Y) )        
       plt.xlabel('Time')
       
       
@@ -1395,6 +1411,7 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        
        time=seed_data_dict[ seed_num ][ testing_dir ]["time"]
        modulation=seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
+       angle = seed_data_dict[ seed_num ][ testing_dir ]["angle"]
        n_out={}
        
        n_out[1]=seed_data_dict[ seed_num ][ testing_dir ]["n_out"][1]
@@ -1403,6 +1420,8 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        deriv_n1=seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][1]
        deriv_n2=seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][2]
        deriv_n3=seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][3]
+       footState=seed_data_dict[ seed_num ][ testing_dir ]["footState"]
+       footY= list( map( lambda x: (x-25.5)/2, seed_data_dict[ seed_num ][ testing_dir ]["footY"]) )
        
        transparency  =0.5
        mod_color =(0,0,0)
@@ -1414,8 +1433,20 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
         mod_color = (m,0,0, transparency)  
        else:
         mod_color = (0,0,0, transparency)  
+        
        
        config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize, True, mod_color)
+       
+       if m==0:
+        #config_plot(axFOOTSTATE, time[short_start:short_stop], footState[short_start:short_stop], "FootState", " Leg Angle over time", fontsize, True, "black")
+        config_plot(axFOOTSTATE, time[short_start:short_stop], footY[short_start:short_stop], "FootY", " Leg Angle over time", fontsize, True, "gray")
+       else:
+        #config_plot(axFOOTSTATE, time[short_start:short_stop], footState[short_start:short_stop], "FootState", " Leg Angle over time", fontsize, True, mod_color )
+        config_plot(axFOOTSTATE, time[short_start:short_stop], footY[short_start:short_stop], "FootY", " Leg Angle over time", fontsize, True, mod_color )
+       
+       
+       config_plot(ax2A, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle", " Leg Angle over time", fontsize, True, mod_color)
+       
        
        ymin, ymax = ax1A.get_ylim()
        xmin, xmax = ax1A.get_xlim()
@@ -1436,24 +1467,29 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        #config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize)
        #config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize)
        
-       config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r: 1)", "BackSwing neuron output over time", fontsize, True, mod_color)
-       config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r: 1)", "FootLift neuron output over time",  fontsize, True, mod_color)
-       config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r: 1)", "ForwardSwing neuron output over time", fontsize, True, mod_color)
+       if m == 0:  #True
+        config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT output", "Foot neuron output over time", fontsize, True, "purple" )
+        config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS output", "BackSwing neuron output over time",  fontsize, True, "orange" )
+        config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS output", "ForwardSwing neuron output over time", fontsize, True, "green" )
+       else:
+        config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT output", "Foot neuron output over time", fontsize, True, mod_color )
+        config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS output", "BackSwing neuron output over time",  fontsize, True, mod_color )
+        config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS output", "ForwardSwing neuron output over time", fontsize, True, mod_color )
+
        
        
-       
-       config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize, True, mod_color)
-       config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize, True, mod_color)
-       config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, True, mod_color)
+       config_plot(ax6A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta FT over time", fontsize, True, "purple")
+       config_plot(ax6A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize, True, "orange")
+       config_plot(ax6A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, True, "green" )
       
       ax1A.text(x, y, txt, fontsize=12, ha="left", va="top") 
       
+      ax2A.set_ylabel( "Leg Angle " , fontsize=fontsize )
+      ax3A.set_ylabel( "FT " , fontsize=fontsize )
+      ax4A.set_ylabel( "BS " , fontsize=fontsize )
+      ax5A.set_ylabel( "FS " , fontsize=fontsize )
       
-      ax2A.set_ylabel( "FT " , fontsize=fontsize )
-      ax3A.set_ylabel( "BS " , fontsize=fontsize )
-      ax4A.set_ylabel( "FS " , fontsize=fontsize )
-      
-      ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+      ax6A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
       
       plt.tight_layout()
       #legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
@@ -1862,7 +1898,7 @@ def main():
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
      print("plot_actvity ") 
      #plot_activity( 100, 1110, 1350, 68 )
-     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR )
+     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR, LEG_ANGLE_SENSOR=False )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation

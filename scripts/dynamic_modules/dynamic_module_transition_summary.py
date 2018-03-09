@@ -15,6 +15,15 @@ CPG_3_EVO_STD =            "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-
 CPG_3_EVO_MOD_TEST_MOD =   "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
 CPG_3_EVO_MOD_TEST_NOMOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv"
 
+MPG_3_EVO_STD_SA_ON =            "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/TESTS/SA_ON_AMP_0.0/seed_{}_recorded_activity.csv"
+MPG_3_EVO_STD_SA_OFF =            "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/TESTS/SA_OFF_AMP_0.0/seed_{}_recorded_activity.csv"
+
+#MPG_3_EVO_MOD_TEST_MOD =   "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
+#MPG_3_EVO_MOD_TEST_NOMOD = "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv"
+
+
+
+
 RPG_3_EVO_STD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/seed_{}_recorded_activity.csv"
 RPG_3_EVO_MOD_TEST_MOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/seed_{}_recorded_activity.csv"
 RPG_3_EVO_MOD_TEST_NOMOD = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/TESTS/AMP_0.0/seed_{}_recorded_activity.csv"
@@ -39,19 +48,25 @@ BS_POS=17
 FS_POS=28
 
 WRITE_DICTIONARY={}
-WRITE_DICTIONARY["CPG_3_EVO_STD.txt"]            = CPG_3_EVO_STD
-WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_MOD.txt"]   = CPG_3_EVO_MOD_TEST_MOD
-WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_NOMOD.txt"] = CPG_3_EVO_MOD_TEST_NOMOD
+#WRITE_DICTIONARY["CPG_3_EVO_STD.txt"]            = CPG_3_EVO_STD
+#WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_MOD.txt"]   = CPG_3_EVO_MOD_TEST_MOD
+#WRITE_DICTIONARY["CPG_3_EVO_MOD_TEST_NOMOD.txt"] = CPG_3_EVO_MOD_TEST_NOMOD
 
-WRITE_DICTIONARY["RPG_3_EVO_STD.txt"]            = RPG_3_EVO_STD
-WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_MOD.txt"]   = RPG_3_EVO_MOD_TEST_MOD
-WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_NOMOD.txt"] = RPG_3_EVO_MOD_TEST_NOMOD
+WRITE_DICTIONARY["MPG_3_EVO_STD_SA_OFF.txt"]            = MPG_3_EVO_STD_SA_OFF
+WRITE_DICTIONARY["MPG_3_EVO_STD_SA_OFF.txt"]            = MPG_3_EVO_STD_SA_OFF
+
+
+
+#WRITE_DICTIONARY["RPG_3_EVO_STD.txt"]            = RPG_3_EVO_STD
+#WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_MOD.txt"]   = RPG_3_EVO_MOD_TEST_MOD
+#WRITE_DICTIONARY["RPG_3_EVO_MOD_TEST_NOMOD.txt"] = RPG_3_EVO_MOD_TEST_NOMOD
 
 
 if len(sys.argv) < 2:
   print("Must provide a seed_activity.csv file!")
   print("Running default values")
   DEFAULT_MODE=True
+  OUTPUT_DM_SEED_FILE=""
 elif len(sys.argv) == 2:
   SEED_ACTIVITY_FILE=sys.argv[1]
   OUTPUT_DM_SEED_FILE=""

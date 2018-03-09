@@ -1,11 +1,27 @@
 #!/bin/bash
 
 
+XXX_SEED_XXX="43"
 
-XXX_SEED_XXX="4"
-XXX_NAME_XXX="RPG3_STD_$XXX_SEED_XXX"
+if [ "$1" != "" ]; then
+  XXX_SEED_XXX="$1"
+fi
+
+echo "XXX_SEED_XXX: $XXX_SEED_XXX"
+
+#mod_std="mod1-ON"
+mod_std="standard"
+#MOD_STD="MOD"
+MOD_STD="STD"
+TYPE="CPG"
+SIZE="3"
+
+
+##############
+
+XXX_NAME_XXX="${TYPE}${SIZE}_${MOD_STD}_$XXX_SEED_XXX"
 XXX_CTRNN_PATH_XXX="/scratch/jasoyode/github_jasoyode/CTRNN_NM/"
-INNER_FOLDER="JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON"
+INNER_FOLDER="JOB_ctrnn-${TYPE}_size-${SIZE}_sim-100run-500gen_signal-SINE-1p_M-${mod_std}"
 
 
 
