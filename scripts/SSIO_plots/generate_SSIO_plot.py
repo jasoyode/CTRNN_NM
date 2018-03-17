@@ -21,7 +21,7 @@ EQ_THRESHOLD=0.0001
 OUTPUT_THRESHOLD=0.001
 STEPSIZE=0.1
 self_loop_cutoff=4
-STEPS=10   #5
+STEPS=5   #5
 VECTOR_STEPS=1
 
 MODULATION=-0.25
@@ -223,8 +223,8 @@ def main( MODULATION ):
   #quit()
   
   
-  for i in range(1, size+1):
-  #for i in range(2,3): for BS only for debug speed up
+  #for i in range(1, size+1):
+  for i in range(2,3):    #for BS only for debug speed up
     neuron_ssio=i
   #do all the stuff and generate plots
     if i ==1:

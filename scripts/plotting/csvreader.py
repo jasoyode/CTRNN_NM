@@ -27,6 +27,8 @@ DATA="../../DATA"
 PLOTS="../../PLOTS"
 
 BRIGHT_MODULATION_MODE=False
+
+BRIGHT_SSIO_MODE=True
 SSIO_THICKNESS=2
 CUSTOM_TRAJECTORY=True
 
@@ -60,7 +62,7 @@ def customize_trajectory( name, m ):
    
 
 
-BRIGHT_SSIO_MODE=False
+
  
 def customize_ssio_color( mod ):
  if BRIGHT_SSIO_MODE:

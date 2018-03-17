@@ -830,8 +830,13 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
     cout << "Parameters: " << start1 << " -> " << stop1 << ", " << start2 << " -> " << stop2 << endl;
   } else {
     cout << "Non-mutation mode running." << endl;
+    
     string bestAgentFitnessAndReceptorLogFilename( dirPath   );
     bestAgentFitnessAndReceptorLogFilename = bestAgentFitnessAndReceptorLogFilename + "/seeds_tested_fitness.csv";
+    
+    
+    //cout << bestAgentFitnessAndReceptorLogFilename << endl;
+    //exit(1);
     
     if ( !recordAllActivity ) {
       bestAgentFitnessAndReceptorLogFile.open( bestAgentFitnessAndReceptorLogFilename );
