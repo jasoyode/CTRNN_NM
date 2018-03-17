@@ -14,6 +14,8 @@ from sklearn.preprocessing import StandardScaler
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.collections import LineCollection
 
+from scipy.interpolate import spline
+
 PI=3.141592653589
 
 #headless mode
@@ -24,8 +26,57 @@ import matplotlib.pyplot as plt
 DATA="../../DATA"
 PLOTS="../../PLOTS"
 
+BRIGHT_MODULATION_MODE=False
+SSIO_THICKNESS=2
+CUSTOM_TRAJECTORY=True
 
 
+
+
+def customize_mod_color( mod ):
+ if BRIGHT_MODULATION_MODE:
+  return 1
+ else:
+  return mod
+  
+def customize_trajectory( name, m ):
+ if CUSTOM_TRAJECTORY:
+  
+  if name == "FT":
+   return "purple"
+  elif name == "BS":
+   return "orange"
+  else:     # name == "FS":
+   return "green"
+   
+ else:
+  
+  if m < 0:
+   return (0,0, customize_mod_color(abs(m)), 0.5)   
+  elif m > 0:
+   return (customize_mod_color( m),0,0, 0.5)   
+  else:
+   return (0,0,0, 0.5)  
+   
+
+
+BRIGHT_SSIO_MODE=False
+ 
+def customize_ssio_color( mod ):
+ if BRIGHT_SSIO_MODE:
+  if mod > 0:
+   return 1
+  elif mod > 0:
+   return -1
+  else:
+   return mod
+ else:
+  return mod
+
+
+
+
+LEG_ANGLE_SENSOR=True
 SSIO_MODE=True
 SSIO_MODULATION_MODE=True
 
@@ -399,13 +450,11 @@ def get_ssio_data_for_plotting( DATA, exp_base, seed_num):
      ssio_data[i][mod]["x"].append( float(ssio_row["x"]) )
      ssio_data[i][mod]["y"].append( float(ssio_row["y"]) )
 
-
-
  return ssio_data, SSIO_MODE
 
 def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False, alternate_output="", LEG_ANGLE_SENSOR=False ):
     
-    
+    figsize_xy=(8, 11)
      
     
     print("plot_activity")
@@ -642,7 +691,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         
 ####################################        
         plt.close('all')
-        fig, ( (ax1A, ax1B), (ax2A, ax2B), (ax3A,ax3B), (ax4A, ax4B), (ax5A, ax5B) ) = plt.subplots(nrows=5, ncols=2, figsize=(8, 11) )
+        fig, ( (ax1A, ax1B), (ax2A, ax2B), (ax3A,ax3B), (ax4A, ax4B), (ax5A, ax5B) ) = plt.subplots(nrows=5, ncols=2, figsize=figsize_xy )
         plt.xlabel('Time')
         
         #time = time
@@ -719,7 +768,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
 
         plt.close('all')
         
-        fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=6, ncols=1, figsize=(8, 11) )        
+        fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=6, ncols=1, figsize=figsize_xy )        
         plt.xlabel('Time')
         
         config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
@@ -833,6 +882,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         co=[]
         transparency=0.5
         thickness=2
+        ssio_thickness=SSIO_THICKNESS
         
         
         for m in modulation[start:stop]:
@@ -878,7 +928,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         SHOW_2D_NON_SS=False
 ###########################################################################################################################        
         if SHOW_2D_NON_SS:
-         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
+         fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=figsize_xy )
          
          #old scatter plot
          #dyn2.scatter( n_out[1][start:stop], n_out[2][start:stop], c=modulation[start:stop], cmap=cm, label='neuron activation dynamics' )
@@ -891,11 +941,11 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
          if SSIO_MODE:
           ss_i=1
           for mod in ssio_data[i].keys():
-           R=min( 1, max(mod*2,0))
+           R=min( 1, customize_ssio_color(max(mod*2,0)) )
            G=0
-           B=min(1, max(-mod*2,0))
+           B=min(1, customize_ssio_color(max(-mod*2,0)) )
            ssio_color=(R,G,B)
-           dyn2.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+           dyn2.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
          
          dyn2.set_xlabel("FT")
          dyn2.set_ylabel("BS")
@@ -910,11 +960,11 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
          if SSIO_MODE:
           ss_i=2
           for mod in ssio_data[i].keys():
-           R=min( 1, max(mod*2,0))
+           R=min( 1, customize_ssio_color(max(mod*2,0)) )
            G=0
-           B=min(1, max(-mod*2,0))
+           B=min(1, customize_ssio_color(max(-mod*2,0)) )
            ssio_color=(R,G,B)
-           dyn3.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+           dyn3.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
          dyn3.set_xlabel("FT")
          dyn3.set_ylabel("FS")
          
@@ -928,11 +978,11 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
          if SSIO_MODE:
           ss_i=3
           for mod in ssio_data[i].keys():
-           R=min( 1, max(mod*2,0))
+           R=min( 1, customize_ssio_color(max(mod*2,0)) )
            G=0
-           B=min(1, max(-mod*2,0))
+           B=min(1, customize_ssio_color(max(-mod*2,0)) )
            ssio_color=(R,G,B)
-           dyn4.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+           dyn4.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
          dyn4.set_xlabel("BS")
          dyn4.set_ylabel("FS")
          
@@ -955,23 +1005,24 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
          ssio_data, SSIO_MODE = get_ssio_data_for_plotting( DATA, exp_base, seed_num )
         
         
-        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=(8, 11) )
+        fig, ( (dyn2), (dyn3), (dyn4) ) = plt.subplots(nrows=3, ncols=1, figsize=figsize_xy )
         
         
         X = [ n_input[1][start:stop], n_out[1][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        
         lc = LineCollection(segs, color="purple") # colors=co)  #cmap=cmap, norm=norm)
         plt.setp(lc, linewidth=thickness )
         dyn2.add_collection( lc )
         if SSIO_MODE:
          ss_i=1
          for mod in ssio_data[i].keys():
-          R=min( 1, max(mod*2,0))
+          R=min( 1, customize_ssio_color(max(mod*2,0)) )
           G=0
-          B=min(1, max(-mod*2,0))
+          B=min(1, customize_ssio_color(max(-mod*2,0)) )
           ssio_color=(R,G,B)
-          dyn2.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+          dyn2.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
         dyn2.set_xlabel("BS+FS")
         dyn2.set_ylabel("FT")
         if XLIM_MODE:
@@ -986,11 +1037,11 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         if SSIO_MODE:
          ss_i=2
          for mod in ssio_data[i].keys():
-          R=min( 1, max(mod*2,0))
+          R=min( 1, customize_ssio_color(max(mod*2,0)) )
           G=0
-          B=min(1, max(-mod*2,0))
+          B=min(1, customize_ssio_color(max(-mod*2,0)) )
           ssio_color=(R,G,B)
-          dyn3.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )         
+          dyn3.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )         
          
         dyn3.set_xlabel("FT+FS")
         dyn3.set_ylabel("BS")
@@ -1006,11 +1057,11 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         if SSIO_MODE:
          ss_i=3
          for mod in ssio_data[i].keys():
-          R=min( 1, max(mod*2,0))
+          R=min( 1, customize_ssio_color(max(mod*2,0)) )
           G=0
-          B=min(1, max(-mod*2,0))
+          B=min(1, customize_ssio_color(max(-mod*2,0)) )
           ssio_color=(R,G,B)
-          dyn4.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+          dyn4.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
           
         dyn4.set_xlabel("FT+BS")
         dyn4.set_ylabel("FS")
@@ -1427,10 +1478,12 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        mod_color =(0,0,0)
        m = seed_data_dict[ seed_num ][ testing_dir ]["modulation"][0]
        
+       #XXXXXXXXXXXXXX
+       
        if m < 0:
-        mod_color = (0,0,abs(m), transparency )
+        mod_color = (0,0,customize_mod_color(abs(m) ), transparency )
        elif m > 0:
-        mod_color = (m,0,0, transparency)  
+        mod_color = (customize_mod_color(m),0,0, transparency)  
        else:
         mod_color = (0,0,0, transparency)  
         
@@ -1534,16 +1587,19 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        co=[]
        transparency=0.5
        thickness=2
+       ssio_thickness=SSIO_THICKNESS
        start=0
        stop=-1
        
        #seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
        
+       BRIGHT_MODULATION_MODE=True
+       
        for m in seed_data_dict[ seed_num ][ testing_dir ]["modulation"][start:stop]:
         if m < 0:
-         co.append(  (0,0,abs(m), transparency)   )
+         co.append(  (0,0,customize_mod_color(abs(m)), transparency)   )
         elif m > 0:
-         co.append(  ( m,0,0, transparency)   )
+         co.append(  ( customize_mod_color(m),0,0, transparency)   )
         else:
          co.append(  (0,0,0, transparency)  )
        
@@ -1625,12 +1681,14 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
         stop=-1
         seed_data_dict[ seed_num ][ testing_dir ]["modulation"]
         for m in seed_data_dict[ seed_num ][ testing_dir ]["modulation"][start:stop]:
-         if m < 0:
-          co.append(  (0,0,abs(m), transparency)   )
-         elif m > 0:
-          co.append(  ( m,0,0, transparency)   )
-         else:
-          co.append(  (0,0,0, transparency)  )
+         c_to_app = customize_trajectory( label, m)
+         co.append( c_to_app )
+#         if m < 0:
+#          co.append(  (0,0, customize_mod_color(abs(m)), transparency)   )
+#         elif m > 0:
+#          co.append(  (customize_mod_color( m),0,0, transparency)   )
+#         else:
+#          co.append(  (0,0,0, transparency)  )
 #####################      
         
         #X_LIM=5
@@ -1638,7 +1696,11 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
         X = [ seed_data_dict[ seed_num ][ testing_dir ]["n_input"][num][start:stop], seed_data_dict[ seed_num ][ testing_dir ]["n_out"][num][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
         segs = np.concatenate([points[:-1], points[1:]], axis = 1)
+        
+        #if 
+        
         lc = LineCollection(segs, colors=co)  #cmap=cmap, norm=norm)
+        
         plt.setp(lc, linewidth=thickness )
         ax.add_collection( lc )
         ax.set_xlabel( label+ " input"  )
@@ -1647,11 +1709,11 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
         if SSIO_MODE:
           ss_i=pair[0]
           for mod in ssio_data[i].keys():
-           R=min( 1, max(mod*2,0))
+           R=min( 1, customize_ssio_color(max(mod*2,0)) )
            G=0
-           B=min(1, max(-mod*2,0))
+           B=min(1, customize_ssio_color(max(-mod*2,0)) )
            ssio_color=(R,G,B)
-           ax.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color )
+           ax.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
 
         
  
@@ -1752,6 +1814,15 @@ def plot_fitness_landscape( mutation_file_path, alternate_output="",SEED="" ) :
  #fig.patch.set_facecolor('white')
  #ax = fig.add_subplot(111, projection='3d')
  #ax.plot_surface(X,Y,Z)
+ 
+ 
+ len_xaxis,len_yaxis = 5.,5. #fix here your numbers
+ xspace, yspace = .85, .85 # change the size of the void border here.
+ x_fig,y_fig = len_xaxis / xspace, len_yaxis / yspace
+ 
+ figure =  plt.figure(figsize=(x_fig,y_fig))
+ plt.subplots_adjust(left=1-xspace, right = xspace, top=yspace, bottom = 1-yspace)
+
 
  plt.scatter( X,Y, s=5,c=colors )
  plt.xlabel(xlabel)
@@ -1898,7 +1969,7 @@ def main():
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
      print("plot_actvity ") 
      #plot_activity( 100, 1110, 1350, 68 )
-     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR, LEG_ANGLE_SENSOR=False )
+     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR, LEG_ANGLE_SENSOR=LEG_ANGLE_SENSOR )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation

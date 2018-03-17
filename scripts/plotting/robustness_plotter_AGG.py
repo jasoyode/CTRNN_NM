@@ -40,14 +40,18 @@ if len( sys.argv) < 2:
   quit()
  
 
-#EVO_COND="standard"
-EVO_COND="mod1-ON"
+EVO_COND="standard"
+#EVO_COND="mod1-ON"
 
 ROB_FILENAME="RESULTS_CONSTANT_.csv"
+MPG_ON_FILENAME="RESULTS_SA_ON_CONSTANT_.csv"
+MPG_OFF_FILENAME="RESULTS_SA_OFF_CONSTANT_.csv"
+
+numplots=12
 
 
 for PLOT_MODE in PLOT_MODES:
-  fig, axes = plt.subplots(nrows=1, ncols=9, figsize=(9, 6), squeeze=False)
+  fig, axes = plt.subplots(nrows=1, ncols=numplots, figsize=(numplots, 6), squeeze=False)
 
   axes_data_dict={}        #r,c
   axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,0]
@@ -56,28 +60,38 @@ for PLOT_MODE in PLOT_MODES:
 
   
   #MPG_GOOD_345
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,3]
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,4]
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,5]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[0,3]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[0,4]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[0,5]
+  
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[0,6]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[0,7]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[0,8]
 
   
   #axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,3]
   #axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,4]
   #axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,5]
 
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,6]
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,7]
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,8]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,9]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,10]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,11]
 
 
   label_data_dict={}
   label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "CPG3"
   label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "CPG4"
   label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "CPG5"
+  
+  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = "MPG3-"
+  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = "MPG4-"
+  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = "MPG5-"
 
-  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "MPG3"
-  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "MPG4"
-  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "MPG5"
+
+  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = "MPG3+"
+  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = "MPG4+"
+  label_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = "MPG5+"
+
 
   #label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "MPG3"
   #label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "MPG4"

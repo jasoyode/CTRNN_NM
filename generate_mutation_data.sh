@@ -15,24 +15,39 @@ if [ "$TITLE" == "" ]; then
 fi
 
 
+#bias2  and  3->2
+#./runExp $INI $DIR $TITLE 2 2 17 17 &
+
+# 3->2  wALL
+#./runExp $INI $DIR $TITLE 17 17 22 22 &
+
+
+#exit
+
+#RPG
 ./runExp $INI $DIR $TITLE 19 19 20 20  &
 ./runExp $INI $DIR $TITLE 19 19 21 21  &
 ./runExp $INI $DIR $TITLE 20 20 21 21  &
 
 #exit
 
+./runExp $INI $DIR $TITLE 1 1 14 14 &
+./runExp $INI $DIR $TITLE 1 1 22 22 &
 
 #1=bias1, bias2   timingConstant1
-for i in $( seq 1 6); do
+for i in $( seq 3 6); do
+#RPG
   ./runExp $INI $DIR $TITLE $i $i 19 19  &
   ./runExp $INI $DIR $TITLE $i $i 20 20  &
   ./runExp $INI $DIR $TITLE $i $i 21 21  &  
-  ./runExp $INI $DIR $TITLE $i $i 22 22  &
+  ./runExp $INI $DIR $TITLE $i $i 14 14 &
+  ./runExp $INI $DIR $TITLE $i $i 22 22 &
   
 done
 
 
-for i in $( seq 19 21); do
+for i in $( seq 10 21); do
+  ./runExp $INI $DIR $TITLE 2  2  $i $i  &
   ./runExp $INI $DIR $TITLE $i $i 22 22  &
 done
 
@@ -51,12 +66,18 @@ done
 #   these should need to change together
 ./runExp $INI $DIR $TITLE 11 11 14 14  &
 
-#the rest are not nearly as meaningful
+
 exit
+
+#the rest are not nearly as meaningful
+#exit
 
 #for i in $( seq 11 6); do
 #  ./runExp $INI $DIR $TITLE $i $i 19 19  &
 #done
+
+#bias2  and  3->2
+#./runExp $INI $DIR $TITLE 2 2 17 17 &
 
 
 #1=bias1, bias2

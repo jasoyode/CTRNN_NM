@@ -13,7 +13,7 @@ fi
 INIs="$1"
 TEST_DIR="$2"
 
-FILTER=""
+FILTER="CONST"
 
 for temp in $( ls $INIs |grep "$FILTER" ); do
 

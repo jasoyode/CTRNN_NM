@@ -10,13 +10,15 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-VIOLIN_MODE=True
+VIOLIN_MODE=False
 
 SUFFIX="ROBUSTNESS_RESULTS_AMP_.csv"
 #SUFFIX="ROBUSTNESS_RESULTS_CONST_NEG_-.csv"
 #SUFFIX="ROBUSTNESS_RESULTS_CONST_POS_.csv"
-SUFFIX="ROBUSTNESS_RESULTS_CONSTANT_.csv"
+#SUFFIX="ROBUSTNESS_RESULTS_CONSTANT_.csv"
 
+MPG_SUFFIX_OFF="ROBUSTNESS_RESULTS_SA_OFF_AMP_.csv"
+MPG_SUFFIX_ON="ROBUSTNESS_RESULTS_SA_ON_AMP_.csv"
 
 
 #location for DATA from experiments and PLOTS
@@ -63,10 +65,16 @@ robustness1_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-4_sim-10
 robustness1_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-5_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+SUFFIX )
 
 
+#ADD LATER TO COMPARE TO CPG
+robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+MPG_SUFFIX_OFF )
+robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+MPG_SUFFIX_OFF )
+robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+MPG_SUFFIX_OFF )
 
-robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+SUFFIX )
-robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+SUFFIX )
-robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+SUFFIX )
+robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+MPG_SUFFIX_ON )
+robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+MPG_SUFFIX_ON )
+robustness1_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+MPG_SUFFIX_ON )
+
+
 
 #robustness1_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+SUFFIX )
 #robustness1_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/"+SUFFIX )
@@ -82,10 +90,14 @@ robustness0_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-10
 robustness0_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-4_sim-100run-500gen_signal-SINE-1p_M-standard/"+SUFFIX )
 robustness0_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-5_sim-100run-500gen_signal-SINE-1p_M-standard/"+SUFFIX )
 
+#ADD LATER TO COMPARE TO CPG
+robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"+MPG_SUFFIX_OFF )
+robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-standard/"+MPG_SUFFIX_OFF )
+robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-standard/"+MPG_SUFFIX_OFF )
 
-robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"+SUFFIX )
-robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-standard/"+SUFFIX )
-robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-standard/"+SUFFIX )
+robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"+MPG_SUFFIX_ON )
+robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-standard/"+MPG_SUFFIX_ON )
+robustness0_csvs.append( "../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-standard/"+MPG_SUFFIX_ON )
 
 
 #robustness0_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"+SUFFIX )
@@ -99,8 +111,15 @@ robustness0_csvs.append( "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-10
 
 
 pos = range(0, len(robustness0_csvs))
-labels0=[ "CPG3","CPG4","CPG5","MPG3","MPG4","MPG5","RPG3","RPG4","RPG5" ]
-labels1=[ "CPG3","CPG4","CPG5","MPG3","MPG4","MPG5","RPG3","RPG4","RPG5" ]
+labels0=[ "CPG3","CPG4","CPG5","MPG3-","MPG4-","MPG5-","MPG3+","MPG4+","MPG5+","RPG3","RPG4","RPG5" ]
+labels1=[ "CPG3","CPG4","CPG5","MPG3-","MPG4-","MPG5-","MPG3+","MPG4+","MPG5+","RPG3","RPG4","RPG5" ]
+
+#trying to add color
+CPG_COLOR='blue'
+MPG1_COLOR='lightgreen'
+MPG2_COLOR='green'
+RPG_COLOR='red'
+colors = [CPG_COLOR,CPG_COLOR,CPG_COLOR,MPG1_COLOR,MPG1_COLOR,MPG1_COLOR,MPG2_COLOR,MPG2_COLOR,MPG2_COLOR,RPG_COLOR,RPG_COLOR,RPG_COLOR]
 
 
 data0=[]
@@ -110,6 +129,7 @@ for robustness_csv in robustness0_csvs:
     reader = csv.DictReader(csvfile)
     for row in reader:
       if not 'robustness' in row:
+        print( robustness_csv )
         print("Are you sure you specified the correct csv file? It must have a 'noise' in the header to work in this mode")
         quit()
                     
@@ -151,7 +171,7 @@ fs = 10  # fontsize
 #data = [np.random.normal(0, std, size=100) for std in pos]
 
 #https://stackoverflow.com/questions/19953348/error-when-looping-to-produce-subplots
-fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6) , squeeze=False)
+fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5) , squeeze=False)
 
 #print( len(data0) )
 #print( len( pos ))
@@ -173,10 +193,14 @@ def set_axis_style(ax, labels):
     ax.get_xaxis().set_tick_params(direction='out')
     ax.xaxis.set_ticks_position('bottom')
     ax.set_xticks(np.arange(1, len(labels) + 1))
-    ax.set_xticklabels(labels)
+    ax.set_xticklabels(labels, rotation=45)  #, color=colors )   #'vertical')
     ax.set_ylim(0, 1.1)
     ax.set_xlim(0.25, len(labels) + 0.75)
     ax.set_xlabel('Sample name')
+    
+    #colors defined above
+    for xtick, color in zip(ax.get_xticklabels(), colors):
+        xtick.set_color(color)
 
 
 
@@ -213,25 +237,31 @@ def customize(ax2, data):
 if VIOLIN_MODE:
     customize(axes[0, 0], data0 )
 else:
-    axes[0, 0].boxplot(data0)  #, color="blue")
+    bplot1 = axes[0, 0].boxplot(data0, patch_artist=True)  #, color="blue")
 
-axes[0, 0].set_title('Comparing Network Robustness', fontsize=fs)
+
+axes[0, 0].set_title('Networks Evolved Without Neuromodulation', fontsize=fs)
 
 
 if VIOLIN_MODE:
     customize(axes[0, 1], data1 )
 else:
-    axes[0, 1].boxplot(data1)
+    bplot2 = axes[0, 1].boxplot(data1, patch_artist=True)
 
 
-axes[0, 1].boxplot(data1)
+    
+    for bplot in (bplot1, bplot2):
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+
+
 
 #axes[0, 1].violinplot(data1, pos, points=20, widths=0.3,
 #                      showmeans=True, showextrema=True, showmedians=True)
 
 
-axes[0, 1].set_title('Comparing Network Robustness', fontsize=fs)
-
+axes[0, 1].set_title('Networks Evolved With Neuromodulation', fontsize=fs)
+#
 
 
 
@@ -257,17 +287,17 @@ modulationAxis = axes[0][1]
 set_axis_style( standardAxis, labels0)
 set_axis_style( modulationAxis, labels0)
 
-standardAxis.set_xlabel('Evolved Without Neuromodulation Groups')
-standardAxis.set_ylabel('Robustness to Oscillatory Noise')
-modulationAxis.set_xlabel('Evolved With Neuromodulation Groups')
-modulationAxis.set_ylabel('Robustness to Oscillatory Noise')
+standardAxis.set_xlabel('Evolved Without Neuromodulation')
+standardAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
+modulationAxis.set_xlabel('Evolved With Neuromodulation')
+modulationAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
 
  
 #for ax in axes.flatten():
 #    set_axis_style(ax, labels0)
     
-
-fig.suptitle("Violin Plotting Examples")
+# No need tof title
+fig.suptitle("Comparing Network Robustness")
 
 fig.subplots_adjust(hspace=0.4)
 

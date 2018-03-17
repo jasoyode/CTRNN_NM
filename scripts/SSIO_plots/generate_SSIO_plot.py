@@ -21,7 +21,7 @@ EQ_THRESHOLD=0.0001
 OUTPUT_THRESHOLD=0.001
 STEPSIZE=0.1
 self_loop_cutoff=4
-STEPS=5
+STEPS=10   #5
 VECTOR_STEPS=1
 
 MODULATION=-0.25
@@ -43,10 +43,10 @@ GENOME_TYPE_PATH="/scratch/jasoyode/github_jasoyode/CTRNN_NM/DATA/CPG_RPG_MPG_34
 
 
 #x coordinates
-CONSTANT_INPUT_LEVELS_PER_UNIT=25
+CONSTANT_INPUT_LEVELS_PER_UNIT=25   #25  #500
 
 #y coordinates
-LEVELS_CURRENT_ACTIVATION=10
+LEVELS_CURRENT_ACTIVATION=10   #10  #20
 
 #fewer columns
 VECTOR_FIELD_DIVIDER=CONSTANT_INPUT_LEVELS_PER_UNIT*8/10
@@ -224,6 +224,7 @@ def main( MODULATION ):
   
   
   for i in range(1, size+1):
+  #for i in range(2,3): for BS only for debug speed up
     neuron_ssio=i
   #do all the stuff and generate plots
     if i ==1:

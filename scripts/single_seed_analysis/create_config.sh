@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-XXX_SEED_XXX="43"
+XXX_SEED_XXX="59"
 
 if [ "$1" != "" ]; then
   XXX_SEED_XXX="$1"
@@ -9,11 +9,11 @@ fi
 
 echo "XXX_SEED_XXX: $XXX_SEED_XXX"
 
-#mod_std="mod1-ON"
-mod_std="standard"
-#MOD_STD="MOD"
-MOD_STD="STD"
-TYPE="CPG"
+mod_std="mod1-ON"
+#mod_std="standard"
+MOD_STD="MOD"
+#MOD_STD="STD"
+TYPE="RPG"
 SIZE="3"
 
 

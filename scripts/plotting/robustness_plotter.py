@@ -1,4 +1,5 @@
 import re
+import operator
 import os
 import sys
 import csv
@@ -17,7 +18,14 @@ import matplotlib.mlab as mlab
 PI=3.141592653589
 
 #levels=[ 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
-levels=[ 0.9 ]
+levels=[ 0.98 ]
+
+HARD_LEVEL=0.98
+abs_level=0.45
+
+
+SOFT_MODE=True
+
 
 SAVE_PLOTS_MODE=True
 SCATTER=False
@@ -115,16 +123,27 @@ with open( sys.argv[-1]  ) as csvfile:
   normalized_fitness_data={}
   
   for seed in seed_data_dict.keys():
+    #print (seed )
     noise_data[seed] = []
     fitness_data[seed] = []
     normalized_fitness_data[seed] = []
     #print( sorted( seed_data_dict[seed].keys() ) )
     
     #if not '0.0' in seed_data_dict[seed]:
-    #  baseline = float( max( seed_data_dict[seed] ) )
+    #baseline = float( max( seed_data_dict[seed] ) )
+    #print("baseline: " + str( baseline))
     #else:
-    baseline = float( seed_data_dict[seed]['0.0'] )
+    #should use max of all tests, not just baseline
+    #baseline = float( seed_data_dict[seed]['0.0'] )
+    
+    #print( seed_data_dict[seed] )
+    #print( max( seed_data_dict[seed].items(), key=operator.itemgetter(1))[0] )
 
+    #get max value from all noise levels and use that as the metric to measure robustness against
+    baseline =  max( seed_data_dict[seed].items(), key=operator.itemgetter(1))[1]  
+
+    #print("max" + str(  max(seed_data_dict[seed]   )  )  )
+    #print("baseline: " + str( baseline))
     
     for noise in sorted( seed_data_dict[seed].keys(), key=float ):
       noise_data[seed].append( float(noise) )
@@ -189,7 +208,8 @@ with open( sys.argv[-1]  ) as csvfile:
   
   
   #first only include the networks with a fitness over threshold
-  FITNESS_THRESHOLD = 0.2
+  #include all to be a fair comparison
+  FITNESS_THRESHOLD = 0.0
   
   
   aggregated_fitness_by_noise_level = {}
@@ -197,7 +217,7 @@ with open( sys.argv[-1]  ) as csvfile:
   
   total_successful_networks=0
   for seed in seed_data_dict.keys():
-  
+    #print( seed )
     #baseline = float( max( seed_data_dict[seed] ) )
     baseline =  seed_data_dict[seed]['0.0'] 
     
@@ -222,8 +242,8 @@ with open( sys.argv[-1]  ) as csvfile:
         #append to the data
         aggregated_normalized_fitness_by_noise_level[noise_key].append( float(seed_data_dict[seed][noise_key])/baseline)  
     
-#  print( "Successful networks: "+ str(total_successful_networks ) +" out of " + str(len(seed_data_dict.keys())) )
-  
+  print( "Successful networks: "+ str(total_successful_networks ) +" out of " + str(len(seed_data_dict.keys())) )
+  print( "  From file: {}".format( sys.argv[-1] ))
   
   fitness_means = []
   fitness_errors = []
@@ -331,16 +351,27 @@ with open( sys.argv[-1]  ) as csvfile:
     for i in range(len(normalized_fitness_data[seed]) ) :
       for level in levels:
         
-        if normalized_fitness_data[seed][i] > level:
-          seed_robustness_dict[level][seed] += 1
+        #This is the cutoff of whether we include the test as a pass or not
+        
+        if not SOFT_MODE:
+          if normalized_fitness_data[seed][i] > level and fitness_data[seed][i] > abs_level :
+            seed_robustness_dict[level][seed] += 1
+        else:
+          #alternate form we just add the percentage
+          seed_robustness_dict[level][seed] += normalized_fitness_data[seed][i]
+        
+        #elif normalized_fitness_data[seed][i] > level:
+        #  print( "failed because abs == {}".format(  fitness_data[seed][i] ) )
+        #else:
+        #  print( "failed because normalized == {}".format( normalized_fitness_data[seed][i]  ))
     
     
     for level in levels:
       seed_robustness_dict[level][seed] = round( seed_robustness_dict[level][seed] / total, 3)
   
   
-  for s in seed_robustness_dict[0.9].keys():
-    seed_summary[s]['robustness'] = seed_robustness_dict[0.9][s]
+  for s in seed_robustness_dict[HARD_LEVEL].keys():
+    seed_summary[s]['robustness'] = seed_robustness_dict[HARD_LEVEL][s]
   
   #this is all seeds and their robustness
   #print("Sorted seeds by their robustness score:  " )
@@ -388,7 +419,7 @@ with open( sys.argv[-1]  ) as csvfile:
   if SAVE_PLOTS_MODE:
     plt.xlabel('Robustness')   
     plt.ylabel('Frequency')
-    plt.title( "Robustness Frequency Distribution: {}".format(  str(robust_mean[0.9] )  ) )
+    plt.title( "Robustness Frequency Distribution: {}".format(  str(robust_mean[HARD_LEVEL] )  ) )
     plt.savefig( "{}/{}/{}/{}_robustness_histogram.png".format( PLOTS, experiment_title, job_title, robust_label) )
   
   

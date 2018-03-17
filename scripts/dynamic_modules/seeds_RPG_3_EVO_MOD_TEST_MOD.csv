@@ -1,0 +1,99 @@
+1,{ --- { ---
+2,{ --- { ---
+3,{ --- { ---
+4,{ --- { ---
+5,{ --- { ---
+6,{ --- { ---
+7,{ --- { ---
+11,{ --- { ---
+14,{ --- { ---
+15,{ --- { ---
+16,{ --- { ---
+19,{ --- { ---
+21,{ --- { ---
+22,{ --- { ---
+26,{ --- { ---
+31,{ --- { ---
+34,{ --- { ---
+35,{ --- { ---
+37,{ --- { ---
+38,{ --- { ---
+43,{ --- { ---
+44,{ --- { ---
+46,{ --- { ---
+47,{ --- { ---
+49,{ --- { ---
+50,{ --- { ---
+51,{ --- { ---
+52,{ --- { ---
+56,{ --- { ---
+58,{ --- { ---
+60,{ --- { ---
+61,{ --- { ---
+63,{ --- { ---
+64,{ --- { ---
+66,{ --- { ---
+67,{ --- { ---
+69,{ --- { ---
+70,{ --- { ---
+71,{ --- { ---
+72,{ --- { ---
+73,{ --- { ---
+75,{ --- { ---
+77,{ --- { ---
+79,{ --- { ---
+81,{ --- { ---
+82,{ --- { ---
+83,{ --- { ---
+84,{ --- { ---
+89,{ --- { ---
+91,{ --- { ---
+92,{ --- { ---
+93,{ --- { ---
+94,{ --- { ---
+95,{ --- { ---
+97,{ --- { ---
+98,{ --- { ---
+99,{ --- { ---
+8,{FT↓ BS- FS+}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+13,{FT↓ BS- FS+}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+29,{FT↓ BS- FS+}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+42,{FT↓ BS- FS+}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+96,{FT↓ BS- FS+}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+30,{ --- { --- { ---
+76,{ --- { --- { ---
+80,{ --- { --- { ---
+86,{ --- { --- { ---
+88,{ --- { --- { ---
+18,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT↑ BS+ FS↓}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+20,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT↑ BS+ FS↓}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+39,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT↑ BS+ FS↓}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+62,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT↑ BS+ FS↓}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+33,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT- BS+ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+36,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT- BS+ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+54,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT- BS+ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+90,{FT↓ BS- FS+}=>{FT- BS↑ FS+}=>{FT- BS+ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+25,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT↑ BS↑ FS-}=>{FT+ BS+ FS↑}=>
+55,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT↑ BS↑ FS-}=>{FT+ BS+ FS↑}=>
+85,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT↑ BS↑ FS-}=>{FT+ BS+ FS↑}=>
+87,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT↑ BS↑ FS-}=>{FT+ BS+ FS↑}=>
+12,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS+ FS↑}=>
+27,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS+ FS↑}=>
+59,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS+ FS↑}=>
+17,{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS↓ FS↑}=>
+28,{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS↓ FS↑}=>
+40,{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS↓ FS↑}=>
+23,{FT+ BS↓ FS-}=>{FT↓ BS- FS↑}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>
+53,{FT+ BS↓ FS-}=>{FT↓ BS- FS↑}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>
+74,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT- BS↑ FS-}=>{FT↑ BS+ FS-}=>{FT+ BS+ FS↑}=>
+100,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT- BS↑ FS-}=>{FT↑ BS+ FS-}=>{FT+ BS+ FS↑}=>
+45,{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT- BS↑ FS-}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+65,{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT- BS↑ FS-}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+57,{FT+ BS↓ FS-}=>{FT↓ BS- FS↑}=>{FT↑ BS↑ FS↓}=>
+68,{FT+ BS↓ FS-}=>{FT↓ BS- FS↑}=>{FT↑ BS↑ FS↓}=>
+24,{FT+ BS↓ FS-}=>{FT↓ BS- FS↑}=>{FT- BS- FS↓}=>{FT↑ BS↑ FS-}=>
+10,{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT↑ BS↑ FS-}=>{FT+ BS↓ FS↑}=>
+48,{FT+ BS↓ FS+}=>{FT↓ BS- FS+}=>{FT- BS↑ FS↓}=>{FT↑ BS+ FS-}=>{FT+ BS+ FS↑}=>
+9,{FT↓ BS- FS+}=>{FT↑ BS↑ FS↓}=>{FT+ BS↓ FS-}=>{FT+ BS- FS↑}=>
+41,{FT↓ BS- FS+}=>{FT- BS- FS↓}=>{FT- BS↑ FS-}=>{FT↑ BS+ FS-}=>{FT+ BS↓ FS↑}=>
+32,{FT↓ BS↓ FS↑}=>{FT- BS- FS↓}=>{FT- BS↑ FS-}=>{FT↑ BS+ FS-}=>

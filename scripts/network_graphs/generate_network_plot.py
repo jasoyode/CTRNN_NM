@@ -313,16 +313,19 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
     else:
       lbl="{}\n{}".format(name,stability)
     
+    dm_font_size=20
+    ON_thickness=3
+    
     if PLOT_DYNAMIC_MODULES:
       radius=1
       if DYNAMIC_MODULE_VALUES[n]=="+":
-        A.add_node(i,fontname="times bold", label=lbl,fontsize=12,style="bold", fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="times bold", label=lbl,fontsize=dm_font_size,style="bold", fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y), penwidth=ON_thickness )
       elif DYNAMIC_MODULE_VALUES[n]=="↑":
-        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="filled",fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="filled",fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
       elif DYNAMIC_MODULE_VALUES[n]=="↓":
-        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="bold,filled",fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="bold,filled",fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y), penwidth=ON_thickness )
       elif DYNAMIC_MODULE_VALUES[n]=="-":
-        A.add_node(i,fontname="times bold", label=lbl,fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="times bold", label=lbl,fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
       else:
         print("No state detected exiting")
         quit()
@@ -330,7 +333,7 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
     else:
       if imitate_beer:
         radius=1
-        A.add_node(i,fontname="times bold", label=lbl,fontsize=12, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="times bold", label=lbl,fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
       else:
         radius=1.5
         A.add_node(i, label=lbl, fixedsize=True, width=radius, height=radius,shape='circle', color='black',pos='{},{}'.format(x,y) )

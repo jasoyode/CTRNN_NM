@@ -12,12 +12,12 @@ EXP_DIR="$1"
 for DIR in $( ls $EXP_DIR ); do
 
   #echo "Entering $EXP_DIR/$DIR"
-  for RESULT in $( ls $EXP_DIR/$DIR | grep "RESULT" ); do
+  for RESULT in $( ls $EXP_DIR/$DIR | grep "RESULT" | grep -v "ROBUSTNESS" ); do
     #echo "Result File Found: $RESULT"
     #NEEDS TO BE FIXED!
     COMMAND=$( echo "python robustness_plotter.py $EXP_DIR/${DIR}/${RESULT}"  | sed "s/\/\//\//" )
     #python robustness_plotter.py $EXP_DIR/$DIR/$RESULT
-    eval $COMMAND
+    eval $COMMAND 
   done
 
 done

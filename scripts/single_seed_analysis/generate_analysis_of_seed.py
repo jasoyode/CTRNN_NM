@@ -39,7 +39,7 @@ def main( config_file ):
   #2.generate network graphs of normal network
   #generate_network_graph()
   #3. generate SSIO curves and SSIO.csvs for later plots
-  #generate_SSIO_curves()
+  generate_SSIO_curves()
   #4. generate normal activity plots (add SSIO with curves)
   generate_normal_activity_plots()
   #5. generate testing data

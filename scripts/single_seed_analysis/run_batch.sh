@@ -11,7 +11,14 @@
 
 #python generate_analysis_of_seed.py config_BEER_BEST_CPG3.ini
 #python generate_analysis_of_seed.py config_CPG3_30.ini
-#python generate_analysis_of_seed.py config_CPG3_STD_35.ini
+##python generate_analysis_of_seed.py config_CPG3_STD_35.ini
+
+#python generate_analysis_of_seed.py config_RPG3_MOD_59.ini
+#python generate_analysis_of_seed.py config_RPG3_MOD_67.ini
+#python generate_analysis_of_seed.py config_RPG3_MOD_98.ini
+#python generate_analysis_of_seed.py config_RPG3_MOD_99.ini
+
+
 
 python generate_analysis_of_seed.py config_RPG3_STD_16.ini
 python generate_analysis_of_seed.py config_RPG3_STD_4.ini

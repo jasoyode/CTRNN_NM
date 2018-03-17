@@ -26,14 +26,21 @@ done
 for JOB in ${JOBS[@]}; do
   echo "$JOB"
   DIR="$JOB/TESTS/"
-  FILTERS=( AMP_ CONSTANT_ )    #CONST_POS_  CONST_NEG_-
+  #FILTERS=(SA_OFF_AMP_ SA_ON_AMP_ CONSTANT_ )    #CONST_POS_  CONST_NEG_-
+#  FILTERS=( SA_OFF_AMP_ )
+  FILTERS=(SA_OFF_CONSTANT_ SA_ON_CONSTANT_  )
+#  FILTERS=( AMP_ )  # CONSTANT_ )
+#  ANTI_FILTER=( SA_O )
+  ANTI_FILTER=( XXX )
   for FILTER in ${FILTERS[@]}; do
     echo $FILTER
     OUTPUT="$JOB/RESULTS_${FILTER}.csv"
     echo "seed,fitness,noise," > $OUTPUT
     #sort numerically
-    for file in $( ls $DIR | grep "$FILTER" |sed "s/$FILTER//" | sort -k1.1n  ); do
-      echo $file
+    for file in $( ls $DIR | grep -v "$ANTI_FILTER" | grep "$FILTER" |sed "s/$FILTER//" | sort -k1.1n  ); do
+      
+      #echo $file
+      
       NOISE=$( echo "${FILTER}${file}" | sed "s/.*$FILTER//" )
       for line in $( cat $DIR/${FILTER}${file}/seeds_tested_fitness.csv | grep -v "seed" ); do
         echo "${line}${NOISE}" >> $OUTPUT

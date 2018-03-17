@@ -49,10 +49,18 @@ def main():
       
       
   else:
-    create_inis( original_ini_file, original_directory )
+    if SENSORS_OVERRIDE_BOTH:
+      create_inis( original_ini_file, original_directory, SENSOR_MODE="ON" )
+      create_inis( original_ini_file, original_directory, SENSOR_MODE="OFF" )
+    else:
+      create_inis( original_ini_file, original_directory )
 
 
 def create_inis( original_ini_file, original_directory, SEED=-1, SENSOR_MODE=""  ):
+  
+  #print( SENSOR_MODE )
+  #return
+  
   
   PLOT_SEED_ACTIVITY_MODE=( SEED != -1)
   if FORCE_GEN_ALL:
@@ -121,7 +129,6 @@ def create_inis( original_ini_file, original_directory, SEED=-1, SENSOR_MODE="" 
     search_replace_pairs.append( ("mixedPatternGen.*" , "mixedPatternGen = false" ))
     search_replace_pairs.append( ("minSensorWeights.*" , "minSensorWeights = -16" ))
     search_replace_pairs.append( ("maxSensorWeights.*" , "maxSensorWeights = 16" ))
-
 
   
   

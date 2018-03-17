@@ -1,0 +1,25 @@
+Seed 31 did not have any cycles, consider lowering the CYCLE_REQ threshold from 10
+Seed 31 did not have any cycles, consider lowering the CYCLE_REQ threshold from 10
+Seed 57 did not have any cycles, consider lowering the CYCLE_REQ threshold from 10
+Seed 57 did not have any cycles, consider lowering the CYCLE_REQ threshold from 10
+Seed 67 did not have any cycles, consider lowering the CYCLE_REQ threshold from 10
+Seed 67 did not have any cycles, consider lowering the CYCLE_REQ threshold from 10
+{ --- { ---  appeared 39 times in the seeds [2, 3, 5, 6, 14, 15, 16, 20, 21, 24, 25, 27, 30, 36, 40, 42, 44, 47, 48, 50, 51, 54, 55, 58, 64, 65, 66, 69, 72, 77, 79, 82, 86, 88, 91, 92, 93, 94, 99]
+{BS↓}=>{FT↓ FS↑}=>{BS↑}=>{FS↓}=>{FT↑}=> was DM #5 in Beers list, has consistency: T adjacency: T and  appeared 18 times in the seeds [9, 18, 33, 35, 37, 39, 41, 46, 52, 56, 59, 60, 63, 68, 70, 81, 96, 98]
+{BS↓}=>{FT↓ FS↑}=>{BS↑}=>{FT↑ FS↓}=> was DM #4 in Beers list, has consistency: T adjacency: T and  appeared 6 times in the seeds [10, 29, 45, 75, 87, 95]
+{BS↓}=>{FT↓ FS↑}=>{BS↑ FS↓}=>{FT↑}=> was DM #29 in Beers list, has consistency: F adjacency: T and  appeared 4 times in the seeds [11, 26, 32, 61]
+{FT↓}=>{BS↑ FS↓}=>{FT↑}=>{BS↓}=>{FS↑}=> was DM #8 in Beers list, has consistency: T adjacency: T and  appeared 4 times in the seeds [12, 73, 74, 80]
+{FT↓}=>{FS↓}=>{BS↑}=>{FT↑}=>{BS↓ FS↑}=> was DM #3 in Beers list, has consistency: T adjacency: T and  appeared 3 times in the seeds [7, 23, 97]
+{FT↓ FS↑}=>{BS↓}=>{FS↓}=>{FT↑}=>{BS↑}=>  appeared 3 times in the seeds [62, 76, 83]
+{FT↓}=>{BS↑}=>{FS↓}=>{FT↑}=>{BS↓}=>{FS↑}=> was DM #10 in Beers list, has consistency: T adjacency: T and  appeared 3 times in the seeds [78, 90, 100]
+{FT↓}=>{BS↑}=>{FT↑ FS↓}=>{BS↓}=>{FS↑}=> was DM #9 in Beers list, has consistency: T adjacency: T and  appeared 2 times in the seeds [19, 84]
+{BS↓}=>{FT↓}=>{FT↑ BS↑}=>  appeared 2 times in the seeds [28, 49]
+{BS↓}=>{FT↓ BS↑}=>{FT↑}=>  appeared 2 times in the seeds [4, 13]
+{FS↓}=>{BS↑}=>{FT↓}=>{FS↑}=>{BS↓}=>{FT↑}=>  appeared 2 times in the seeds [1, 53]
+{BS↓}=>{FT↓}=>{BS↑}=>{FT↑}=>  appeared 2 times in the seeds [34, 85]
+{FT↓}=>{BS↑ FS↓}=>{FT↑}=>{BS↓ FS↑}=> was DM #1 in Beers list, has consistency: T adjacency: T and  appeared 2 times in the seeds [8, 71]
+{FT↓ FS↑}=>{BS↓}=>{FT↑ FS↓}=>{BS↑}=>  appeared 1 times in the seeds [22]
+{FS↓}=>{BS↑}=>{FT↓}=>{BS↓ FS↑}=>{FT↑}=>  appeared 1 times in the seeds [89]
+{FT↓ BS↓}=>{FS↓}=>{FT↑ BS↑}=>{FS↑}=> was DM #6 in Beers list, has consistency: T adjacency: T and  appeared 1 times in the seeds [43]
+{FS↓}=>{FT↓}=>{BS↓}=>{FS↑}=>{BS↑}=>{FT↑}=>  appeared 1 times in the seeds [38]
+{FS↓}=>{BS↑}=>{FT↓ FS↑}=>{BS↓}=>{FT↑}=>  appeared 1 times in the seeds [17]
