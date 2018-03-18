@@ -24,7 +24,11 @@ HARD_LEVEL=0.90
 abs_level=0.45
 
 
-SOFT_MODE=True
+SOFT_MODE=False
+
+STOP_AT_FIRST_FAIL_MODE=True
+
+
 
 
 SAVE_PLOTS_MODE=True
@@ -349,11 +353,21 @@ with open( sys.argv[-1]  ) as csvfile:
       seed_robustness_dict[level][seed] = 0
     
     for i in range(len(normalized_fitness_data[seed]) ) :
+    
+      SEED_FAILED=False
       for level in levels:
         
         #This is the cutoff of whether we include the test as a pass or not
-        
-        if not SOFT_MODE:
+        if STOP_AT_FIRST_FAIL_MODE:
+          if SEED_FAILED:
+            continue
+          else:
+            if normalized_fitness_data[seed][i] > level and fitness_data[seed][i] > abs_level:
+              seed_robustness_dict[level][seed] += 1
+            else:
+              SEED_FAILED=True
+            
+        elif not SOFT_MODE:
           if normalized_fitness_data[seed][i] > level and fitness_data[seed][i] > abs_level :
             seed_robustness_dict[level][seed] += 1
         else:

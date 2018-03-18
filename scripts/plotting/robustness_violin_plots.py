@@ -10,7 +10,9 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-VIOLIN_MODE=True
+USE_FIRST_FAIL=True
+
+VIOLIN_MODE=False
 
 SUFFIX="ROBUSTNESS_RESULTS_AMP_.csv"
 #SUFFIX="ROBUSTNESS_RESULTS_CONST_NEG_-.csv"
@@ -137,7 +139,10 @@ for robustness_csv in robustness0_csvs:
       fitness_at_90 = row['fitness_at_90']
       robustness = float( row['robustness'] )
       
-      d.append( robustness )
+      if USE_FIRST_FAIL:
+        d.append( robustness/2 )
+      else:
+        d.append( robustness )
                               
   data0.append( np.asarray(d) ) 
 
@@ -157,7 +162,11 @@ for robustness_csv in robustness1_csvs:
       fitness_at_90 = row['fitness_at_90']
       robustness = float( row['robustness'] )
       
-      d.append( robustness )
+      if USE_FIRST_FAIL:
+        d.append( robustness/2 )
+      else:
+        d.append( robustness )
+      
                               
   data1.append( np.asarray(d) ) 
 
@@ -193,7 +202,10 @@ def set_axis_style(ax, labels):
     ax.xaxis.set_ticks_position('bottom')
     ax.set_xticks(np.arange(1, len(labels) + 1))
     ax.set_xticklabels(labels, rotation=45)  #, color=colors )   #'vertical')
-    ax.set_ylim(0, 1.1)
+    if USE_FIRST_FAIL:
+        ax.set_ylim(0, 0.5)
+    else:
+        ax.set_ylim(0, 1.0)
     ax.set_xlim(0.25, len(labels) + 0.75)
     ax.set_xlabel('Sample name')
     
@@ -287,9 +299,14 @@ set_axis_style( standardAxis, labels0)
 set_axis_style( modulationAxis, labels0)
 
 standardAxis.set_xlabel('Evolved Without Neuromodulation')
-standardAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
 modulationAxis.set_xlabel('Evolved With Neuromodulation')
-modulationAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
+
+if USE_FIRST_FAIL:
+    standardAxis.set_ylabel('Maximum Modulation Level Before Failure')  # to Oscillatory Neuromodulation Signal')
+    modulationAxis.set_ylabel('Maximum Modulation Level Before Failure')  # to Oscillatory Neuromodulation Signal')
+else:
+    standardAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
+    modulationAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
 
  
 #for ax in axes.flatten():
@@ -300,7 +317,12 @@ fig.suptitle("Comparing Network Robustness")
 
 fig.subplots_adjust(hspace=0.4)
 
-if VIOLIN_MODE:
-    plt.savefig("violinplot_{}.png".format(SUFFIX) )
+if USE_FIRST_FAIL:
+    PREFIX="FAIL_FIRST_"
 else:
-    plt.savefig("boxplot_{}.png".format(SUFFIX) )
+    PREFIX=""
+    
+if VIOLIN_MODE:
+    plt.savefig("{}violinplot_{}.png".format(PREFIX, SUFFIX) )
+else:
+    plt.savefig("{}boxplot_{}.png".format(PREFIX, SUFFIX) )
