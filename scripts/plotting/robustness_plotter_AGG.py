@@ -20,6 +20,8 @@ PI=3.141592653589
 levels=[ 0.9 ]
 
 
+ORIENTATION="HORIZONTAL"
+#ORIENTATION="VERTICAL"
 
 PLOT_MODES=["IND_ABS","AGG_ABS","AGG_PERC","IND_PERC"]
 
@@ -49,33 +51,49 @@ MPG_OFF_FILENAME="RESULTS_SA_OFF_CONSTANT_.csv"
 
 numplots=12
 
+def convert_to_orientation( value, x_or_y ):
+  if x_or_y =="x":
+    if ORIENTATION=="VERTICAL":
+      return value
+    else:
+      return 0
+  else:
+    if ORIENTATION=="VERTICAL":
+      return 0
+    else:
+      return value
+
 
 for PLOT_MODE in PLOT_MODES:
-  fig, axes = plt.subplots(nrows=1, ncols=numplots, figsize=(numplots, 6), squeeze=False)
+  if ORIENTATION=="VERTICAL":
+    fig, axes = plt.subplots(nrows=numplots, ncols=1, figsize=(7, 3/4*numplots), squeeze=False, sharex=True, sharey=True)
+  else:
+    fig, axes = plt.subplots(nrows=1, ncols=numplots, figsize=(numplots, 6), squeeze=False, sharex=True, sharey=True)
+  
 
   axes_data_dict={}        #r,c
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,0]
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,1]
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,2]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[ convert_to_orientation( 0, "x" ), convert_to_orientation( 0, "y" ) ]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[ convert_to_orientation( 1, "x" ), convert_to_orientation( 1, "y" ) ]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[ convert_to_orientation( 2, "x" ), convert_to_orientation( 2, "y" ) ]
 
   
   #MPG_GOOD_345
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[0,3]
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[0,4]
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[0,5]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[ convert_to_orientation( 3, "x" ), convert_to_orientation( 3, "y" ) ]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[ convert_to_orientation( 4, "x" ), convert_to_orientation( 4, "y" ) ]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_OFF_FILENAME] = axes[ convert_to_orientation( 5, "x" ), convert_to_orientation( 5, "y" ) ]
   
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[0,6]
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[0,7]
-  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[0,8]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[ convert_to_orientation( 6, "x" ), convert_to_orientation( 6, "y" ) ]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[ convert_to_orientation( 7, "x" ), convert_to_orientation( 7, "y" ) ]
+  axes_data_dict["../../DATA/MPG_GOOD_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + MPG_ON_FILENAME] = axes[ convert_to_orientation( 8, "x" ), convert_to_orientation( 8, "y" ) ]
 
   
   #axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,3]
   #axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,4]
   #axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-MPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,5]
 
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,9]
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,10]
-  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[0,11]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[ convert_to_orientation( 9, "x" ), convert_to_orientation( 9, "y" ) ]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[ convert_to_orientation( 10, "x" ), convert_to_orientation( 10, "y" ) ]
+  axes_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = axes[ convert_to_orientation( 11, "x" ), convert_to_orientation( 11, "y" ) ]
 
 
   label_data_dict={}
@@ -102,10 +120,19 @@ for PLOT_MODE in PLOT_MODES:
   label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-4_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "RPG4"
   label_data_dict["../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-5_sim-100run-500gen_signal-SINE-1p_M-"+EVO_COND+"/" + ROB_FILENAME] = "RPG5"
   
-  
+  CPG_COLOR='blue'
+  MPG1_COLOR='lightgreen'
+  MPG2_COLOR='green'
+  RPG_COLOR='red'
+  colors = {}
+  for i in range(3,6):
+    colors["CPG{}".format(i)] = CPG_COLOR
+    colors["MPG{}-".format(i)] = MPG1_COLOR
+    colors["MPG{}+".format(i)] = MPG2_COLOR
+    colors["RPG{}".format(i)] = RPG_COLOR
   
   for csv_path in axes_data_dict.keys():
-    print(csv_path  )
+    color = colors[ label_data_dict[csv_path] ]
     #indent ALL
     cur_plot=axes_data_dict[csv_path]
     
@@ -182,19 +209,38 @@ for PLOT_MODE in PLOT_MODES:
         # individual percentage
         ######################################        
         if PLOT_MODE == "IND_PERC":
+          
           #if SAVE_PLOTS_MODE:  
-          cur_plot.set_xlim(0, 1.0)
-          cur_plot.set_ylim(-0.5, 0.5)
-          cur_plot.set_xlabel( label_data_dict[csv_path] )
-          cur_plot.plot( normalized_fitness_data[seed], noise_data[seed], color="black", alpha=0.1, label=seed)
+          if ORIENTATION=="VERTICAL":
+            cur_plot.set_ylim(0, 1.0)
+            cur_plot.set_xlim(-0.5, 0.5)
+            cur_plot.set_ylabel( label_data_dict[csv_path], color=color )  #, rotation=0 )
+            #if bottom_plot != axes_data_dict[csv_path]:
+            #  cur_plot.xaxis.set_visible(False)
+            cur_plot.plot( noise_data[seed], normalized_fitness_data[seed], color="black", alpha=0.1, label=seed)
+          else:
+            cur_plot.set_xlim(0, 1.0)
+            cur_plot.set_ylim(-0.5, 0.5)
+            cur_plot.set_xlabel( label_data_dict[csv_path], color=color  )
+            cur_plot.plot( normalized_fitness_data[seed], noise_data[seed], color="black", alpha=0.1, label=seed)
+          
+          
         #########################################
         # individual absolute
         #########################################
         if PLOT_MODE == "IND_ABS":
-          cur_plot.set_xlabel( label_data_dict[csv_path] )
-          cur_plot.set_xlim(0, .628)
-          cur_plot.set_ylim(-0.5, 0.5)
-          cur_plot.plot( fitness_data[seed], noise_data[seed], color="black", alpha=0.1, label=seed)
+          if ORIENTATION=="VERTICAL":
+            cur_plot.set_ylabel( label_data_dict[csv_path], color=color  )
+            cur_plot.set_ylim(0, .628)
+            cur_plot.set_xlim(-0.5, 0.5)
+            #if bottom_plot != axes_data_dict[csv_path]:
+            #  cur_plot.xaxis.set_visible(False)
+            cur_plot.plot( noise_data[seed], fitness_data[seed], color="black", alpha=0.1, label=seed)
+          else:
+            cur_plot.set_xlabel( label_data_dict[csv_path], color=color  )
+            cur_plot.set_xlim(0, .628)
+            cur_plot.set_ylim(-0.5, 0.5)
+            cur_plot.plot( fitness_data[seed], noise_data[seed], color="black", alpha=0.1, label=seed)
 
       
       ####DO MORE
@@ -247,24 +293,42 @@ for PLOT_MODE in PLOT_MODES:
       # aggregate absolute   
       #########################################
       if PLOT_MODE == "AGG_ABS":
-        cur_plot.plot(fitness_means, noise_levels )
-        cur_plot.fill_betweenx( noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
-        cur_plot.set_ylim(-0.5, 0.5)
-        cur_plot.set_xlim(0.0, 0.628)
-        cur_plot.set_xlabel( label_data_dict[csv_path] )
+        if ORIENTATION=="VERTICAL":
+          cur_plot.plot(noise_levels, fitness_means )
+          cur_plot.fill_between( noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
+          cur_plot.set_xlim(-0.5, 0.5)
+          cur_plot.set_ylim(0.0, 0.628)
+          #if bottom_plot != axes_data_dict[csv_path]:
+          #  cur_plot.xaxis.set_visible(False)
+          cur_plot.set_ylabel( label_data_dict[csv_path], color=color  )
+        else:
+          cur_plot.plot(fitness_means, noise_levels )
+          cur_plot.fill_betweenx( noise_levels, fitness_means-fitness_errors, fitness_means+fitness_errors, facecolor='b', alpha=0.1)
+          cur_plot.set_ylim(-0.5, 0.5)
+          cur_plot.set_xlim(0.0, 0.628)
+          cur_plot.set_xlabel( label_data_dict[csv_path], color=color  )
         #plt.ylabel('Noise')   
         #plt.xlabel('Fitness')
         #plt.title( 'Measuring Aggregate Absolute Fitness to Neuromodulatory Noise')                    
       
       if PLOT_MODE=="AGG_PERC":
-        cur_plot.plot(norm_fitness_means, noise_levels  )
-        cur_plot.fill_betweenx( noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)
-        cur_plot.set_ylim(-0.5, 0.5)
-        cur_plot.set_xlim(0.0, 1.0)
-        cur_plot.set_xlabel( label_data_dict[csv_path] )
-        #cur_plot.ylabel('Noise')   
-        #cur_plot.xlabel('Fitness %')
-        #cur_plot.title( 'Measuring Aggregate Normalized Fitness to Neuromodulatory Noise')                    
+        if ORIENTATION=="VERTICAL":
+          cur_plot.plot( noise_levels, norm_fitness_means  )
+          cur_plot.fill_between( noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)
+          cur_plot.set_xlim(-0.5, 0.5)
+          cur_plot.set_ylim(0.0, 1.0)
+          #if bottom_plot != axes_data_dict[csv_path]:
+          #  cur_plot.xaxis.set_visible(False)
+          cur_plot.set_ylabel( label_data_dict[csv_path], color=color  )
+        else:
+          cur_plot.plot(norm_fitness_means, noise_levels  )
+          cur_plot.fill_betweenx( noise_levels, norm_fitness_means-norm_fitness_errors, norm_fitness_means+norm_fitness_errors, facecolor='b', alpha=0.1)
+          cur_plot.set_ylim(-0.5, 0.5)
+          cur_plot.set_xlim(0.0, 1.0)
+          cur_plot.set_xlabel( label_data_dict[csv_path], color=color  )
+          #cur_plot.ylabel('Noise')   
+          #cur_plot.xlabel('Fitness %')
+          #cur_plot.title( 'Measuring Aggregate Normalized Fitness to Neuromodulatory Noise')                    
           
      
             
@@ -277,6 +341,14 @@ for PLOT_MODE in PLOT_MODES:
 
     #print ("{}/{}/{}".format( PLOTS, experiment_title, job_title ) )
     #fig.set_ylabel('Noise')
-    axes[0,0].set_ylabel('All Weights Change %')
+    
+    modulation_label="Modulation Signal"
+    
+    if ORIENTATION=="VERTICAL":
+      axes[numplots-1,0].set_xlabel(modulation_label )
+      #axes[0,0].title("Fitness Landscape")
+      cur_plot.xaxis.set_visible(True)
+    else:
+      axes[0,0].set_ylabel(modulation_label)
     fig.suptitle("Fitness Landscape")
-    plt.savefig( PLOT_MODE+"_AGG_DEMO.png" )
+    plt.savefig( "{}_AGG_{}.png".format(PLOT_MODE, ORIENTATION ))

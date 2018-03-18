@@ -10,6 +10,13 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
+COLOR_POINTS_MODE=False
+
+COLOR_BY_METRIC="robustness"
+
+
+#VIOLIN_MODE=True
+VIOLIN_MODE=False
 
 SUFFIX="ROBUSTNESS_RESULTS_AMP_.csv"
 
@@ -40,11 +47,16 @@ ONE_VALUE="CPG3_MOD_BS_SWITCH"
 
 genomes[ ONE_VALUE ] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
 
-genomes["CPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/phenotypes.txt" 
-genomes["CPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt" 
-genomes["RPG3_STD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/phenotypes.txt" 
-genomes["RPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
-genomes["BEER"] = "../../DATA/CITED_DATA/phenotypes.txt"
+
+
+#genomes["CPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes[ ONE_VALUE ] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+
+
+#genomes["CPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt" 
+#genomes["RPG3_STD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/phenotypes.txt" 
+#genomes["RPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
+#genomes["BEER"] = "../../DATA/CITED_DATA/phenotypes.txt"
 
 seeds["CPG3_MOD_BS_SWITCH"] = (10,27,29,44,45,47,54,75,95)
 seeds["CPG3_STD"] = range(1,101)
@@ -80,7 +92,7 @@ def set_axis_style(ax, labels):
     ax.set_xticklabels(labels, rotation=45)  #, color=colors )   #'vertical')
     ax.set_ylim(-16, 16)
     ax.set_xlim(0.25, len(labels) + 0.75)
-    ax.set_xlabel('Sample name')
+    #ax.set_xlabel('Sample name')
     
 
 
@@ -112,11 +124,6 @@ def set_axis_style2(ax, labels):
     ax.set_xticklabels(labels)
 
 
-
-
-
-
-
 for label in genomes.keys():
   seed_to_parameter_dict_dict={}
   parameter_dict={}
@@ -139,7 +146,7 @@ for label in genomes.keys():
       for header in row:
         if header.strip() == "":
             continue
-        print("header: {}   row[header]: {}".format(header,  row[header] ))
+        #print("header: {}   row[header]: {}".format(header,  row[header] ))
         
         seed_to_parameter_dict_dict[seed][header] = row[header]
         
@@ -150,34 +157,45 @@ for label in genomes.keys():
 
   data0=[]
   labels0=[]
-
+  if COLOR_POINTS_MODE:
+    scatter_color=[]
+  
+  
+  #####TODO need to redo the way this gets created so I can assign a color to each data point
+  ###The data in master is not apparently showing the same values so there could be a problem there...
+  
+  
   for header in sorted(parameter_dict.keys()):
+    
     if header in exclude_list[label]:
         continue
     labels0.append( header )
     data0.append(  parameter_dict[header] )
-
+    
+    
+    if COLOR_POINTS_MODE:	
+      c = parameter_dict[COLOR_BY_METRIC]
+      print( "c: {}".format(c ))
+      scatter_color.append( [c, 0.0, 0.0, 0.5] )
 
 
   fs = 10  # fontsize
-  fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(12, 6) , squeeze=False)
+  fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(len(labels0), 6) , squeeze=False)
 
-
-  #if VIOLIN_MODE:
-  #    customize(axes[0, 0], data0 )
-  #else:
-  bplot1 = axes[0, 0].boxplot( data0 ) #, patch_artist=True)  #, color="blue")
+  if not COLOR_POINTS_MODE:
+    if VIOLIN_MODE:
+      customize(axes[0, 0], data0 )
+    else:
+      bplot1 = axes[0, 0].boxplot( data0 ) #, patch_artist=True)  #, color="blue")
   
   
   scatter_data_x=[]
   scatter_data_y=[]
   
+  
   count=1
   for data_row in data0:
-    
-    #print( data_row )
     for data_item in data_row:
-      #print( data_item )
       scatter_data_x.append( count )
       scatter_data_y.append( data_item )
     count+=1
@@ -185,43 +203,30 @@ for label in genomes.keys():
   
   #print( len( scatter_data_x) )
   #print( len(scatter_data_y ))
+  if COLOR_POINTS_MODE:
+    axes[0, 0].scatter( scatter_data_x, scatter_data_y)   #,c=scatter_color )   #'r.',alpha=0.2, marker='o', color=scatter_color) 
+  elif not VIOLIN_MODE:
+    axes[0, 0].plot( scatter_data_x, scatter_data_y, 'r.',alpha=0.2, marker='o') 
   
-  axes[0, 0].plot( scatter_data_x, scatter_data_y, 'r.',alpha=0.2, marker='o') 
-  
   
 
-  axes[0, 0].set_title('Networks Evolved Without Neuromodulation', fontsize=fs)
-
-  #if VIOLIN_MODE:
-  #    customize(axes[0, 1], data1 )
-  #else:
-  #    bplot2 = axes[0, 1].boxplot(data1, patch_artist=True)
-
-
-
-
+  axes[0, 0].set_title(label, fontsize=fs)
   standardAxis = axes[0][0]
-  #modulationAxis = axes[0][1] 
-
-
   set_axis_style( standardAxis, labels0)
-  #set_axis_style( modulationAxis, labels0)
-
-  standardAxis.set_xlabel('Evolved Without Neuromodulation')
-  standardAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
-  #modulationAxis.set_xlabel('Evolved With Neuromodulation')
-  #modulationAxis.set_ylabel('Robustness')  # to Oscillatory Neuromodulation Signal')
-
+  standardAxis.set_ylabel('Parameter Value')  # to Oscillatory Neuromodulation Signal')
      
   #for ax in axes.flatten():
   #    set_axis_style(ax, labels0)
         
-  # No need tof title
-  fig.suptitle("Comparing Network Robustness")
+  fig.suptitle("Network Parameter Distributions")
 
   #fig.subplots_adjust(hspace=0.4)
+  if COLOR_POINTS_MODE:
+    plt.savefig("parameter_coloredfitnessplot_{}.png".format(label) )
+  elif VIOLIN_MODE:
+    plt.savefig("parameter_violinplot_{}.png".format(label) )
+  else:
+    plt.savefig("parameter_boxplot_{}.png".format(label) )
 
-  #if VIOLIN_MODE:
-  #    plt.savefig("violinplot_{}.png".format(SUFFIX) )
-  #else:
-  plt.savefig("parameter_boxplot_{}.png".format(label) )
+print("got to end")
+#print( label )

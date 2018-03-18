@@ -10,7 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-VIOLIN_MODE=False
+VIOLIN_MODE=True
 
 SUFFIX="ROBUSTNESS_RESULTS_AMP_.csv"
 #SUFFIX="ROBUSTNESS_RESULTS_CONST_NEG_-.csv"
@@ -120,7 +120,6 @@ MPG1_COLOR='lightgreen'
 MPG2_COLOR='green'
 RPG_COLOR='red'
 colors = [CPG_COLOR,CPG_COLOR,CPG_COLOR,MPG1_COLOR,MPG1_COLOR,MPG1_COLOR,MPG2_COLOR,MPG2_COLOR,MPG2_COLOR,RPG_COLOR,RPG_COLOR,RPG_COLOR]
-
 
 data0=[]
 for robustness_csv in robustness0_csvs:

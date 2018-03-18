@@ -18,9 +18,9 @@ import matplotlib.mlab as mlab
 PI=3.141592653589
 
 #levels=[ 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
-levels=[ 0.98 ]
+levels=[ 0.90 ]
 
-HARD_LEVEL=0.98
+HARD_LEVEL=0.90
 abs_level=0.45
 
 

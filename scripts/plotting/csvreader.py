@@ -32,7 +32,9 @@ BRIGHT_SSIO_MODE=True
 SSIO_THICKNESS=2
 CUSTOM_TRAJECTORY=True
 
-
+LEG_ANGLE_SENSOR=False
+SSIO_MODE=True
+SSIO_MODULATION_MODE=True
 
 
 def customize_mod_color( mod ):
@@ -60,9 +62,6 @@ def customize_trajectory( name, m ):
   else:
    return (0,0,0, 0.5)  
    
-
-
-
  
 def customize_ssio_color( mod ):
  if BRIGHT_SSIO_MODE:
@@ -78,9 +77,7 @@ def customize_ssio_color( mod ):
 
 
 
-LEG_ANGLE_SENSOR=True
-SSIO_MODE=True
-SSIO_MODULATION_MODE=True
+
 
 #0   SENSORS OFF
 #1   SENSORS ON
@@ -1540,9 +1537,9 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
       ax1A.text(x, y, txt, fontsize=12, ha="left", va="top") 
       
       ax2A.set_ylabel( "Leg Angle " , fontsize=fontsize )
-      ax3A.set_ylabel( "FT " , fontsize=fontsize )
-      ax4A.set_ylabel( "BS " , fontsize=fontsize )
-      ax5A.set_ylabel( "FS " , fontsize=fontsize )
+      ax3A.set_ylabel( "FT Output" , fontsize=fontsize )
+      ax4A.set_ylabel( "BS Output" , fontsize=fontsize )
+      ax5A.set_ylabel( "FS Output" , fontsize=fontsize )
       
       ax6A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
       
