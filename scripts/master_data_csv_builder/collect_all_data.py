@@ -17,7 +17,14 @@ seeds ={}
 
 
 folders={}
-folders["CPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/" 
+folders["CPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/" 
+folders["CPG3_STD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"
+
+ 
+folders["RPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/" 
+folders["RPG3_STD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/"
+
+
 
 #"fitness_and_receptors.csv"   seed,fitness,r1,r2,r3,
 #"phenotypes.txt"  all genome

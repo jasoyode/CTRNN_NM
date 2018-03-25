@@ -20,16 +20,18 @@
 
 
 
-python generate_analysis_of_seed.py config_RPG3_STD_16.ini
-python generate_analysis_of_seed.py config_RPG3_STD_4.ini
-python generate_analysis_of_seed.py config_RPG3_STD_56.ini
-python generate_analysis_of_seed.py config_RPG3_STD_61.ini
-python generate_analysis_of_seed.py config_RPG3_STD_69.ini
-python generate_analysis_of_seed.py config_RPG3_STD_71.ini
-python generate_analysis_of_seed.py config_RPG3_STD_72.ini
-python generate_analysis_of_seed.py config_RPG3_STD_75.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_16.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_4.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_56.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_61.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_69.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_71.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_72.ini
+#python generate_analysis_of_seed.py config_RPG3_STD_75.ini
 
-#python generate_analysis_of_seed.py config_RPG3_MOD_99.ini
+python generate_analysis_of_seed.py config_RPG3_MOD_60.ini
+python generate_analysis_of_seed.py config_RPG3_MOD_68.ini
+python generate_analysis_of_seed.py config_RPG3_MOD_99.ini
 
 #python generate_analysis_of_seed.py config_CPG3_MOD_38.ini
 #python generate_analysis_of_seed.py config_CPG3_MOD_4.ini

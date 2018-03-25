@@ -37,15 +37,15 @@ def main( config_file ):
   #1. generate dynamic module analysis of normal network functionality
   #generate_dynamic_module_analysis()
   #2.generate network graphs of normal network
-  #generate_network_graph()
+  generate_network_graph()
   #3. generate SSIO curves and SSIO.csvs for later plots
   #generate_SSIO_curves()
   #4. generate normal activity plots (add SSIO with curves)
-  generate_normal_activity_plots()
+  #generate_normal_activity_plots()
   #5. generate testing data
   #generate_test_data()
   #6. generate testing data plots
-  generate_testing_plots()
+  #generate_testing_plots()
   #7. generate mutation data
   #generate_mutation_data()
   #8. generate mutation parameter space plots  may want to specify the specific genome positions to mutate?

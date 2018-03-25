@@ -183,6 +183,7 @@ def get_phenotype_from_genotype_dictionary( csv_path, SEED ):
             elif "w_" in header:
               x = float( row[header] )
               value_dict[ header ] = mapSearchParameter(x, -16, 16 )
+              
             else:
               print("header not interpretted")
 
@@ -256,6 +257,7 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
                 if int(header[-1]) > size:
                   size = int(header[-1])
           break
+  
   
 
 
@@ -401,8 +403,9 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
           
           if include_angle_sensors:
             if (i==j):
+              #print( value_dict[ "w_AS->{}".format(i) ] )
               weight= value_dict[ "w_AS->{}".format(i) ]
-            A.add_edge(99,i, len=MINLEN,label=weight,color='black' )
+              A.add_edge(99,i, len=MINLEN,label=weight,color='black' )
         
   A.graph_attr['epsilon']='0.001'
   A.write('simple.dot') # write to simple.dot

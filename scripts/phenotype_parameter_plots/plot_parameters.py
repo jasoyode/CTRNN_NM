@@ -10,9 +10,15 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-COLOR_POINTS_MODE=False
+COLOR_POINTS_MODE=True
 
 COLOR_BY_METRIC="robustness"
+#COLOR_BY_METRIC="fitness_at_90"
+#COLOR_BY_METRIC="fitness"
+
+
+#compares the points within their sets instead of absolute
+RELATIVE_COLOR_PLOTTING_MODE=True
 
 
 #VIOLIN_MODE=True
@@ -45,20 +51,54 @@ seeds ={}
 
 ONE_VALUE="CPG3_MOD_BS_SWITCH"
 
-genomes[ ONE_VALUE ] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
+#genomes[ ONE_VALUE ] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
+genomes[ ONE_VALUE ] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv"
+
+
+genomes["CPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+genomes["CPG3_STD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv" 
+
+#genomes["RPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/RPG3_MOD_ALL_DATA.csv" 
+#genomes["RPG3_STD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/RPG3_STD_ALL_DATA.csv" 
+
+
+genomes["CPG3_STD_DM4"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+genomes["CPG3_STD_DM6"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+genomes["CPG3_STD_DM1"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+genomes["CPG3_STD_DM10"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+genomes["CPG3_STD_DM15"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
 
 
 
-#genomes["CPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-#genomes[ ONE_VALUE ] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#CPG3_STD
+seeds["CPG3_STD_DM4"]=   [2, 5, 9, 15, 21, 25, 28, 30, 35, 37, 41, 45, 51, 54, 63, 65, 67, 75, 85, 86, 87, 91, 92, 96, 97]
+seeds["CPG3_STD_DM6"] =  [4, 8, 11, 19, 29, 33, 34, 38, 40, 42, 48, 59, 60, 77, 79, 80, 81, 98]
+seeds["CPG3_STD_DM1"] =  [18, 26, 36, 43, 57, 58, 74, 78, 93, 95]
+seeds["CPG3_STD_DM10"] = [3, 6, 27, 46, 66, 70, 76]
+seeds["CPG3_STD_DM15"] = [12, 20, 32, 56, 83]
 
 
-#genomes["CPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt" 
-#genomes["RPG3_STD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-standard/phenotypes.txt" 
-#genomes["RPG3_MOD"] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-RPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
-#genomes["BEER"] = "../../DATA/CITED_DATA/phenotypes.txt"
+ 
+#CPG3_MOD
+seeds["CPG3_MOD_DM5"] =  [5, 9, 15, 16, 18, 21, 24, 25, 30, 33, 35, 37, 39, 41, 46, 50, 51, 52, 56, 60, 63, 65, 68, 69, 81, 82, 87, 92, 96, 98]
+seeds["CPG3_MOD_DM10"] = [2, 3, 6, 20, 40, 42, 58, 64, 66, 70, 72, 79, 86, 90,94,100]
+seeds["CPG3_MOD_DM4"] =  [10, 27, 29, 44, 45, 47, 54, 67, 75, 95]
+seeds["CPG3_MOD_DM8"] =  [8, 12, 73, 74, 80, 93]
+seeds["CPG3_MOD_DM9"] =  [14, 19, 55, 78, 84]
+seeds["CPG3_MOD_DM29"] = [4, 11, 26, 32, 61]
 
-seeds["CPG3_MOD_BS_SWITCH"] = (10,27,29,44,45,47,54,75,95)
+
+genomes["CPG3_MOD_DM5"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+genomes["CPG3_MOD_DM10"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+genomes["CPG3_MOD_DM4"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+genomes["CPG3_MOD_DM8"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+genomes["CPG3_MOD_DM9"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+genomes["CPG3_MOD_DM29"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+
+
+
+
+seeds["CPG3_MOD_BS_SWITCH"] = (10,27,29,44,45,47,54,75,95,67)
 seeds["CPG3_STD"] = range(1,101)
 seeds["CPG3_MOD"] = range(1,101)
 seeds["RPG3_STD"] = range(1,101)
@@ -71,10 +111,29 @@ exclude_list["CPG3_MOD_BS_SWITCH"] = ( "seed", "recep1","recep2", "recep3", "tim
 exclude_list["BEER"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
 
 exclude_list["CPG3_STD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_STD_DM4"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_STD_DM6"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_STD_DM1"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_STD_DM10"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_STD_DM15"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+
+
 exclude_list["CPG3_MOD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_MOD_DM5"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_MOD_DM10"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_MOD_DM4"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_MOD_DM8"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_MOD_DM9"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+exclude_list["CPG3_MOD_DM29"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3", "w_AS->1", "w_AS->2","w_AS->3")
+
+
+
 
 exclude_list["RPG3_STD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3")
 exclude_list["RPG3_MOD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3")
+
+
+always_exclude_list =["fitness","robustness","fitness_at_90", "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3"]
 
 
 def adjacent_values(vals, q1, q3):
@@ -164,19 +223,47 @@ for label in genomes.keys():
   #####TODO need to redo the way this gets created so I can assign a color to each data point
   ###The data in master is not apparently showing the same values so there could be a problem there...
   
-  
+  count = 0
   for header in sorted(parameter_dict.keys()):
     
-    if header in exclude_list[label]:
+    if header in exclude_list[label] or header in always_exclude_list:
         continue
+    #if not "ss" in header:  #hack to get fitness and robustness removed from plots - can't continue, because 
     labels0.append( header )
     data0.append(  parameter_dict[header] )
     
     
+    
     if COLOR_POINTS_MODE:	
-      c = parameter_dict[COLOR_BY_METRIC]
-      print( "c: {}".format(c ))
-      scatter_color.append( [c, 0.0, 0.0, 0.5] )
+      raw_metric_column = parameter_dict[COLOR_BY_METRIC]
+      
+      mn=0
+      mx=1
+      if RELATIVE_COLOR_PLOTTING_MODE:
+        mn = min( raw_metric_column )
+        mx = max( raw_metric_column ) 
+        if mx == mn:
+          mx = 1
+          mn = 0 
+      
+      for c in raw_metric_column:
+        #if c == mx or c == mn:
+        #  print( "c: {}".format(c ))
+        
+        # scale  min + percentage
+        #  0.1  0.9    
+        #      0         .8
+        #      .8        .8
+        c = (c-mn)/ ( mx-mn)
+        c =  min( 1, max( 0, c))
+        #   if c =0   alpha =1, if c =1 alpha =1
+        #  f( 0.5) = 0,  f(0) = 1  f(1) = 1   
+        #  f(x) =  (x-1)**2 
+        alpha = max(0.1, 4*(c-0.5)**2)
+        #alpha=0.5
+        
+        scatter_color.append( (1-c, c, 0.0,  alpha)  )
+        count += 1
 
 
   fs = 10  # fontsize
@@ -204,7 +291,10 @@ for label in genomes.keys():
   #print( len( scatter_data_x) )
   #print( len(scatter_data_y ))
   if COLOR_POINTS_MODE:
-    axes[0, 0].scatter( scatter_data_x, scatter_data_y)   #,c=scatter_color )   #'r.',alpha=0.2, marker='o', color=scatter_color) 
+    X = np.array( scatter_color )
+    axes[0, 0].scatter( scatter_data_x, scatter_data_y, c=scatter_color )   #'r.',alpha=0.2, marker='o', color=scatter_color) 
+    #print( "exit")
+    #quit()
   elif not VIOLIN_MODE:
     axes[0, 0].plot( scatter_data_x, scatter_data_y, 'r.',alpha=0.2, marker='o') 
   
