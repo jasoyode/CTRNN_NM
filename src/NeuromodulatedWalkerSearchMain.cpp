@@ -559,6 +559,9 @@ string EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, 
         mutatedVector(i) = mutatedVector(i) * (1 + mutation2*MAX );
       }
       
+    } else if ( parameterNum2 == 29   ) {
+      //do nothing!
+    
     } else {
       mutatedVector(parameterNum2) = mutation2;
     }
@@ -583,6 +586,8 @@ string EvaluateMutants(TVector<double> &v, int parameterNum1, double mutation1, 
     
     if (parameterNum2 == 22 ) {
       paramVal2 = 1 + mutation2*MAX;
+    } else if ( parameterNum2 == 29) {
+      //do nothing
     } else {
       paramVal2 = phenotype(parameterNum2);
     }
@@ -1105,7 +1110,7 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       param_map[27] = "w*-to-1or3";
       param_map[28] = "w*-to-2or3";
       
-      
+      param_map[29] = "none";
       
       
       
@@ -1113,6 +1118,9 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
       int sliceBMax = stop2;
       int sliceAStart = start1;
       int sliceBStart = start2;
+      
+      
+      
       
 /////////////////////////// 
       for (int sliceA = sliceAStart; sliceA <= sliceAMax; sliceA++ ) {
@@ -1152,6 +1160,13 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
                  string results = EvaluateMutants( genome, sliceA, i, sliceB, j );
                  recordLog << results << endl;
                  
+                 
+                 if ( sliceB == 29 ) {
+                   cout << "testing to end on a param2 99 mutation";
+                   //end the for loop early! we only need to do once
+                   break;
+                 }
+                 
                  //recordLog << i << "," << j << "," << mutFit << "," << endl;
               }
             }
@@ -1162,6 +1177,9 @@ void generateActivityLogsFromGenomes(const char* ini, const char* directory, con
             if (sliceB == 22 ) {
               //ADD ORIGINAL AT END!
               recordLog << phenotype(sliceA) << "," << 1 << "," << origFit << ",";
+            } else if (sliceB == 29 ) {
+              //ADD ORIGINAL AT END!
+              recordLog << phenotype(sliceA) << "," << -1 << "," << origFit << ","; 
             } else {
               //ADD ORIGINAL AT END!
               recordLog << phenotype(sliceA) << "," << phenotype(sliceB) << "," << origFit << ",";

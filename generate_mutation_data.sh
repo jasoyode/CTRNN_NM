@@ -21,8 +21,13 @@ fi
 # 3->2  wALL
 #./runExp $INI $DIR $TITLE 17 17 22 22 &
 
+#single parameter sensitivity
+for i in $( seq 1 23); do
+  ./runExp $INI $DIR $TITLE $i $i 29 29  &
+done
 
-#exit
+exit
+
 
 #RPG
 ./runExp $INI $DIR $TITLE 19 19 20 20  &
