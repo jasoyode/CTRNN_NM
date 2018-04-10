@@ -20,14 +20,17 @@ PI=3.141592653589
 #levels=[ 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
 levels=[ 0.90 ]
 
+#only include when 90% of fitness of max test
 HARD_LEVEL=0.90
+
+#only include when making absolute score of 0.45
 abs_level=0.45
 
-
+#don't set a hard cutoff for pass/fail
 SOFT_MODE=False
 
-STOP_AT_FIRST_FAIL_MODE=True
-
+#mode to give simpler explanation of robustness (probably equivalent)
+STOP_AT_FIRST_FAIL_MODE=False
 
 
 
@@ -39,8 +42,8 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 #location for DATA from experiments and PLOTS
-DATA="../../DATA"
-PLOTS="../../PLOTS/TESTS/"
+DATA="../../../DATA"
+PLOTS="../../../PLOTS/TESTS/"
 
 if len( sys.argv) < 2:
   print("Usage:   python robustness_plotter.py [DATA.csv] ")

@@ -31,6 +31,8 @@ import configparser
 PI=3.141592653
 ROUND=3
 
+LABELS_ON=False
+
 
 if len(sys.argv) <= 1:
   CONFIG_FILE="config.ini"
@@ -222,11 +224,20 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
   # INDENT ALL BELOW
   #######################################
   
-  #CUSTOM_NAME = re.sub("XSEEDX", SEED, CUSTOM_NAME)
-  if PLOT_DYNAMIC_MODULES:
-    A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}".format(  DM_LABEL )  )
+  
+  if LABELS_ON:
+  
+    #CUSTOM_NAME = re.sub("XSEEDX", SEED, CUSTOM_NAME)
+    if PLOT_DYNAMIC_MODULES:
+      A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}".format(  DM_LABEL )  )
+    else:
+      A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}".format(CUSTOM_NAME )  )
   else:
-    A=pgv.AGraph(  directed=True , overlap=False, splines='curved', labelloc="t",label="{}".format(CUSTOM_NAME )  )
+    #CUSTOM_NAME = re.sub("XSEEDX", SEED, CUSTOM_NAME)
+    if PLOT_DYNAMIC_MODULES:
+      A=pgv.AGraph(  directed=True , overlap=False, splines='curved')  #, labelloc="t",label="{}".format(  DM_LABEL )  )
+    else:
+      A=pgv.AGraph(  directed=True , overlap=False, splines='curved')  #, labelloc="t",label="{}".format(CUSTOM_NAME )  )
 
   value_dict = {}
 
@@ -309,6 +320,7 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
         stability+="\nL:{} R:{}".format( round(l,1)  ,round(r, 1) )
       else:
         stability+="\nNO FOLD"
+        #stability+=""
     #lbl="{}\nB:{}\nTC:{}\nRS: {}".format(name, value_dict["bias{}".format(i) ], value_dict["timConst{}".format(i) ], value_dict["recep{}".format(i) ]   )
     if all_details:
       lbl="{}\nB:{}\nTC:{}\n {}".format(name, value_dict["bias{}".format(i) ], value_dict["timConst{}".format(i) ], stability   )
@@ -317,17 +329,18 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
     
     dm_font_size=20
     ON_thickness=3
+    EDGE_thickness=2
     
     if PLOT_DYNAMIC_MODULES:
       radius=1
       if DYNAMIC_MODULE_VALUES[n]=="+":
-        A.add_node(i,fontname="times bold", label=lbl,fontsize=dm_font_size,style="bold", fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y), penwidth=ON_thickness )
+        A.add_node(i,fontname="arial bold", label=lbl,fontsize=dm_font_size,style="bold", fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y), penwidth=ON_thickness )
       elif DYNAMIC_MODULE_VALUES[n]=="↑":
-        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="filled",fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="arial bold", label=lbl,fillcolor="gray",style="filled",fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
       elif DYNAMIC_MODULE_VALUES[n]=="↓":
-        A.add_node(i,fontname="times bold", label=lbl,fillcolor="gray",style="bold,filled",fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y), penwidth=ON_thickness )
+        A.add_node(i,fontname="arial bold", label=lbl,fillcolor="gray",style="bold,filled",fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y), penwidth=ON_thickness )
       elif DYNAMIC_MODULE_VALUES[n]=="-":
-        A.add_node(i,fontname="times bold", label=lbl,fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="arial bold", label=lbl,fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
       else:
         print("No state detected exiting")
         quit()
@@ -335,7 +348,7 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
     else:
       if imitate_beer:
         radius=1
-        A.add_node(i,fontname="times bold", label=lbl,fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
+        A.add_node(i,fontname="arial bold", label=lbl,fontsize=dm_font_size, fixedsize=True, width=radius, height=radius, shape='circle', color='black',pos='{},{}'.format(x,y) )
       else:
         radius=1.5
         A.add_node(i, label=lbl, fixedsize=True, width=radius, height=radius,shape='circle', color='black',pos='{},{}'.format(x,y) )
@@ -368,12 +381,12 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
         
         if DYNAMIC_MODULE_VALUES[n] in "-↑":
           #must include to keep shape
-          A.add_edge(i,j,len=MINLEN/2, arrowhead="tee", style="invis"  )
+          A.add_edge(i,j,len=MINLEN/2, arrowhead="tee", style="invis",penwidth=EDGE_thickness  )
         elif i!=j:
           if weight > 0:
-            A.add_edge(i,j,len=MINLEN/2, arrowhead="tee",  )
+            A.add_edge(i,j,len=MINLEN/2, arrowhead="tee", penwidth=EDGE_thickness )
           elif weight <0:
-            A.add_edge(i,j,len=MINLEN/2, arrowhead="dot" )
+            A.add_edge(i,j,len=MINLEN/2, arrowhead="dot", penwidth=EDGE_thickness )
           else:
             print("weight is zero no showing!")
       
@@ -383,9 +396,9 @@ def generate_graph( csv_path, include_angle_sensors, all_details, imitate_beer, 
           h=100
           if i != j:
             if weight > 0:
-              A.add_edge(i,j,len=MINLEN/2, arrowhead="tee",  )
+              A.add_edge(i,j,len=MINLEN/2, arrowhead="tee", penwidth=EDGE_thickness )
             elif weight <0:
-              A.add_edge(i,j,len=MINLEN/2, arrowhead="dot" )
+              A.add_edge(i,j,len=MINLEN/2, arrowhead="dot", penwidth=EDGE_thickness )
             else:
               print("weight is zero no showing!")
         

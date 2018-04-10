@@ -29,11 +29,14 @@ PLOTS="../../PLOTS"
 BRIGHT_MODULATION_MODE=False
 
 BRIGHT_SSIO_MODE=True
-SSIO_THICKNESS=2
+SSIO_THICKNESS=1
 CUSTOM_TRAJECTORY=True
 
-LEG_ANGLE_SENSOR=True
+ALIFE2018_ONLY_ACTUAL_SSIO=True
 
+LEG_ANGLE_SENSOR=False
+fs=16    #22
+tickfs=fs-4
 
 SSIO_MODE=True
 SSIO_MODULATION_MODE=True
@@ -85,7 +88,12 @@ def customize_ssio_color( mod ):
 #1   SENSORS ON
 MPG_EXCLUDE="1"
 
-X_LIM=25
+#X_LIM=25
+X_LIM_A=-24   #-5
+X_LIM_B=1   #15
+#X_LIM_A=-4  #BEER
+#X_LIM_B=14  #BEER
+
 XLIM_MODE=True
 
 COMPARE_MODE=0
@@ -264,7 +272,7 @@ def plot_fitness2( ):
     exp_base = re.sub(r'.*/DATA/','', experiment_directory )
     plt.title( exp_title + '\nBest Fitness of Individual Experiment Runs')
     plt.grid(True)
-    plt.savefig("{0}/{1}/individual_runs_{2}.png".format(PLOTS,  exp_base, exp_title ) )
+    plt.savefig("{0}/{1}/individual_runs_{2}.png".format(PLOTS,  exp_base, exp_title ), dpi=1000 )
 
 
 
@@ -288,7 +296,7 @@ def plot_fitness2( ):
     exp_base = re.sub(r'.*/DATA/','', experiment_directory )
     plt.title( exp_title +'\nMean Best Fitness by Generation with Standard Error')
     plt.grid(True)
-    plt.savefig("{0}/{1}/mean_runs_with_error_{2}.png".format(PLOTS, exp_base, exp_title ) )
+    plt.savefig("{0}/{1}/mean_runs_with_error_{2}.png".format(PLOTS, exp_base, exp_title ),dpi=1000 )
 
     #print( '{}/{}/seed_*.csv'.format( DATA, experiment_directory  ) )
 
@@ -409,10 +417,11 @@ def plot_fitness( comparisonName, directories, styles_dict,  fromCSV=False):
     plt.grid(True)
     legend = plt.legend(loc='lower right') #, bbox_to_anchor=(1, 0.5) )
     
-    plt.savefig("{0}/COMPARE/comparing_{1}.png".format(PLOTS, comparisonName ) )
+    plt.savefig("{0}/COMPARE/comparing_{1}.png".format(PLOTS, comparisonName ),dpi=1000 )
 
 
 def get_ssio_data_for_plotting( DATA, exp_base, seed_num): 
+ 
  SSIO_MODE=True
  ssio_files={}
  ssio_data={}
@@ -427,6 +436,7 @@ def get_ssio_data_for_plotting( DATA, exp_base, seed_num):
     ssio_mod_level=re.sub('.*seed_.*_ssio_n.*_mod_',"",mod_ssio)
     ssio_mod_level=re.sub( ".csv","", ssio_mod_level)
     ssio_mod_level=float( ssio_mod_level )
+    
     ssio_files[i][ssio_mod_level]=mod_ssio
   
   #normal file is just modulation level 0
@@ -453,9 +463,9 @@ def get_ssio_data_for_plotting( DATA, exp_base, seed_num):
 
  return ssio_data, SSIO_MODE
 
-def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False, alternate_output="", LEG_ANGLE_SENSOR=False ):
+def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=1000, seed=-1, SSIO_MODE=False, alternate_output="", LEG_ANGLE_SENSOR=False, PNG_W=8,PNG_Y=11 ):
     
-    figsize_xy=(8, 11)
+    figsize_xy=(PNG_W,PNG_Y)
      
     
     print("plot_activity")
@@ -693,12 +703,30 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
 ####################################        
         plt.close('all')
         fig, ( (ax1A, ax1B), (ax2A, ax2B), (ax3A,ax3B), (ax4A, ax4B), (ax5A, ax5B) ) = plt.subplots(nrows=5, ncols=2, figsize=figsize_xy )
-        plt.xlabel('Time')
+        plt.xlabel('Time', fontsize=fs)
         
         #time = time
-        fontsize=12
-
-        config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        fontsize=fs
+        
+        
+        
+        
+        
+        walking=[]
+        for t in time[start:stop]:
+         if t%44==0:
+          walking.append(1.05)
+         else:
+          walking.append(1)
+        
+        #ax1A.scatter( time[start:stop], walking, label="Hypothetical Steps", color="black" )  
+        #ax1A.set_ylabel( ylabel , fontsize=fs)
+        
+        
+        config_plot(ax1A, time[start:stop], walking, "Ideal Steps", " Modulation level over time", fs,linecolor="black" ) 
+        config_plot(ax1A, time[start:stop], list(map(lambda x: (1+x), modulation[start:stop])), "Modulation Signal", " Modulation level over time", fs,linecolor=(1,0,1) ) 
+        
+        
         #distance
         fitness_calc = distance[-1]/time[-1];
         
@@ -713,7 +741,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         
         x=xmin+width/10
         y=ymax+height/10
-        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
+        ax1A.text(x, y, txt, fontsize=fs, ha="left", va="top")
         
         bs_r = "OFF" if (seed_to_fitness_map[seed_num][1] == 0.0) else  str( seed_to_fitness_map[seed_num][1]  )
         ft_r = "OFF" if (seed_to_fitness_map[seed_num][2] == 0.0) else  str( seed_to_fitness_map[seed_num][2]  )
@@ -721,47 +749,47 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         
         
         
-        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "purple")
-        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
-        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
+        config_plot(ax2A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fs, (), "purple")
+        config_plot(ax3A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fs, (), "orange")
+        config_plot(ax4A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fs, (), "green")
         
         
         
         
-        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "purple")
-        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange" )
-        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
+        config_plot(ax5A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fs, (), "purple")
+        config_plot(ax5A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fs, (), "orange" )
+        config_plot(ax5A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fs, (), "green")
         
-        #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
-        #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fontsize )
-        #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
+        #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fs=fs )
+        #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fs )
+        #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fs )
         
-        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
-        
-        
-        
-        #config_plot(ax1B, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
-        config_plot(ax1B, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle", " Leg Angle over time", fontsize)
-        
-        ax1B.text(x, y, txt, fontsize=12, ha="left", va="top")
+        ax5A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fs )
         
         
-        config_plot(ax2B, time[short_start:short_stop], footState[short_start:short_stop], "FootState", "FootState over time", fontsize)
-        config_plot(ax3B, time[short_start:short_stop], jointX[short_start:short_stop], "jointX", "jointX over time", fontsize)
-        config_plot(ax4B, time[short_start:short_stop], footX[short_start:short_stop], "FootX", "footX over time", fontsize)
-        config_plot(ax5B, time[short_start:short_stop], footY[short_start:short_stop], "FootY", "footY over time",  fontsize)
+        
+        #config_plot(ax1B, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fs)
+        config_plot(ax1B, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle", " Leg Angle over time", fs)
+        
+        ax1B.text(x, y, txt, fontsize=fs, ha="left", va="top")
+        
+        
+        config_plot(ax2B, time[short_start:short_stop], footState[short_start:short_stop], "FootState", "FootState over time", fs)
+        config_plot(ax3B, time[short_start:short_stop], jointX[short_start:short_stop], "jointX", "jointX over time", fs)
+        config_plot(ax4B, time[short_start:short_stop], footX[short_start:short_stop], "FootX", "footX over time", fs)
+        config_plot(ax5B, time[short_start:short_stop], footY[short_start:short_stop], "FootY", "footY over time",  fs)
         
         plt.tight_layout()
         
-        #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=fs)
         
         exp_title = re.sub(r'.*/','', experiment_directory )       
         exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
         if alternate_output== "":
-         plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         plt.savefig("{0}/{1}/seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ),dpi=1000 )
         else:
          os.system("mkdir -p {}/NormalTrajectories".format(alternate_output) )
-         plt.savefig("{0}/NormalTrajectories/seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
+         plt.savefig("{0}/NormalTrajectories/seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ),dpi=1000 )
 ##################################################
 # just plot the activity of output neurons
 ##################################################
@@ -769,10 +797,12 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
 
         plt.close('all')
         
-        fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=6, ncols=1, figsize=figsize_xy )        
-        plt.xlabel('Time')
+        #fig, ( (ax1A), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=6, ncols=1, figsize=figsize_xy )        
+        #TEMPHACK
+        fig, ( (ax5A), (ax6A) ) = plt.subplots(nrows=2, ncols=1, figsize=figsize_xy )        
+        plt.xlabel('Time',fontsize=fs)
         
-        config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fontsize)
+        config_plot(ax1A, time[start:stop], modulation[start:stop], "Modulation", " Modulation level over time", fs)
         
         ymin, ymax = ax1A.get_ylim()
         xmin, xmax = ax1A.get_xlim()
@@ -786,48 +816,78 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         
         x=xmin+width/10
         y=ymax+height/10
-        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
+        ax1A.text(x, y, txt, fontsize=fs, ha="left", va="top")
         
-        config_plot(ax2A, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle ", "Leg Angle over time", fontsize, (), "black")
         
-        #config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fontsize, (), "purple")
-        #config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fontsize, (), "orange")
-        #config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fontsize, (), "green")
+        config_plot(ax2A, time[short_start:short_stop], angle[short_start:short_stop], "Leg Angle ", "Leg Angle over time", fs, (), "black")
         
-        config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT output", "BackSwing neuron output over time", fontsize, (), "purple")
-        config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS output", "FootLift neuron output over time",  fontsize, (), "orange")
-        config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS output", "ForwardSwing neuron output over time", fontsize, (), "green")
         
-        config_plot(ax6A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT", " delta BS over time", fontsize, (), "purple")
-        config_plot(ax6A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta FT over time", fontsize, (), "orange")
-        config_plot(ax6A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, (), "green")
+        
+        #config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT (r:"+ bs_r+")", "BackSwing neuron output over time", fs, (), "purple")
+        #config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS (r:"+ ft_r+")", "FootLift neuron output over time",  fs, (), "orange")
+        #config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS (r:"+ fs_r+")", "ForwardSwing neuron output over time", fs, (), "green")
+        
+        config_plot(ax3A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT output", "BackSwing neuron output over time", fs, (), "purple")
+        config_plot(ax4A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS output", "FootLift neuron output over time",  fs, (), "orange")
+        
+        #TEMPHACK
+        #config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS output", "ForwardSwing neuron output over time", fs, (), "green")
+        
+        config_plot(ax5A, time[short_start:short_stop], n_out[1][short_start:short_stop], "FT Output", "ForwardSwing neuron output over time", fs, (), "purple")
+        config_plot(ax5A, time[short_start:short_stop], n_out[2][short_start:short_stop], "BS Output", "ForwardSwing neuron output over time", fs, (), "orange")
+        config_plot(ax5A, time[short_start:short_stop], n_out[3][short_start:short_stop], "FS Output", "ForwardSwing neuron output over time", fs, (), "green")
+        
+        ax5A.set_ylabel( "Neuron Output" , fontsize=fs)
+        ax5A.legend(loc='center left', fontsize=fs )
+        plt.setp(ax5A.get_xticklabels(), visible=False)
+              
+        
+        
+        config_plot(ax6A, time[short_start:short_stop], deriv_n1[short_start:short_stop], r"$\Delta$ FT Output", " delta BS over time", fs, (), "purple")
+        config_plot(ax6A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS Output", " delta FT over time", fs, (), "orange")
+        config_plot(ax6A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS Output", " delta FS over time", fs, (), "green")
+        
+        
         
         #TODO ADD FLAG FOR TURNING THIS ON AND OFF
         if LEG_ANGLE_SENSOR:
-         config_plot(ax6A, time[short_start:short_stop], angle_omega[short_start:short_stop], r"$\Delta$ Angular Velocity", " Leg Angular Velocity", fontsize, (), "black")
+         config_plot(ax6A, time[short_start:short_stop], angle_omega[short_start:short_stop], r"$\Delta$ Angular Velocity", " Leg Angular Velocity", fs, (), "black")
          
         
         
-        #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fontsize )
-        #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fontsize )
-        #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fontsize )
+        #ax2A.set_ylabel( "FT (r:"+ bs_r+")" , fontsize=fs )
+        #ax3A.set_ylabel( "BS (r:"+ ft_r+")" , fontsize=fs )
+        #ax4A.set_ylabel( "FS (r:"+ fs_r+")" , fontsize=fs )
         
-        ax6A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+        ax6A.set_ylabel( r'$\Delta$ Neuron Output' , fontsize=fs )
+        
+        
         
         plt.tight_layout()
         legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
-        #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        
+        #TEMPHACK
+        #tickfs=fs-2
+        ax6A.legend(loc='lower left', fontsize=fs  )
+        for tick in ax6A.xaxis.get_major_ticks():
+         tick.label.set_fontsize(tickfs) 
+        for tick in ax6A.yaxis.get_major_ticks():
+         tick.label.set_fontsize(tickfs) 
+         
+        plt.tight_layout()
+        
+        #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=fs)
         if alternate_output== "":
-         plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ),dpi=1000 )
         else:
-         plt.savefig("{0}/NormalTrajectories/single_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
+         plt.savefig("{0}/NormalTrajectories/single_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ),dpi=1000 )
         
 ################################################
         #angle plots
         plt.close('all')
         fig, ( ( ax1B) ) = plt.subplots(nrows=1, ncols=1 )
         plt.xlabel(r"$\Theta$")
-        fontsize=12
+        fontsize=fs
         fitness_calc = distance[-1]/time[-1];
         print( "Calculating fitness based upon final position instead of from file..."  )
         txt = "Fitness: {}".format( fitness_calc )
@@ -837,17 +897,18 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         height=ymax-ymin
         x=xmin+width/10
         y=ymax+height/10
-        ax1A.text(x, y, txt, fontsize=12, ha="left", va="top")
-        config_plot(ax1B, angle[short_start:short_stop], angle_omega[short_start:short_stop], r"$\.\Theta$", "angle over time", fontsize)
+        ax1A.text(x, y, txt, fontsize=fs, ha="left", va="top")
+        config_plot(ax1B, angle[short_start:short_stop], angle_omega[short_start:short_stop], r"$\.\Theta$", "angle over time", fs)
         plt.tight_layout()
         legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
-        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+        plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=fs)
         exp_title = re.sub(r'.*/','', experiment_directory )       
         exp_base = re.sub(r'.*/DATA/','', experiment_directory )    
+        
         if alternate_output== "":
-         plt.savefig("{0}/{1}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         plt.savefig("{0}/{1}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ),dpi=1000 )
         else:
-         plt.savefig("{0}/NormalTrajectories/angles_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
+         plt.savefig("{0}/NormalTrajectories/angles_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ),dpi=1000 )
 #############################################################
         
         
@@ -914,9 +975,9 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         
         dyn1.legend()
         if alternate_output== "":
-         plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         plt.savefig("{0}/{1}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ),dpi=1000 )
         else:
-         plt.savefig("{0}/NormalTrajectories/dynamics3d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
+         plt.savefig("{0}/NormalTrajectories/dynamics3d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ),dpi=1000 )
         
         #######################################################
         # 2d plots
@@ -990,9 +1051,9 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
          plt.tight_layout()
          
          if alternate_output== "":
-          plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+          plt.savefig("{0}/{1}/dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ),dpi=1000 )
          else:
-          plt.savefig("{0}/NormalTrajectories/dynamics2d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
+          plt.savefig("{0}/NormalTrajectories/dynamics2d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ),dpi=1000 )
 ###################################################################################################################         
         
         #######################################################
@@ -1027,7 +1088,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         dyn2.set_xlabel("BS+FS")
         dyn2.set_ylabel("FT")
         if XLIM_MODE:
-         dyn2.set_xlim(-X_LIM, X_LIM )
+         dyn2.set_xlim(X_LIM_A, X_LIM_B )
         
         X = [ n_input[2][start:stop], n_out[2][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
@@ -1047,7 +1108,7 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         dyn3.set_xlabel("FT+FS")
         dyn3.set_ylabel("BS")
         if XLIM_MODE:
-         dyn3.set_xlim(-X_LIM,X_LIM)
+         dyn3.set_xlim(X_LIM_A, X_LIM_B)
         
         X = [ n_input[3][start:stop], n_out[3][start:stop] ]
         points = np.array([X[0], X[1] ]).T.reshape(-1, 1, 2)
@@ -1067,13 +1128,13 @@ def plot_activity(experiment_directory, quantity=1, short_start=0, short_stop=10
         dyn4.set_xlabel("FT+BS")
         dyn4.set_ylabel("FS")
         if XLIM_MODE:
-         dyn4.set_xlim(-X_LIM,X_LIM)
+         dyn4.set_xlim(X_LIM_A, X_LIM_B)
         
         plt.tight_layout()
         if alternate_output== "":
-         plt.savefig("{0}/{1}/summed_dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
+         plt.savefig("{0}/{1}/summed_dynamics2d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ),dpi=1000 )
         else:
-         plt.savefig("{0}/NormalTrajectories/summed_dynamics2d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ) )
+         plt.savefig("{0}/NormalTrajectories/summed_dynamics2d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title  ),dpi=1000 )
         
         
         #not working
@@ -1116,7 +1177,7 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
     
     start=0
     stop=-1
-    fontsize=12
+    fontsize=fs
     txt = "no txt"
     
     print( "Plotting activity2")
@@ -1395,7 +1456,7 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        fig = plt.figure(1)
        fig.set_size_inches(PNG_W, PNG_Y)
 
-
+       first=True
       
        #######################################
        for testing_dir in testing_dict.keys():
@@ -1403,9 +1464,22 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
         rr=int(testing_dict[testing_dir][1])
         cc=int(testing_dict[testing_dir][2])
         
+        
+        
         n=( rr* max_col  + cc+1 )
         #ax = fig.add_subplot( 3, 2, n )
-        ax = fig.add_subplot( max_row, max_col, n )
+        #ax = fig.add_subplot( max_row, max_col, n, sharey=ax1 )
+        
+        if first:
+         ax = fig.add_subplot( max_row, max_col, n )
+         firstAx=ax
+         first=False
+         for tick in ax.yaxis.get_major_ticks():
+          tick.label.set_fontsize(tickfs) 
+        else:
+         ax = fig.add_subplot( max_row, max_col, n, sharey=firstAx )
+         plt.setp(ax.get_yticklabels(), visible=False)
+         
          
         #print( "seed_num: {} \ntesting_dir: {}\n seed_data_dict[ seed_num ].keys(): {}".format(seed_num, testing_dir, seed_data_dict[ seed_num ].keys() ))
         
@@ -1414,13 +1488,13 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
          plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][1][short_start:short_stop], label=r"$\Delta$ FT" )
          plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][2][short_start:short_stop], label=r"$\Delta$ BS" )
          plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][short_start:short_stop], seed_data_dict[ seed_num ][ testing_dir ]["deriv_n_out"][3][short_start:short_stop], label=r"$\Delta$ FS" )
-         ax.set_ylabel( r'$\Delta$ neuron outputs' )   #, fontsize=fontsize )
+         ax.set_ylabel( r'$\Delta$ neuron outputs' )   #, fontsize=fs )
          legend = ax.legend(loc='center right' )
          
         else:
          plt.plot( seed_data_dict[ seed_num ][ testing_dir ]["time"][start:stop], seed_data_dict[ seed_num ][ testing_dir ][ st][start:stop] )      # Or whatever you want in the subplot
          
-         ax.set_ylabel( st )
+         ax.set_ylabel( st, fontsize=fs )
         plt.title(  testing_dict[testing_dir][0]    )
         
        plt.tight_layout()
@@ -1435,11 +1509,11 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        
        if alternate_output=="":
         os.system("mkdir -p {0}/TESTS/{1}/{2}".format(PLOTS, exp_base, comparison_name) )
-        plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+        plt.savefig("{0}/TESTS/{1}/{5}/{4}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ),dpi=1000 )
        else:
         #print( "mkdir -p {0}/TESTING_TRAJECTORIES/{1}".format(alternate_output, comparison_name) )
         os.system("mkdir -p {0}/TESTING_TRAJECTORIES/{1}".format(alternate_output, comparison_name) )
-        plt.savefig("{0}/TESTING_TRAJECTORIES/{4}/{3}_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, st, comparison_name  ) )
+        plt.savefig("{0}/TESTING_TRAJECTORIES/{4}/{3}_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, st, comparison_name  ),dpi=1000 )
 
        plt.close('all')
        ######################################
@@ -1454,7 +1528,7 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
       
       
       fig, ( (ax1A), (axFOOTSTATE), (ax2A), (ax3A), (ax4A), (ax5A), (ax6A) ) = plt.subplots(nrows=7, ncols=1, figsize=(PNG_W, PNG_Y) )        
-      plt.xlabel('Time')
+      plt.xlabel('Time',fontsize=fs)
       
       
       #multiple plots
@@ -1536,24 +1610,24 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        config_plot(ax6A, time[short_start:short_stop], deriv_n2[short_start:short_stop], r"$\Delta$ BS", " delta BS over time", fontsize, True, "orange")
        config_plot(ax6A, time[short_start:short_stop], deriv_n3[short_start:short_stop], r"$\Delta$ FS", " delta FS over time", fontsize, True, "green" )
       
-      ax1A.text(x, y, txt, fontsize=12, ha="left", va="top") 
+      ax1A.text(x, y, txt, fontsize=fs, ha="left", va="top") 
       
-      ax2A.set_ylabel( "Leg Angle " , fontsize=fontsize )
-      ax3A.set_ylabel( "FT Output" , fontsize=fontsize )
-      ax4A.set_ylabel( "BS Output" , fontsize=fontsize )
-      ax5A.set_ylabel( "FS Output" , fontsize=fontsize )
+      ax2A.set_ylabel( "Leg Angle " , fontsize=fs )
+      ax3A.set_ylabel( "FT Output" , fontsize=fs )
+      ax4A.set_ylabel( "BS Output" , fontsize=fs )
+      ax5A.set_ylabel( "FS Output" , fontsize=fs )
       
-      ax6A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fontsize )
+      ax6A.set_ylabel( r'$\Delta$ neuron outputs' , fontsize=fs )
       
       plt.tight_layout()
       #legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
-      #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+      #plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=fs)
       
       #plt.savefig("{0}/{1}/single_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title  ) )
       if alternate_output=="":
-       plt.savefig("{0}/TESTS/{1}/{5}/neurons_act_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ) )
+       plt.savefig("{0}/TESTS/{1}/{5}/neurons_act_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, st, comparison_name  ),dpi=1000 )
       else:
-       plt.savefig("{0}/TESTING_TRAJECTORIES/{4}/neurons_act_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, st, comparison_name  ) )
+       plt.savefig("{0}/TESTING_TRAJECTORIES/{4}/neurons_act_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, st, comparison_name  ),dpi=1000 )
       
       
 ###########################################################
@@ -1567,6 +1641,7 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        cc=int(testing_dict[testing_dir][2])
        n=( rr*max_col+ cc+1 )
        ax = fig.add_subplot( max_row, max_col, n,  projection='3d' )
+       
       
        #lowest mapped to blue, zero to black, highest mapped to red
        colors = [(0, 0, 1, 0.1), (0, 0, 0, 0.1), (1, 0, 0, 0.1)]  # R -> G -> B
@@ -1630,9 +1705,9 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
       plt.tight_layout()
       #plt.savefig("demo_seed_{}.png".format( seed_num  ) )
       if alternate_output=="":
-       plt.savefig("{0}/TESTS/{1}/{4}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name  ) )
+       plt.savefig("{0}/TESTS/{1}/{4}/dynamics3d_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name  ),dpi=1000 )
       else:
-       plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/dynamics3d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, comparison_name  ) )
+       plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/dynamics3d_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, comparison_name  ),dpi=1000 )
       
       plt.close('all')
       fig = plt.figure(3)
@@ -1653,11 +1728,18 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        num=pair[0]
        label=pair[1]
        
-       for testing_dir in testing_dict.keys():
+       first=True
+       for testing_dir in sorted(testing_dict.keys()):
         rr=int(testing_dict[testing_dir][1])
         cc=int(testing_dict[testing_dir][2])
         n=( rr*max_col+ cc+1 )
-        ax = fig.add_subplot( max_row, max_col, n )
+        
+        #ax = fig.add_subplot( max_row, max_col, n )
+        if first:
+         ax = fig.add_subplot( max_row, max_col, n )
+         firstAx=ax
+        else:
+         ax = fig.add_subplot( max_row, max_col, n, sharey=firstAx )
 
 #####################       COLOR SETUP
         #lowest mapped to blue, zero to black, highest mapped to red
@@ -1704,29 +1786,41 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
         
         plt.setp(lc, linewidth=thickness )
         ax.add_collection( lc )
-        ax.set_xlabel( label+ " input"  )
-        ax.set_ylabel( label+ " ouput"  )
+        if first:
+         ax.set_ylabel( label+ " output",fontsize=fs  )
+         first=False
+        else:
+          plt.setp(ax.get_yticklabels(), visible=False)
+        ax.set_xlabel( label+ " input", fontsize=fs  )
         
         if SSIO_MODE:
           ss_i=pair[0]
           for mod in ssio_data[i].keys():
+           #ALIFE2018HACK
+           if ALIFE2018_ONLY_ACTUAL_SSIO:
+            if "M="+str(1+mod) != testing_dict[testing_dir][0]:
+             continue
            R=min( 1, customize_ssio_color(max(mod*2,0)) )
            G=0
            B=min(1, customize_ssio_color(max(-mod*2,0)) )
            ssio_color=(R,G,B)
            ax.plot( ssio_data[ss_i][mod]["x"] , ssio_data[ss_i][mod]["y"], alpha=0.5, color=ssio_color, linewidth=ssio_thickness )
+           for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(tickfs)
+           for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(tickfs)
 
         
  
         if XLIM_MODE:
-         ax.set_xlim(-X_LIM, X_LIM )
-        plt.title(  testing_dict[testing_dir][0]  )
+         ax.set_xlim(X_LIM_A, X_LIM_B )
+        plt.title(  testing_dict[testing_dir][0],fontsize=fs  )
         
        plt.tight_layout()
        if alternate_output=="":
-        plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, "n"+label  ) )
+        plt.savefig("{0}/TESTS/{1}/{4}/dynamics2d_{5}_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title, comparison_name, "n"+label  ),dpi=1000 )
        else:
-        plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/dynamics2d_{4}_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, comparison_name, "n"+label  ) )
+        plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/dynamics2d_{4}_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title, comparison_name, "n"+label  ),dpi=1000 )
       
       
       plt.close('all')
@@ -1751,17 +1845,17 @@ def plot_activity2(experiment_directory, testing_dict, comparison_name, quantity
        angle_omega=seed_data_dict[ seed_num ][ testing_dir ]["omega"]
        distance=seed_data_dict[ seed_num ][ testing_dir ]["distance"]
        time=seed_data_dict[ seed_num ][ testing_dir ]["time"]
-       fontsize=12
+       fontsize=fs
        ax1B.plot( angle, angle_omega, color=mod_color )
 
        
       plt.tight_layout()
       legend = plt.legend(loc='center right', bbox_to_anchor=(1, 0.5) )
-      plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=12)
+      plt.text(0, 0, "Fitness: {}".format(seed_to_fitness_map[seed_num] ), fontsize=fs)
       if alternate_output=="":
-       plt.savefig("{0}/TESTS/{1}/{4}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title,  comparison_name  ) )
+       plt.savefig("{0}/TESTS/{1}/{4}/angles_seed_{2}_{3}.png".format(PLOTS, exp_base, seed_num, exp_title,  comparison_name  ),dpi=1000 )
       else:
-       plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/angles_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title,  comparison_name  ) )
+       plt.savefig("{0}/TESTING_TRAJECTORIES/{3}/angles_seed_{1}_{2}.png".format(alternate_output, seed_num, exp_title,  comparison_name  ),dpi=1000 )
 
 def plot_fitness_landscape( mutation_file_path, alternate_output="",SEED="" ) :
  
@@ -1846,12 +1940,12 @@ def plot_fitness_landscape( mutation_file_path, alternate_output="",SEED="" ) :
   
  os.system( "mkdir -p {}".format( plot_path ) )
  
- savefile = re.sub(".*/seed",'seed', mutation_file_path )
- savefile = re.sub(r'mutations.csv','mutation_fitness_landscape.png', savefile )
+ savefile = re.sub(".*/seed",'seed', mutation_file_path,dpi=1000 )
+ savefile = re.sub(r'mutations.csv','mutation_fitness_landscape.png', savefile,dpi=1000 )
  
  #print( "savefile: {}".format(savefile ))
  #quit()
- plt.savefig( "{}/{}".format(plot_path, savefile ) )
+ plt.savefig( "{}/{}".format(plot_path, savefile ),dpi=1000 )
  #plt.savefig( savefile )
  
  plt.close()
@@ -1947,14 +2041,14 @@ def plot_fitness_landscape_single_plot( mutation_directory_path, alternate_outpu
  os.system( "mkdir -p {}".format( plot_path ) )
  
  savefile = "{}_parameter_sensitivity_analysis.png".format( SEED )
- plt.savefig( "{}/{}".format(plot_path, savefile ) )
+ plt.savefig( "{}/{}".format(plot_path, savefile ),dpi=1000 )
  plt.close()
 
 
 
 
 
-def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_color=(), linecolor="" ):
+def config_plot(ax, time, data, ylabel, title,  fs1=fs, simple=False, mod_color=(), linecolor="" ):
 
      if len(mod_color) <= 0:
       if linecolor != "":
@@ -1966,11 +2060,12 @@ def config_plot(ax, time, data, ylabel, title,  fontsize=12, simple=False, mod_c
       #quit()
       ax.plot( time, data, label=ylabel, color=mod_color )
      #ax.locator_params(nbins=3)
-     #ax.set_xlabel('time', fontsize=fontsize)
+     #ax.set_xlabel('time', fontsize=fs)
      if not simple:
-      ax.set_ylabel( ylabel , fontsize=fontsize)
-      legend = ax.legend(loc='center right' )
-     #ax.set_title(title, fontsize=fontsize)
+      ax.set_ylabel( ylabel , fontsize=fs)
+      #legend = ax.legend(loc='center right' )
+      legend = ax.legend(loc='lower left' )
+     #ax.set_title(title, fontsize=fs)
 
 def main():
 
@@ -2087,7 +2182,7 @@ def main():
      os.system( "mkdir -p {}/{}".format( PLOTS, exp_base ) )
      print("plot_actvity ") 
      #plot_activity( 100, 1110, 1350, 68 )
-     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR, LEG_ANGLE_SENSOR=LEG_ANGLE_SENSOR )
+     plot_activity(experiment_directory, quantity=quantity, short_start=short_start, short_stop=short_stop, seed=seed, SSIO_MODE=SSIO_MODE,alternate_output=OUTPUT_DIR, LEG_ANGLE_SENSOR=LEG_ANGLE_SENSOR, PNG_W=PNG_W, PNG_Y=PNG_Y )
 
      #email plots to jasonayoder@gmail.com
      #this should be handled separately from the data generation

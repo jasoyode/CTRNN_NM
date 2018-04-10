@@ -10,7 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-COLOR_POINTS_MODE=True
+COLOR_POINTS_MODE=False
 
 COLOR_BY_METRIC="robustness"
 #COLOR_BY_METRIC="fitness_at_90"
@@ -18,11 +18,11 @@ COLOR_BY_METRIC="robustness"
 
 
 #compares the points within their sets instead of absolute
-RELATIVE_COLOR_PLOTTING_MODE=True
+RELATIVE_COLOR_PLOTTING_MODE=False
 
 
-#VIOLIN_MODE=True
-VIOLIN_MODE=False
+VIOLIN_MODE=True
+#VIOLIN_MODE=False
 
 SUFFIX="ROBUSTNESS_RESULTS_AMP_.csv"
 
@@ -52,21 +52,21 @@ seeds ={}
 ONE_VALUE="CPG3_MOD_BS_SWITCH"
 
 #genomes[ ONE_VALUE ] = "../../DATA/CPG_RPG_MPG_345/JOB_ctrnn-CPG_size-3_sim-100run-500gen_signal-SINE-1p_M-mod1-ON/phenotypes.txt"
-genomes[ ONE_VALUE ] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv"
+#genomes[ ONE_VALUE ] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv"
 
 
-genomes["CPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-genomes["CPG3_STD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv" 
+#genomes["CPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_STD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv" 
 
-#genomes["RPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/RPG3_MOD_ALL_DATA.csv" 
-#genomes["RPG3_STD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/RPG3_STD_ALL_DATA.csv" 
+genomes["RPG3_MOD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/RPG3_MOD_ALL_DATA.csv" 
+genomes["RPG3_STD"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/RPG3_STD_ALL_DATA.csv" 
 
 
-genomes["CPG3_STD_DM4"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
-genomes["CPG3_STD_DM6"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
-genomes["CPG3_STD_DM1"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
-genomes["CPG3_STD_DM10"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
-genomes["CPG3_STD_DM15"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+#genomes["CPG3_STD_DM4"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+#genomes["CPG3_STD_DM6"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+#genomes["CPG3_STD_DM1"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+#genomes["CPG3_STD_DM10"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
+#genomes["CPG3_STD_DM15"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_STD_ALL_DATA.csv"
 
 
 
@@ -88,12 +88,12 @@ seeds["CPG3_MOD_DM9"] =  [14, 19, 55, 78, 84]
 seeds["CPG3_MOD_DM29"] = [4, 11, 26, 32, 61]
 
 
-genomes["CPG3_MOD_DM5"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-genomes["CPG3_MOD_DM10"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-genomes["CPG3_MOD_DM4"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-genomes["CPG3_MOD_DM8"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-genomes["CPG3_MOD_DM9"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
-genomes["CPG3_MOD_DM29"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_MOD_DM5"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_MOD_DM10"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_MOD_DM4"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_MOD_DM8"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_MOD_DM9"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
+#genomes["CPG3_MOD_DM29"] = "/scratch/jasoyode/github_jasoyode/CTRNN_NM/scripts/master_data_csv_builder/CPG3_MOD_ALL_DATA.csv" 
 
 
 
@@ -128,9 +128,20 @@ exclude_list["CPG3_MOD_DM29"]=( "seed", "recep1","recep2", "recep3", "timConst1"
 
 
 
+parameter_label_map={}
+parameter_label_map["bias1"]="bias FT"
+parameter_label_map["bias2"]="bias BS"
+parameter_label_map["bias3"]="bias FS"
+parameter_label_map["w_AS->1"]="sW FT"
+parameter_label_map["w_AS->2"]="sW BS"
+parameter_label_map["w_AS->3"]="sW FS"
+
 
 exclude_list["RPG3_STD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3")
 exclude_list["RPG3_MOD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3")
+
+exclude_list["RPG3_STD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3","w_1->1","w_1->2","w_1->3","w_2->1","w_2->2","w_2->3","w_3->1","w_3->2","w_3->3" )
+exclude_list["RPG3_MOD"]=( "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3","w_1->1","w_1->2","w_1->3","w_2->1","w_2->2","w_2->3","w_3->1","w_3->2","w_3->3" )
 
 
 always_exclude_list =["fitness","robustness","fitness_at_90", "seed", "recep1","recep2", "recep3", "timConst1", "timConst2","timConst3"]
@@ -148,7 +159,7 @@ def set_axis_style(ax, labels):
     ax.get_xaxis().set_tick_params(direction='out')
     ax.xaxis.set_ticks_position('bottom')
     ax.set_xticks(np.arange(1, len(labels) + 1))
-    ax.set_xticklabels(labels, rotation=45)  #, color=colors )   #'vertical')
+    ax.set_xticklabels(labels, rotation=65, fontsize=fs-2)  #, color=colors )   #'vertical')
     ax.set_ylim(-16, 16)
     ax.set_xlim(0.25, len(labels) + 0.75)
     #ax.set_xlabel('Sample name')
@@ -229,7 +240,11 @@ for label in genomes.keys():
     if header in exclude_list[label] or header in always_exclude_list:
         continue
     #if not "ss" in header:  #hack to get fitness and robustness removed from plots - can't continue, because 
-    labels0.append( header )
+    #ALIFE2018HACK
+    
+    
+    
+    labels0.append( parameter_label_map[header] )
     data0.append(  parameter_dict[header] )
     
     
@@ -266,8 +281,17 @@ for label in genomes.keys():
         count += 1
 
 
-  fs = 10  # fontsize
-  fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(len(labels0), 6) , squeeze=False)
+  fs = 13  # fontsize
+  
+  x = len(labels0)
+  y= 4
+  ALIFE2018_HACK=True
+  if ALIFE2018_HACK:
+    x=3
+    y=4
+  
+  
+  fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(x,y) , squeeze=False)
 
   if not COLOR_POINTS_MODE:
     if VIOLIN_MODE:
@@ -299,16 +323,26 @@ for label in genomes.keys():
     axes[0, 0].plot( scatter_data_x, scatter_data_y, 'r.',alpha=0.2, marker='o') 
   
   
-
-  axes[0, 0].set_title(label, fontsize=fs)
+  
+  #ALIFE2018
+  
+  if label=="RPG3_STD":
+    axes[0, 0].set_title("Evolved Without Modulation      ", fontsize=fs)
+  elif label =="RPG3_MOD":
+    axes[0, 0].set_title("Evolved With Modulation ", fontsize=fs)
+  else:
+    axes[0, 0].set_title(label, fontsize=fs)
+  
   standardAxis = axes[0][0]
   set_axis_style( standardAxis, labels0)
-  standardAxis.set_ylabel('Parameter Value')  # to Oscillatory Neuromodulation Signal')
+  standardAxis.set_ylabel('Parameter Value',fontsize=fs)  # to Oscillatory Neuromodulation Signal')
      
   #for ax in axes.flatten():
   #    set_axis_style(ax, labels0)
         
-  fig.suptitle("Network Parameter Distributions")
+  #fig.suptitle("Network Parameter Distributions")
+  #fig.tight_layout()
+  fig.subplots_adjust(bottom=0.17,left=0.225,right=0.95,top=0.9)
 
   #fig.subplots_adjust(hspace=0.4)
   if COLOR_POINTS_MODE:

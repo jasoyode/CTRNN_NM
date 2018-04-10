@@ -22,7 +22,7 @@ fi
 #./runExp $INI $DIR $TITLE 17 17 22 22 &
 
 #single parameter sensitivity
-for i in $( seq 1 23); do
+for i in $( seq 1 22); do
   ./runExp $INI $DIR $TITLE $i $i 29 29  &
 done
 

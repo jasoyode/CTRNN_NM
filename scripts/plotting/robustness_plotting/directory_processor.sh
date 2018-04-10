@@ -3,7 +3,7 @@
 
 if [ "" == "$1" ]; then
   echo "Usage:  $0  [EXPERIMENT_DIRECTORY]"
-  echo "Example $0  ../../DATA/DEMO3_CPG_RPG_3/"
+  echo "Example $0  ../../../DATA/DEMO3_CPG_RPG_3/"
   exit
 fi
 
@@ -15,7 +15,7 @@ for DIR in $( ls $EXP_DIR ); do
   for RESULT in $( ls $EXP_DIR/$DIR | grep "RESULT" | grep -v "ROBUSTNESS" ); do
     #echo "Result File Found: $RESULT"
     #NEEDS TO BE FIXED!
-    COMMAND=$( echo "python robustness_plotter.py $EXP_DIR/${DIR}/${RESULT}"  | sed "s/\/\//\//" )
+    COMMAND=$( echo "python robustness_process_and_plot_ind.py $EXP_DIR/${DIR}/${RESULT}"  | sed "s/\/\//\//" )
     #python robustness_plotter.py $EXP_DIR/$DIR/$RESULT
     eval $COMMAND 
   done
